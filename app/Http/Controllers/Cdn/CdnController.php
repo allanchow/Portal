@@ -62,7 +62,6 @@ class CdnController extends Controller
             Lang::get('lang.cname'),
             Lang::get('lang.status'),
             Lang::get('lang.created'),
-            Lang::get('lang.last_updated'),
             Lang::get('lang.action'))
             ->noScript();
         $ext_view = $this->ext_view;
@@ -92,7 +91,7 @@ class CdnController extends Controller
            $resources = $resources->where('org_id', User_org::where('user_id', '=', Auth::user()->id)->first()->org_id);
         }
 
-        $resources = $resources->select('id', 'cdn_hostname', 'cname', 'status', 'update_status', 'created_at', 'updated_at');
+        $resources = $resources->select('id', 'cdn_hostname', 'cname', 'status', 'update_status', 'force_update', 'created_at');
 
         if ($search !== '') {
             $resources = $resources->where(function ($query) use ($search) {
@@ -103,13 +102,14 @@ class CdnController extends Controller
 
         return \Datatables::of($resources)
                         /* column username */
-                        ->removeColumn('id', 'update_status')
+                        ->removeColumn('id', 'update_status', 'force_update')
                         ->addColumn('cdn_hostname', function ($model) {
                                 return '<a href="'.route('resource.edit', $model->id).'">'.$model->cdn_hostname.'</a>';
                         })
                         ->addColumn('status', function ($model) {
                             $status = $model->status;
                             $update_status = $model->update_status;
+                            $force_update = $model->force_update;
                             if ($status == 0) {
                                 $stat = '<span class="label label-danger">'.\Lang::get('lang.suspended').'</span>';
                             } elseif ($status == 1) {
@@ -123,6 +123,9 @@ class CdnController extends Controller
                                 $stat .= ' <span class="label label-danger">'.\Lang::get('lang.deleting').'</span>';
                             } elseif ($update_status == 3) {
                                 $stat .= ' <span class="label label-warning">'.\Lang::get('lang.pending').'</span>';
+                            }
+                            if ($force_update == 1) {
+                                $stat .= ' <span class="label label-warning">'.\Lang::get('lang.force_update').'</span>';
                             }
 
                             return $stat;
@@ -237,8 +240,8 @@ class CdnController extends Controller
                 return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_ip'));
             }
             $new_origin = json_encode($ar_origin);
-            if ($resource->origin == $new_origin) {
-                return redirect()->back()->with('fails', Lang::get('lang.error-no_change'));
+            if ($resource->origin == $new_origin && $resource->cdn_hostname == $request->input('cdn_hostname')) {
+                return redirect()->back()->withInput()->with('fails', Lang::get('lang.error-no_change'));
             }
             $resource->cdn_hostname = $request->input('cdn_hostname');
             $resource->origin = $new_origin;
@@ -249,6 +252,24 @@ class CdnController extends Controller
             return redirect()->route('resource.edit', $resource->id)->with('success', Lang::get('lang.added_successfully').'; '.Lang::get('lang.wait_few_mins'));
         } catch (Exception $e) {
             return redirect()->route('resource.edit', $resource->id)->with('fails', $e->getMessage());
+        }
+    }
+
+    public function forceUpdate(Cdn_Resources $resources)
+    {
+        if (Auth::user()->role == "agent" or Auth::user()->role == "admin") {
+            try {
+                $result = $resources->where('force_update', 0)->update(['force_update' => 1]);
+                $msg = Lang::get('lang.updated_successfully');
+                return response()->json(compact('result', 'msg'));
+            } catch (Exception $e) {
+                $error = $e->getMessage();
+                return response()->json(compact('error'));
+            }
+        }
+        else {
+            $error = Lang::get('lang.not_allowed');
+            return response()->json(compact('error'));
         }
     }
 }

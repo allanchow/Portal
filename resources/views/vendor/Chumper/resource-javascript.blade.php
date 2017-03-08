@@ -66,6 +66,17 @@ foreach($segments as $seg){
             toggleActiveClass(classname);
         });
 
+        $('#force_update_button').on('click', function(){
+            $.post("{{url('resources-force-update')}}", function (data) {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    alert(data.msg);
+                    filterTable(show);
+                }
+            });
+        });
+
         document.getElementById('search-text').onkeypress = function(e){
             if (!e) e = window.event;
             var keyCode = e.keyCode || e.which;

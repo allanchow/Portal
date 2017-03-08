@@ -521,6 +521,7 @@ Route::group(['middleware' => ['web']], function () {
         //Route::patch('resource/update/{id}', ['as' => 'resource.update', 'uses' => 'Cdn\CdnController@update']);
         Route::resource('resource', 'Cdn\CdnController');
         Route::get('resource-list', ['as' => 'resource.list', 'uses' => 'Cdn\CdnController@resource_list']);
+        Route::post('resources-force-update', ['as' => 'resource.list', 'uses' => 'Cdn\CdnController@forceUpdate']);
         //Route::get('create-resource', ['as' => 'create-resource',  'uses' =>'Client\helpdesk\CdnController@getResource']);
     });
     Route::get('checkticket', 'Client\helpdesk\ClientTicketController@getCheckTicket'); /* Check your Ticket */

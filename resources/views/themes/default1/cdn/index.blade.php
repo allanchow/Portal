@@ -52,6 +52,9 @@ class="active"
                             <li><a href="#" class="suspended">{{Lang::get('lang.only_suspended')}}</a></li>
                         </ul>
                     </div>
+                    @if ($ext_view == 'themes.default1.agent.layout.agent')
+                        <button type="button" class="btn btn-sm btn-warning" id="force_update_button">{{Lang::get('lang.force_update')}}</button>
+                    @endif
                     <a href="{{route('resource.create')}}" class="btn btn-primary btn-sm">{{Lang::get('lang.create_resource')}}</a>
                     </div>
                 </div>

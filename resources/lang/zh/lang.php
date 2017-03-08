@@ -956,6 +956,8 @@ return [
 	'error-no_change'    => '您尚未進行任何更改',
     'invalid_ip'         => 'IP無效',
     'wait_few_mins'      => '請等待數分鐘才會生效',
+    'force_update'       => '強制更新',
+    'not_allowed'        => '不允許',
     /*
       |-----------------------------------------------
       |  Ticket

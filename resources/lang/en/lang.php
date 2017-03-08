@@ -956,6 +956,8 @@ return [
     'error-no_change'    => 'You have not made any changes.',
     'invalid_ip'         => 'Invalid IP',
     'wait_few_mins'      => 'Please wait for few mins to take effect.',
+    'force_update'       => 'Force update',
+    'not_allowed'        => 'Not allowed',
     /*
       |-----------------------------------------------
       |  Ticket
