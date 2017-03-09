@@ -80,7 +80,6 @@
                         </ul>
 
                         <ul class="nav navbar-nav navbar-right">
-                            @include('themes.default1.update.notification')
                             <!-- User Account: style can be found in dropdown.less -->
                             <li class="dropdown notifications-menu" id="myDropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" onclick="myFunction()">

@@ -91,7 +91,7 @@ class CdnController extends Controller
            $resources = $resources->where('org_id', User_org::where('user_id', '=', Auth::user()->id)->first()->org_id);
         }
 
-        $resources = $resources->select('id', 'cdn_hostname', 'cname', 'status', 'update_status', 'force_update', 'created_at');
+        $resources = $resources->select('id', 'cdn_hostname', 'cname', 'status', 'update_status', 'force_update', 'created_at', 'error_msg');
 
         if ($search !== '') {
             $resources = $resources->where(function ($query) use ($search) {
@@ -102,14 +102,13 @@ class CdnController extends Controller
 
         return \Datatables::of($resources)
                         /* column username */
-                        ->removeColumn('id', 'update_status', 'force_update')
+                        ->removeColumn('id', 'update_status', 'force_update', 'error_msg')
                         ->addColumn('cdn_hostname', function ($model) {
                                 return '<a href="'.route('resource.edit', $model->id).'">'.$model->cdn_hostname.'</a>';
                         })
                         ->addColumn('status', function ($model) {
                             $status = $model->status;
                             $update_status = $model->update_status;
-                            $force_update = $model->force_update;
                             if ($status == 0) {
                                 $stat = '<span class="label label-danger">'.\Lang::get('lang.suspended').'</span>';
                             } elseif ($status == 1) {
@@ -124,8 +123,11 @@ class CdnController extends Controller
                             } elseif ($update_status == 3) {
                                 $stat .= ' <span class="label label-warning">'.\Lang::get('lang.pending').'</span>';
                             }
-                            if ($force_update == 1) {
+                            if ($model->force_update == 1 && (Auth::user()->role == "agent" || Auth::user()->role == "admin")) {
                                 $stat .= ' <span class="label label-warning">'.\Lang::get('lang.force_update').'</span>';
+                            }
+                            if ($model->error_msg != '') {
+                                $stat .= ' <span class="label label-danger">'.\Lang::get('lang.error').'</span>';
                             }
 
                             return $stat;
@@ -240,12 +242,13 @@ class CdnController extends Controller
                 return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_ip'));
             }
             $new_origin = json_encode($ar_origin);
-            if ($resource->origin == $new_origin && $resource->cdn_hostname == $request->input('cdn_hostname')) {
+            if ($resource->origin == $new_origin && $resource->cdn_hostname == $request->input('cdn_hostname') && $resource->error_msg == '') {
                 return redirect()->back()->withInput()->with('fails', Lang::get('lang.error-no_change'));
             }
             $resource->cdn_hostname = $request->input('cdn_hostname');
             $resource->origin = $new_origin;
             $resource->update_status = 1;
+            $resource->error_msg = null;
             // saving inputs
             $resource->save();
 

@@ -67,6 +67,9 @@ class="active"
                     @elseif ($resource->update_status == 3)
                         <span class="label label-warning">{!! Lang::get('lang.pending') !!}</span>
                     @endif
+                    @if ($resource->error_msg != '')
+                        <span class="label label-danger">{!! Lang::get('lang.error') !!}</span>
+                    @endif
                     </p>
                 </div>
             @endif
@@ -106,15 +109,11 @@ class="active"
                     {!! Form::label('created_at',Lang::get('lang.created')) !!}
                     <p>{{ $resource->created_at }}</p>
                 </div>
-                <div class="col-xs-4 form-group">
-                    {!! Form::label('updated_at',Lang::get('lang.last_updated')) !!}
-                    <p>{{ $resource->updated_at }}</p>
-                </div>
             </div>
         @endif
     </div>
     <div class="box-footer">
-        @if ($mode == 'edit' and ($resource->status < 2 or $resource->update_status > 0))
+        @if ($mode == 'edit' and ($resource->status < 2 or $resource->update_status > 0) and $resource->error_msg == '')
             {!! Form::submit(Lang::get('lang.submit'),['class'=>'form-group btn btn-primary disabled'])!!}
         @else
             {!! Form::submit(Lang::get('lang.submit'),['class'=>'form-group btn btn-primary'])!!}

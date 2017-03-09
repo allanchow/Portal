@@ -252,26 +252,26 @@
                         <li @yield('myticket')>
                              <a href="{{url('ticket/myticket')}}" id="load-myticket">
                                 <i class="fa fa-user"></i> <span>{!! Lang::get('lang.my_tickets') !!} </span>
-                                <small class="label pull-right bg-green">{{$myticket -> count()}}</small>
+                                <small class="label pull-right bg-green">{{ isset($myticket) ? $myticket -> count() : ''}}</small>
                             </a>
                         </li>
                         <li @yield('unassigned')>
                              <a href="{{url('unassigned')}}" id="load-unassigned">
                                 <i class="fa fa-th"></i> <span>{!! Lang::get('lang.unassigned') !!}</span>
-                                <small class="label pull-right bg-green">{{$unassigned -> count()}}</small>
+                                <small class="label pull-right bg-green">{{ isset($unassigned) ? $unassigned -> count() : ''}}</small>
                             </a>
                         </li>
                         <li @yield('overdue')>
                              <a href="{{url('ticket/overdue')}}" id="load-unassigned">
                                 <i class="fa fa-calendar-times-o"></i> <span>{!! Lang::get('lang.overdue') !!}</span>
-                                <small class="label pull-right bg-green">{{$overdues->count()}}</small>
+                                <small class="label pull-right bg-green">{{ isset($overdues) ? $overdues->count() : ''}}</small>
                             </a>
                         </li>
                        
                         <li @yield('trash')>
                              <a href="{{url('trash')}}">
                                 <i class="fa fa-trash-o"></i> <span>{!! Lang::get('lang.trash') !!}</span>
-                                <small class="label pull-right bg-green">{{$deleted -> count()}}</small>
+                                <small class="label pull-right bg-green">{{ isset($deleted) ? $deleted -> count() : ''}}</small>
                             </a>
                         </li>
 
@@ -357,7 +357,7 @@ $group = App\Model\helpdesk\Agent\Groups::where('id', '=', $agent_group)->first(
                                     <li id="bar" @yield('answered')><a href="{{ url('/ticket/answered')}}" id="load-answered">{!! Lang::get('lang.answered') !!}</a></li>
                                     <li id="bar" @yield('assigned')><a href="{{ url('/ticket/assigned')}}" id="load-assigned" >{!! Lang::get('lang.assigned') !!}</a></li>
                                     <li id="bar" @yield('closed')><a href="{{ url('/ticket/closed')}}" >{!! Lang::get('lang.closed') !!}</a></li>
-<?php if ($group->can_create_ticket == 1) { ?>
+<?php if (is_object($group) && $group->can_create_ticket == 1) { ?>
                                         <li id="bar" @yield('newticket')><a href="{{ url('/newticket')}}" >{!! Lang::get('lang.create_ticket') !!}</a></li>
                                     <?php } ?>
                                 </ul>

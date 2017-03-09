@@ -958,6 +958,7 @@ return [
     'wait_few_mins'      => 'Please wait for few mins to take effect.',
     'force_update'       => 'Force update',
     'not_allowed'        => 'Not allowed',
+    'error'              => 'Error',
     /*
       |-----------------------------------------------
       |  Ticket

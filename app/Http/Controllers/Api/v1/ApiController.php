@@ -1564,6 +1564,7 @@ class ApiController extends Controller
                                        'file_type' => json_decode($resource->file_type, true),
                                        'origin' => $j_origin,
                                        'cname' => $resource->cname,
+                                       'force_update' => $resource->force_update,
                                        'status' => $status
                                    );
                 }
@@ -1647,6 +1648,11 @@ class ApiController extends Controller
             $resource_id = $this->request->input('resource_id');
             $old_status = $this->request->input('old_status');
             $resource = $this->resources->where('id', $resource_id)->first();
+
+            if ($this->request->has('error_msg') && $this->request->input('error_msg') != '') {
+                $resource->error_msg = $this->request->input('error_msg');
+            }
+
             if ($resource->status == 1 && $old_status == 'pending') {
                 $resource->status = 2;
                 $resource->force_update = 0;

@@ -24,6 +24,7 @@ class CreateCdnResourcesTable extends Migration
             $table->tinyInteger('status'); //0=Suspended, 1=Pending, 2=Active
             $table->tinyInteger('update_status'); //0=No update, 1=Updating, 2=Deleting
             $table->tinyInteger('force_update'); //0=No , 1=Yes
+            $table->text('error_msg');
             $table->timestamps();
         });
         Schema::table('cdn_resources', function (Blueprint $table) {
