@@ -160,7 +160,10 @@ class CdnController extends Controller
         try {
             $i_origin = explode("\n", str_replace(',', "\n", $request->input('origin')));
             foreach ($i_origin as $origin) {
-                $ar_origin[] = ['ip'=>$origin];
+                $origin = trim($origin);
+                if ($origin != '') {
+                    $ar_origin[] = ['ip'=>$origin];
+                }
             }
             if ($resource->validate_origin($ar_origin) === false) {
                 return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_ip'));
