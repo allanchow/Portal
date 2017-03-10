@@ -196,7 +196,7 @@ class="active"
             <!-- timezone -->
             <div class="col-xs-4 form-group {{ $errors->has('agent_time_zone') ? 'has-error' : '' }}">
                 {!! Form::label('agent_tzone',Lang::get('lang.agent_time_zone')) !!} <span class="text-red"> *</span>
-                {!! Form::select('agent_time_zone', [''=>Lang::get('lang.select_a_time_zone'),Lang::get('lang.time_zones')=>$timezones->lists('location','id')->toArray()],null,['class' => 'form-control select']) !!}
+                {!! Form::select('agent_time_zone', [''=>Lang::get('lang.select_a_time_zone'),Lang::get('lang.time_zones')=>$timezones->lists('location','id')->toArray()],$sys_tz,['class' => 'form-control select']) !!}
             </div>
         </div>
         <!-- Assign team -->

@@ -13,6 +13,7 @@ use App\Model\helpdesk\Agent\Assign_team_agent;
 use App\Model\helpdesk\Agent\Department;
 use App\Model\helpdesk\Agent\Groups;
 use App\Model\helpdesk\Agent\Teams;
+use App\Model\helpdesk\Settings\System;
 use App\Model\helpdesk\Utility\CountryCode;
 use App\Model\helpdesk\Utility\Timezones;
 use App\User;
@@ -92,8 +93,9 @@ class AgentController extends Controller
             $phonecode = $code->where('iso', '=', $location->iso_code)->first();
             // returns to the page with all the variables and their datas
             $send_otp = DB::table('common_settings')->select('status')->where('option_name', '=', 'send_otp')->first();
+            $sys_tz = System::whereId('1')->first()->time_zone;
 
-            return view('themes.default1.admin.helpdesk.agent.agents.create', compact('assign', 'teams', 'agents', 'timezones', 'groups', 'departments', 'team', 'send_otp'))->with('phonecode', $phonecode->phonecode);
+            return view('themes.default1.admin.helpdesk.agent.agents.create', compact('assign', 'teams', 'agents', 'timezones', 'groups', 'departments', 'team', 'send_otp', 'sys_tz'))->with('phonecode', $phonecode->phonecode);
         } catch (Exception $e) {
             // returns if try fails with exception meaagse
             return redirect()->back()->with('fails', $e->getMessage());
