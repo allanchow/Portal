@@ -48,7 +48,7 @@ return [
       | used globally for all e-mails that are sent by your application.
       |
      */
-    'from' => ['address' => '', 'name' => ''],
+    'from' => ['address' => 'support@allbrightnet.com', 'name' => 'Support'],
     /*
       |--------------------------------------------------------------------------
       | E-Mail Encryption Protocol

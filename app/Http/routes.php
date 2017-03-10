@@ -444,6 +444,12 @@ Route::group(['middleware' => ['web']], function () {
 
         Route::get('add-tag', ['as'=>'tag.add', 'uses'=>'Agent\helpdesk\Filter\TagController@addToFilter']);
         Route::get('get-tag', ['as'=>'tag.get', 'uses'=>'Agent\helpdesk\Filter\TagController@getTag']);
+
+        Route::get('resendEmail/{name}/{email}/{password}', function ($name, $email, $password) {
+            //Auth\PasswordController@getEmail);
+            $PhpMailController = new App\Http\Controllers\Common\PhpMailController;
+            return $PhpMailController->sendmail(1, $to = ['name' => $name, 'email' => $email], $message = ['subject' => null, 'scenario' => 'registration-notification'], $template_variables = ['user' => $name, 'email_address' => $email, 'user_password' => $password]);
+        });
     });
 
         /*
