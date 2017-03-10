@@ -199,7 +199,7 @@ class CdnController extends Controller
                 $resource->save();
             }
 
-            return redirect()->route('resource.edit', $resource->id)->with('success', Lang::get('lang.added_successfully')."; ".Lang::get('lang.wait_few_mins'));
+            return redirect('resources')->with('success', Lang::get('lang.added_successfully')."; ".Lang::get('lang.wait_few_mins'));
         } catch (Exception $e) {
             return redirect()->back()->withInput()->with('fails', $e->getMessage());
         }
