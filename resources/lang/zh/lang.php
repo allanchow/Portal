@@ -1177,7 +1177,7 @@ return [
      */
     'canned_response'           => '制式答覆',
     'create_canned_response'    => '創建制式答覆',
-    'surrender'                 => '投降',
+    'surrender'                 => '放棄',
     'added_successfully'        => '已成功添加',
     'updated_successfully'      => '已成功更新',
     'user_deleted_successfully' => '用戶已成功刪除',
