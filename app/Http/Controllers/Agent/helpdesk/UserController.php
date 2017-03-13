@@ -258,8 +258,18 @@ class UserController extends Controller
             $location = GeoIP::getLocation();
             $phonecode = $code->where('iso', '=', $location->iso_code)->first();
             $org = Organization::lists('name', 'id')->toArray();
+            
+            $langs = array();
+            $path = base_path('resources/lang');
+            $values = scandir($path);
+            if ($values = array_slice($values, 2)) {
+                foreach ($values as $value) {
+                    $langs = [$value => \Config::get('languages.'.$value)];
+                }
 
-            return view('themes.default1.agent.helpdesk.user.create', compact('org', 'settings', 'email_mandatory'))->with('phonecode', $phonecode->phonecode);
+            }
+
+            return view('themes.default1.agent.helpdesk.user.create', compact('org', 'settings', 'email_mandatory', 'langs'))->with('phonecode', $phonecode->phonecode);
         } catch (Exception $e) {
             return redirect()->back()->with('fails', $e->errorInfo[2]);
         }
