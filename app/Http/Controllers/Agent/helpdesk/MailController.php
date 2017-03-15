@@ -45,7 +45,7 @@ class MailController extends Controller
         //dd($emails);
         if ($settings_email->first()->email_fetching == 1) {
             if ($settings_email->first()->all_emails == 1) {
-                $email = $emails->get();
+                $email = $emails->whereNotNull('fetching_host')->where('fetching_host', '<>', '')->get();
                 if ($email->count() > 0) {
                     foreach ($email as $e_mail) {
                         $this->fetch($e_mail);
@@ -202,7 +202,9 @@ class MailController extends Controller
         $collaborators = $this->collaburators($message, $email);
         $attachments = $message->getAttachments();
         //dd(['body' => $body, 'subject' => $subject, 'address' => $address, 'cc' => $collaborator, 'attachments' => $attachments]);
-        $this->workflow($address, $subject, $body, $collaborators, $attachments, $email);
+        if ($this->ticketController()->checkEmail($address)) {
+            $this->workflow($address, $subject, $body, $collaborators, $attachments, $email);
+        }
     }
 
     public function workflow($address, $subject, $body, $collaborator, $attachments, $email)
