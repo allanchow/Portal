@@ -64,7 +64,7 @@ class="active"
                         <span class="label label-warning">{!! Lang::get('lang.updating') !!}</span>
                     @elseif ($resource->update_status == 2)
                         <span class="label label-warning">{!! Lang::get('lang.deleting') !!}</span>
-                    @elseif ($resource->update_status == 3)
+                    @elseif ($resource->update_status == 3 and (Auth::user()->role == "admin" or Auth::user()->role == "agent"))
                         <span class="label label-warning">{!! Lang::get('lang.pending') !!}</span>
                     @endif
                     @if ($resource->error_msg != '')
@@ -113,7 +113,7 @@ class="active"
         @endif
     </div>
     <div class="box-footer">
-        @if ($mode == 'edit' and ($resource->status < 2 or $resource->update_status > 0) and $resource->error_msg == '')
+        @if ($mode == 'edit' and ($resource->status < 2 or ($resource->update_status > 0 && $resource->update_status < 3)) and $resource->error_msg == '')
             {!! Form::submit(Lang::get('lang.submit'),['class'=>'form-group btn btn-primary disabled'])!!}
         @else
             {!! Form::submit(Lang::get('lang.submit'),['class'=>'form-group btn btn-primary'])!!}

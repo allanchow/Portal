@@ -32,6 +32,7 @@ use Redirect;
 class CdnController extends Controller
 {
 
+    protected $cdn_domain = 'allcdn888.com';
     protected $ext_view = 'themes.default1.client.layout.dashboard';
     protected $default_file_type = ["jpg", "jpeg", "png", "bmp", "gif", "html", "htm", "xml", "js", "css", "pdf", "swf", "ico", "wav"];
     protected $default_max_age = 1800;
@@ -120,7 +121,7 @@ class CdnController extends Controller
                                 $stat .= ' <span class="label label-warning">'.\Lang::get('lang.updating').'</span>';
                             } elseif ($update_status == 2) {
                                 $stat .= ' <span class="label label-danger">'.\Lang::get('lang.deleting').'</span>';
-                            } elseif ($update_status == 3) {
+                            } elseif ($update_status == 3 && (Auth::user()->role == "agent" || Auth::user()->role == "admin")) {
                                 $stat .= ' <span class="label label-warning">'.\Lang::get('lang.pending').'</span>';
                             }
                             if ($model->force_update == 1 && (Auth::user()->role == "agent" || Auth::user()->role == "admin")) {
@@ -187,14 +188,14 @@ class CdnController extends Controller
             if ($resource->save() == true) {
                 if (\App::environment('production')) {
                     $int_id = str_pad($resource->id, 6, "0", STR_PAD_LEFT);
-                    $resource->cname = "cdn-{$int_id}.allbrightnetwork.com";
+                    $resource->cname = "cdn-{$int_id}.{$this->cdn_domain}";
                 } else {
                     if ($resource->id > 100000) {
                         $int_id = $resource->id;
                     } else {
                         $int_id = 900000 + $resource->id;
                     }
-                    $resource->cname = "uat-cdn-{$int_id}.allbrightnetwork.com";
+                    $resource->cname = "uat-cdn-{$int_id}.{$this->cdn_domain}";
                 }
                 $resource->save();
             }
