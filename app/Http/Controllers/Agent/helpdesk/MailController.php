@@ -151,7 +151,6 @@ class MailController extends Controller
         $PhpMailController = new \App\Http\Controllers\Common\PhpMailController();
         $NotificationController = new \App\Http\Controllers\Common\NotificationController();
         $controller = new TicketController($PhpMailController, $NotificationController);
-
         return $controller;
     }
 
@@ -202,7 +201,7 @@ class MailController extends Controller
         $collaborators = $this->collaburators($message, $email);
         $attachments = $message->getAttachments();
         //dd(['body' => $body, 'subject' => $subject, 'address' => $address, 'cc' => $collaborator, 'attachments' => $attachments]);
-        if ($this->ticketController()->checkEmail($address)) {
+        if ($this->ticketController()->checkEmail(checkArray('address', $address[0]))) {
             $this->workflow($address, $subject, $body, $collaborators, $attachments, $email);
         }
     }

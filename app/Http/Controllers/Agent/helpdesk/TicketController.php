@@ -868,9 +868,11 @@ class TicketController extends Controller
                 $admins = User::where('role', '=', 'admin')->get();
                 foreach ($admins as $admin) {
                     $to_email = $admin->email;
-                    $to_user = $admin->first_name;
-                    $to_user_name = $admin->first_name;
-                    array_push($set_mails, ['to_email' => $to_email, 'to_user' => $to_user, 'to_user_name' => $to_user_name]);
+                    if ($to_email != $emailadd) {
+                        $to_user = $admin->first_name;
+                        $to_user_name = $admin->first_name;
+                        array_push($set_mails, ['to_email' => $to_email, 'to_user' => $to_user, 'to_user_name' => $to_user_name]);
+                    }
                 }
             }
 
@@ -883,9 +885,11 @@ class TicketController extends Controller
 
                         if ($department_data->name == $agent->primary_dpt) {
                             $to_email = $agent->email;
-                            $to_user = $agent->first_name;
-                            $to_user_name = $agent->first_name;
-                            array_push($set_mails, ['to_email' => $to_email, 'to_user' => $to_user, 'to_user_name' => $to_user_name]);
+                            if ($to_email != $emailadd) {
+                                $to_user = $agent->first_name;
+                                $to_user_name = $agent->first_name;
+                                array_push($set_mails, ['to_email' => $to_email, 'to_user' => $to_user, 'to_user_name' => $to_user_name]);
+                            }
                         }
                     }
                 }
@@ -893,16 +897,20 @@ class TicketController extends Controller
             }
             if ($is_reply == 1) {
                 $client_email = $ticketdata->user->email;
-                $client_user_name = $ticketdata->user->user_name;
-                array_push($set_mails, ['to_email' => $client_email, 'to_user' => $client_user_name, 'to_user_name' => $client_user_name]);
+                if ($client_email != $emailadd) {
+                    $client_user_name = $ticketdata->user->user_name;
+                    array_push($set_mails, ['to_email' => $client_email, 'to_user' => $client_user_name, 'to_user_name' => $client_user_name]);
+                }
             }
 
             if ($ticketdata->assigned_to) {
                 $assigned_to = User::where('id', '=', $ticketdata->assigned_to)->first();
                 $to_email = $assigned_to->email;
-                $to_user = $assigned_to->first_name;
-                $to_user_name = $assigned_to->first_name;
-                array_push($set_mails, ['to_email' => $to_email, 'to_user' => $to_user, 'to_user_name' => $to_user_name]);
+                if ($to_email != $emailadd) {
+                    $to_user = $assigned_to->first_name;
+                    $to_user_name = $assigned_to->first_name;
+                    array_push($set_mails, ['to_email' => $to_email, 'to_user' => $to_user, 'to_user_name' => $to_user_name]);
+                }
             }
 
             $emails_to_be_sent = array_unique($set_mails, SORT_REGULAR);
