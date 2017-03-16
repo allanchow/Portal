@@ -62,6 +62,7 @@ class TokenAuthController extends Controller
         }
 
         $user_id = \Auth::user()->id;
+        \Auth::user()->update(['ip'=>$request->ip(), 'last_login'=>\Carbon\Carbon::now()]);
 // if no errors are encountered we can return a JWT
         return response()->json(compact('token', 'user_id'));
     }

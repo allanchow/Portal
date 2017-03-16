@@ -392,6 +392,7 @@ class AuthController extends Controller
                 // If auth ok, redirect to restricted area
                 \Session::put('loginAttempts', $loginAttempts + 1);
                 if (Auth::Attempt([$field => $usernameinput, 'password' => $password], $request->has('remember'))) {
+                    Auth::user()->update(['ip'=>$request->ip(), 'last_login'=>\Carbon\Carbon::now()]);
                     if (Auth::user()->role == 'user') {
                         if ($request->input('referer')) {
                             return \Redirect::route($request->input('referer'));
