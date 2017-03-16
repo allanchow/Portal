@@ -237,6 +237,9 @@
                             @else
                             <a href="#"><i class="fa fa-circle"></i> Offline</a>
                             @endif
+                            @if($auth_user_id)
+                            <p><a href="{{url('auth/logout')}}" class="btn btn-danger btn-xs"><b>{!! Lang::get('lang.sign_out') !!}</b></a></p>
+                            @endif
                         </div>
                     </div>
                     <ul id="side-bar" class="sidebar-menu">
