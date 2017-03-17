@@ -87,6 +87,7 @@ class UserController extends Controller
                 Lang::get('lang.phone'),
                 Lang::get('lang.status'),
                 Lang::get('lang.last_login'),
+                'IP',
                 Lang::get('lang.role'),
                 Lang::get('lang.action'))  // these are the column headings to be shown
                 ->noScript();
@@ -134,7 +135,7 @@ class UserController extends Controller
             $users = User::where('role', '!=', 'admin')->where('is_delete', '=', 0);
         }
 
-        $users = $users->select('user_name', 'email', 'mobile', 'active', 'updated_at', 'role', 'id', 'last_name', 'country_code', 'phone_number');
+        $users = $users->select('user_name', 'email', 'mobile', 'active', 'last_login', 'ip', 'role', 'id', 'last_name', 'country_code', 'phone_number');
 
         if ($search !== '') {
             $users = $users->where(function ($query) use ($search) {
@@ -143,7 +144,8 @@ class UserController extends Controller
                 $query->orWhere('first_name', 'LIKE', '%'.$search.'%');
                 $query->orWhere('last_name', 'LIKE', '%'.$search.'%');
                 $query->orWhere('mobile', 'LIKE', '%'.$search.'%');
-                $query->orWhere('updated_at', 'LIKE', '%'.$search.'%');
+                $query->orWhere('last_login', 'LIKE', '%'.$search.'%');
+                $query->orWhere('ip', 'LIKE', '%'.$search.'%');
                 $query->orWhere('country_code', 'LIKE', '%'.$search.'%');
             });
         }
@@ -198,12 +200,7 @@ class UserController extends Controller
 
                             return $stat;
                         })
-                        /* column last login date */
-                        ->addColumn('updated_at', function ($model) {
-                            $t = $model->updated_at;
 
-                            return TicketController::usertimezone($t);
-                        })
                         /* column Role */
                         ->addColumn('role', function ($model) {
                             $role = $model->role;
