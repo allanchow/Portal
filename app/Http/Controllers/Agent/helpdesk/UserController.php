@@ -86,6 +86,7 @@ class UserController extends Controller
                 Lang::get('lang.email'),
                 Lang::get('lang.phone'),
                 Lang::get('lang.status'),
+                Lang::get('lang.created'),
                 Lang::get('lang.last_login'),
                 'IP',
                 Lang::get('lang.role'),
@@ -135,7 +136,7 @@ class UserController extends Controller
             $users = User::where('role', '!=', 'admin')->where('is_delete', '=', 0);
         }
 
-        $users = $users->select('user_name', 'email', 'mobile', 'active', 'last_login', 'ip', 'role', 'id', 'last_name', 'country_code', 'phone_number');
+        $users = $users->select('user_name', 'email', 'mobile', 'active', 'created_at', 'last_login', 'ip', 'role', 'id', 'last_name', 'country_code', 'phone_number');
 
         if ($search !== '') {
             $users = $users->where(function ($query) use ($search) {
@@ -144,6 +145,7 @@ class UserController extends Controller
                 $query->orWhere('first_name', 'LIKE', '%'.$search.'%');
                 $query->orWhere('last_name', 'LIKE', '%'.$search.'%');
                 $query->orWhere('mobile', 'LIKE', '%'.$search.'%');
+                $query->orWhere('create_at', 'LIKE', '%'.$search.'%');
                 $query->orWhere('last_login', 'LIKE', '%'.$search.'%');
                 $query->orWhere('ip', 'LIKE', '%'.$search.'%');
                 $query->orWhere('country_code', 'LIKE', '%'.$search.'%');

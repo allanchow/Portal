@@ -71,7 +71,8 @@ class="active"
                 <th width="100px">{{Lang::get('lang.group')}}</th>
                 <th width="100px">{{Lang::get('lang.department')}}</th>
                 <th width="100px">{{Lang::get('lang.created')}}</th>
-                {{-- <th width="100px">{{Lang::get('lang.lastlogin')}}</th> --}}
+                <th width="100px">{{Lang::get('lang.lastlogin')}}</th>
+                <th width="100px">IP</th>
                 <th width="100px">{{Lang::get('lang.action')}}</th>
             </tr>
             @foreach($user as $use)
@@ -96,10 +97,11 @@ class="active"
                     $group = App\Model\helpdesk\Agent\Groups::whereId($use->assign_group)->first();
                     $department = App\Model\helpdesk\Agent\Department::whereId($use->primary_dpt)->first();
                     ?>
-                <td>{{ $group->name }}</td>
-                <td>{{ $department->name }}</td>
+                <td>{{ $group->name or '' }}</td>
+                <td>{{ $department->name or '' }}</td>
                 <td>{{ UTC::usertimezone($use->created_at) }}</td>
-                {{-- <td>{{$use->Lastlogin_at}}</td> --}}
+                <td>{{$use->last_login}}</td>
+                <td>{{$use->ip}}</td>
                 <td>
                     {!! Form::open(['route'=>['agents.destroy', $use->id],'method'=>'DELETE']) !!}
                     <a href="{{route('agents.edit', $use->id)}}" class="btn btn-info btn-xs btn-flat"><i class="fa fa-edit" style="color:black;"> </i> {!! Lang::get('lang.edit') !!} </a>
