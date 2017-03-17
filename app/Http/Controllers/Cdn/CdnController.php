@@ -31,11 +31,7 @@ use Redirect;
  */
 class CdnController extends Controller
 {
-
-    protected $cdn_domain = 'allcdn888.com';
     protected $ext_view = 'themes.default1.client.layout.dashboard';
-    protected $default_file_type = ["jpg", "jpeg", "png", "bmp", "gif", "html", "htm", "xml", "js", "css", "pdf", "swf", "ico", "wav"];
-    protected $default_max_age = 1800;
 
     /**
      * Create a new controller instance.
@@ -159,6 +155,9 @@ class CdnController extends Controller
     public function store(Cdn_Resources $resource, CdnRequest $request)
     {
         try {
+            if (!$resource->validate_hostname($request->input('cdn_hostname'))) {
+                return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_hostname'));
+            }
             $i_origin = explode("\n", str_replace(',', "\n", $request->input('origin')));
             foreach ($i_origin as $origin) {
                 $origin = trim($origin);
@@ -171,15 +170,15 @@ class CdnController extends Controller
             }
             $resource->cdn_hostname = $request->input('cdn_hostname');
             $resource->org_id = $request->input('org_id');
-            if ($request->has('file_type')) {
+            if ($request->has('file_type') && $request->input('file_type') != '') {
                 $resource->file_type = $request->input('file_type');
             } else {
-                $resource->file_type = json_encode($this->default_file_type);
+                $resource->file_type = json_encode($resource->get_default_file_type());
             }
-            if ($request->has('max_age')) {
+            if ($request->has('max_age') && $request->input('max_age') != '') {
                 $resource->max_age = $request->input('max_age');
             } else {
-                $resource->max_age = $this->default_max_age;
+                $resource->max_age = $resource->get_default_max_age();
             }
             $resource->origin = json_encode($ar_origin);
             $resource->status = 1;
@@ -188,14 +187,14 @@ class CdnController extends Controller
             if ($resource->save() == true) {
                 if (\App::environment('production')) {
                     $int_id = str_pad($resource->id, 6, "0", STR_PAD_LEFT);
-                    $resource->cname = "cdn-{$int_id}.{$this->cdn_domain}";
+                    $resource->cname = "cdn-{$int_id}.{$resource->get_cdn_domain()}";
                 } else {
                     if ($resource->id > 100000) {
                         $int_id = $resource->id;
                     } else {
                         $int_id = 900000 + $resource->id;
                     }
-                    $resource->cname = "uat-cdn-{$int_id}.{$this->cdn_domain}";
+                    $resource->cname = "uat-cdn-{$int_id}.{$resource->get_cdn_domain()}";
                 }
                 $resource->save();
             }
@@ -235,6 +234,11 @@ class CdnController extends Controller
             if (Auth::user()->role == "user" && $resource->org_id != User_org::where('user_id', '=', Auth::user()->id)->first()->org_id) {
                 return redirect()->route('resources')->with('fails', Lang::get('lang.not_found'));
             }
+
+            if (!$resource->validate_hostname($request->input('cdn_hostname'))) {
+                return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_hostname'));
+            }
+
             $i_origin = explode("\n", str_replace(',', "\n", $request->input('origin')));
             foreach ($i_origin as $origin) {
                 $origin = trim($origin);
@@ -256,7 +260,7 @@ class CdnController extends Controller
             // saving inputs
             $resource->save();
 
-            return redirect()->route('resource.edit', $resource->id)->with('success', Lang::get('lang.added_successfully').'; '.Lang::get('lang.wait_few_mins'));
+            return redirect()->route('resource.edit', $resource->id)->with('success', Lang::get('lang.updated_successfully').'; '.Lang::get('lang.wait_few_mins'));
         } catch (Exception $e) {
             return redirect()->route('resource.edit', $resource->id)->with('fails', $e->getMessage());
         }

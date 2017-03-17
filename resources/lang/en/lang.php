@@ -955,6 +955,7 @@ return [
     'one_ip_per_line'    => 'One ip per line',
     'error-no_change'    => 'You have not made any changes.',
     'invalid_ip'         => 'Invalid IP',
+    'invalid_hostname'   => 'Invalid hostname',
     'wait_few_mins'      => 'Please wait for few mins to take effect.',
     'force_update'       => 'Force update',
     'not_allowed'        => 'Not allowed',
