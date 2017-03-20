@@ -11,7 +11,7 @@ class Cdn_Resources extends BaseModel
 
     protected $cdn_domain = 'allcdn888.com';
     protected $exclude_domain = 'allbrightnetwork.com';
-    protected $default_file_type = ["jpg", "jpeg", "png", "bmp", "gif", "html", "htm", "xml", "js", "css", "pdf", "swf", "ico", "wav"];
+    protected $default_file_type = ["jpg", "jpeg", "png", "bmp", "gif", "html", "htm", "xml", "js", "css", "pdf", "swf", "ico", "wav", "txt"];
     protected $default_max_age = 1800;
 
     public function validate_origin($ar_origin)
