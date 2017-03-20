@@ -1649,35 +1649,69 @@ class ApiController extends Controller
             $old_status = $this->request->input('old_status');
             $resource = $this->resources->where('id', $resource_id)->first();
 
-            if ($this->request->has('error_msg') && $this->request->input('error_msg') != '') {
-                $resource->error_msg = $this->request->input('error_msg');
+            //if ($this->request->has('error_msg') && $this->request->input('error_msg') != '') {
+            //    $resource->error_msg = $this->request->input('error_msg');
+            //}
+
+            //{E1001: {code: 1001, type: WARN,  msg: "null CNAME"}}
+            //{E1002: {code: 1002, type: WARN,  msg: "duplicate CNAME"}}
+            //{E1003: {code: 1003, type: WARN,  msg: "cdn_hostname is blacklisted"}}
+            //{E1004: {code: 1004, type: WARN,  msg: "invalid attributes - origin ip, port, weight"}}
+            //{E1007: {code: 1007, type: ERROR,  msg: "staging config test fails"}}
+            //{E3001: {code: 3001, type: ERROR, msg: "xns api call fails"}}
+            //{E3002: {code: 3002, type: WARN,  msg: "dns record(s) already exists, skip dns update"}}
+
+            $ar_error_msg = array();
+            //$is_conf_error = false;
+            if ($this->request->has('errors')) {
+                foreach ($this->request->input('errors') as $rs_error) {
+                    switch ($rs_error['code']) {
+                        case 1001:
+                        case 1002:
+                        case 1003:
+                        case 1004:
+                        case 1007:
+                            $ar_error_msg[] = $rs_error['code'];
+                            break;
+                        case 3001:
+                        case 3002:
+                            break;
+                    }
+                }
             }
 
-            if ($resource->status == 1 && $old_status == 'pending') {
-                $resource->status = 2;
-                $resource->force_update = 0;
-                if ($this->request->has('pop_error') && $this->request->input('pop_error') == 1) {
-                    $resource->update_status = 3;
-                }
+            if ($ar_error_msg) {
+                $resource->error_msg = json_encode($ar_error_msg);
                 $result = $resource->save();
-            } elseif ($old_status == 'updating' && ($resource->update_status == 1 or $resource->update_status == 3)) {
-                if ($this->request->has('pop_error') && $this->request->input('pop_error') == 1) {
-                    $resource->update_status = 3;
-                } else {
-                    $resource->update_status = 0;
-                }
-                $resource->force_update = 0;
-                $result = $resource->save();
-            } elseif ($old_status == 'active' && $resource->force_update == 1) {
-                $resource->force_update = 0;
-                $result = $resource->save();
-            }
-
-            if (isset($result)) {
                 return response()->json(compact('result'));
             } else {
-                $error = 'Status mismatched';
-                return response()->json(compact('error'));
+                $resource->error_msg = null;
+                if ($resource->status == 1 && $old_status == 'pending') {
+                    $resource->status = 2;
+                    $resource->force_update = 0;
+                    if ($this->request->has('pop_error') && $this->request->input('pop_error') == 1) {
+                        $resource->update_status = 3;
+                    }
+                    $result = $resource->save();
+                } elseif ($old_status == 'updating' && ($resource->update_status == 1 or $resource->update_status == 3)) {
+                    if ($this->request->has('pop_error') && $this->request->input('pop_error') == 1) {
+                        $resource->update_status = 3;
+                    } else {
+                        $resource->update_status = 0;
+                    }
+                    $resource->force_update = 0;
+                    $result = $resource->save();
+                } elseif ($old_status == 'active' && $resource->force_update == 1) {
+                    $resource->force_update = 0;
+                    $result = $resource->save();
+                }
+
+                if (isset($result)) {
+                    return response()->json(compact('result'));
+                } else {
+                    $error = 'Status mismatched';
+                    return response()->json(compact('error'));
+                }
             }
         } catch (\Exception $e) {
             $error = $e->getMessage();

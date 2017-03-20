@@ -934,6 +934,7 @@ return [
     'please_rate'        => 'Please rate:',
     'ticket_ratings'     => 'TICKET RATING',
 
+    //CDN
     'Cdn'                => 'CDN',
     'resources'          => 'Resources',
     'create_resource'    => 'Create resource',
@@ -960,6 +961,14 @@ return [
     'force_update'       => 'Force update',
     'not_allowed'        => 'Not allowed',
     'error'              => 'Error',
+
+    //API Error
+    'E1001'              => 'E1001: CNAME is null',
+    'E1002'              => 'E1002: CNAME duplicated',
+    'E1003'              => 'E1003: invalid cdn_hostname',
+    'E1004'              => 'E1004: invalid IP',
+    'E1007'              => 'E1007: conf error',
+
     /*
       |-----------------------------------------------
       |  Ticket

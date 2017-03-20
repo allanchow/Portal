@@ -934,6 +934,7 @@ return [
     'please_rate'        => '請評價：',
     'ticket_ratings'     => '工單評分: ',
 
+    //CDN
     'Cdn'                => 'CDN',
     'resources'          => '資源',
     'create_resource'    => '創建資源',
@@ -960,6 +961,14 @@ return [
     'force_update'       => '強制更新',
     'not_allowed'        => '不允許',
     'error'              => '錯誤',
+
+    //API Error
+    'E1001'              => 'E1001: CNAME為空白',
+    'E1002'              => 'E1002: CNAME重覆',
+    'E1003'              => 'E1003: cdn_hostname無效',
+    'E1004'              => 'E1004: IP無效',
+    'E1007'              => 'E1007: 配置錯誤',
+
     /*
       |-----------------------------------------------
       |  Ticket
