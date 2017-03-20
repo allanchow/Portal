@@ -26,7 +26,7 @@ class Cdn_Resources extends BaseModel
 
     public function validate_hostname($hostname)
     {
-        return preg_match('/^([^-]|\*\.)((?!\.-|-\.|'.$this->cdn_domain.'|'.$this->exclude_domain.')[a-zA-Z0-9\-\.])*(\.\*|)$/', $hostname);
+        return preg_match('/^([^-*]|\*\.)((?!\.-|-\.|'.$this->cdn_domain.'|'.$this->exclude_domain.')[a-zA-Z0-9\-\.])*(\.\*|)$/', $hostname);
     }
 
     public function get_cdn_domain()
