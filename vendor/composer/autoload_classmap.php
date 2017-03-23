@@ -28,6 +28,7 @@ return array(
     'AddForeignKeysToUsersTable' => $baseDir . '/database/migrations/2016_02_16_140454_add_foreign_keys_to_users_table.php',
     'AddLangToUsersTable' => $baseDir . '/database/migrations/2017_03_10_131418_add_lang_to_users_table.php',
     'AddLoginToUsersTable' => $baseDir . '/database/migrations/2017_03_16_174257_add_login_to_users_table.php',
+    'AddXnsHostIdToCdnResourcesTable' => $baseDir . '/database/migrations/2017_03_20_121500_add_xns_host_id_to_cdn_resources_table.php',
     'Adobe_Font_Metrics' => $vendorDir . '/phenx/php-font-lib/classes/Adobe_Font_Metrics.php',
     'AlterTicketSourceTable' => $baseDir . '/database/migrations/2016_08_16_104539_alter_ticket_source_table.php',
     'Attribute_Translator' => $vendorDir . '/dompdf/dompdf/include/attribute_translator.cls.php',
@@ -119,6 +120,7 @@ return array(
     'CreateWorkflowCloseTable' => $baseDir . '/database/migrations/2016_05_19_055008_create_workflow_close_table.php',
     'CreateWorkflowNameTable' => $baseDir . '/database/migrations/2016_04_18_115852_create_workflow_name_table.php',
     'CreateWorkflowRuleTable' => $baseDir . '/database/migrations/2016_04_18_115900_create_workflow_rule_table.php',
+    'CreateXnsTable' => $baseDir . '/database/migrations/2017_03_17_143141_create_xns_table.php',
     'DOMPDF' => $vendorDir . '/dompdf/dompdf/include/dompdf.cls.php',
     'DOMPDF_Exception' => $vendorDir . '/dompdf/dompdf/include/dompdf_exception.cls.php',
     'DOMPDF_Image_Exception' => $vendorDir . '/dompdf/dompdf/include/dompdf_image_exception.cls.php',
@@ -680,4 +682,5 @@ return array(
     'Whoops\\Module' => $vendorDir . '/filp/whoops/src/deprecated/Zend/Module.php',
     'Whoops\\Provider\\Zend\\ExceptionStrategy' => $vendorDir . '/filp/whoops/src/deprecated/Zend/ExceptionStrategy.php',
     'Whoops\\Provider\\Zend\\RouteNotFoundStrategy' => $vendorDir . '/filp/whoops/src/deprecated/Zend/RouteNotFoundStrategy.php',
+    'XnsTableSeeder' => $baseDir . '/database/seeds/XnsTableSeeder.php',
 );

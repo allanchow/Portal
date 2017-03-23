@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cdn;
 
 // controllers
 use App\Http\Controllers\Common\PhpMailController;
+use App\Http\Controllers\Xns\XnsController;
 use App\Http\Controllers\Controller;
 // requests
 use App\Http\Requests\Cdn\CdnRequest;
@@ -78,14 +79,22 @@ class CdnController extends Controller
             } else {
                 $resources = $resources->where('status', 1)->orWhere('update_status', 3);
             }
-        } elseif ($type === 'suspended') {
-            $resources = $resources->where('status', 0);
         } elseif ($type === 'updating') {
-            $resources = $resources->where('update_status', 1);
+            $resources = $resources->where('update_status', 1)->where('status', '<>', 0);
+        } elseif ($type === 'suspended' && (Auth::user()->role == "agent" || Auth::user()->role == "admin")) {
+            $resources = $resources->where('status', 0);
+        } elseif ($type === 'deleting' && (Auth::user()->role == "agent" || Auth::user()->role == "admin")) {
+            $resources = $resources->where('update_status', 2);
+        } elseif ($type === 'revert-dns'){
+            $resources = $resources->where('status', -1);
+        } else {
+            $resources = $resources->where('status', '<>', 0);
         }
 
         if (Auth::user()->role == "user") {
-           $resources = $resources->where('org_id', User_org::where('user_id', '=', Auth::user()->id)->first()->org_id);
+            $resources = $resources->where('org_id', User_org::where('user_id', '=', Auth::user()->id)->first()->org_id)->where('update_status', '<>', 2);
+        } elseif ($type != 'deleting') {
+            $resources = $resources->where('update_status', '<>', 2);
         }
 
         $resources = $resources->select('id', 'cdn_hostname', 'cname', 'status', 'update_status', 'force_update', 'created_at', 'error_msg');
@@ -106,7 +115,9 @@ class CdnController extends Controller
                         ->addColumn('status', function ($model) {
                             $status = $model->status;
                             $update_status = $model->update_status;
-                            if ($status == 0) {
+                            if ($status == -1) {
+                                $stat = '<span class="label label-default">'.\Lang::get('lang.revert_dns').'</span>';
+                            } elseif ($status == 0) {
                                 $stat = '<span class="label label-danger">'.\Lang::get('lang.suspended').'</span>';
                             } elseif ($status == 1) {
                                 $stat = '<span class="label label-warning">'.\Lang::get('lang.pending').'</span>';
@@ -123,7 +134,7 @@ class CdnController extends Controller
                             if ($model->force_update == 1 && (Auth::user()->role == "agent" || Auth::user()->role == "admin")) {
                                 $stat .= ' <span class="label label-warning">'.\Lang::get('lang.force_update').'</span>';
                             }
-                            if ($model->error_msg != '') {
+                            if ($model->error_msg != '' && !(Auth::user()->role == "user" && $status == 2 && $update_status == 0 && $model->force_update == 1)) {
                                 $stat .= ' <span class="label label-danger">'.\Lang::get('lang.error').'</span>';
                             }
 
@@ -209,7 +220,7 @@ class CdnController extends Controller
     {
         try {
             $resource = $resources->where('id', '=', $id)->first();
-            if (Auth::user()->role == "user" && $resource->org_id != User_org::where('user_id', '=', Auth::user()->id)->first()->org_id) {
+            if (!$resource or (Auth::user()->role == "user" && $resource->org_id != User_org::where('user_id', '=', Auth::user()->id)->first()->org_id)) {
                 return redirect()->route('resources')->with('fails', Lang::get('lang.not_found'));
             }
             $j_origin = json_decode($resource->origin, true);
@@ -231,7 +242,7 @@ class CdnController extends Controller
     {
         try {
 			$resource = Cdn_Resources::whereId($id)->first();
-            if (Auth::user()->role == "user" && $resource->org_id != User_org::where('user_id', '=', Auth::user()->id)->first()->org_id) {
+            if (!$resource or (Auth::user()->role == "user" && $resource->org_id != User_org::where('user_id', '=', Auth::user()->id)->first()->org_id)) {
                 return redirect()->route('resources')->with('fails', Lang::get('lang.not_found'));
             }
 
@@ -266,11 +277,42 @@ class CdnController extends Controller
         }
     }
 
-    public function forceUpdate(Cdn_Resources $resources)
+    public function destroy($id, Request $request)
+    {
+        try {
+            $resource = Cdn_Resources::whereId($id)->where('status', '<>', 0)->first();
+
+            if (!$resource or (Auth::user()->role == "user" && $resource->org_id != User_org::where('user_id', '=', Auth::user()->id)->first()->org_id)) {
+                $error = Lang::get('lang.not_found');
+                return response()->json(compact('error'));
+            }
+            $xns = new XnsController();
+            $rs = $xns->delResourceCName($id);
+            if ($rs->getData()->result) {
+                $resource->suspend_cdn_hostname();
+                $resource->update_status = 2;
+                $result = $resource->save();
+                return response()->json(compact('result'));
+            } else {
+                $result = $rs->getData()->error;
+                $error = Lang::get('lang.for_some_reason_your_request_failed');
+                return response()->json(compact('result', 'error'));
+            }
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+            return response()->json(compact('error'));
+        }
+    }
+
+    public function forceUpdate(Cdn_Resources $resources, Request $request)
     {
         if (Auth::user()->role == "agent" or Auth::user()->role == "admin") {
             try {
-                $result = $resources->where('force_update', 0)->update(['force_update' => 1]);
+                if ($request->has('id') && ($id = $request->input('id'))) {
+                    $result = $resources->where('id', $id)->where('status', '>', 0)->update(['force_update' => 1, 'error_msg' => '']);
+                } else {
+                    $result = $resources->where('force_update', 0)->where('status', '>', 0)->update(['force_update' => 1, 'error_msg' => '']);
+                }
                 $msg = Lang::get('lang.updated_successfully');
                 return response()->json(compact('result', 'msg'));
             } catch (Exception $e) {
@@ -282,5 +324,31 @@ class CdnController extends Controller
             $error = Lang::get('lang.not_allowed');
             return response()->json(compact('error'));
         }
+    }
+
+    public function cancelRevertDns($id)
+    {
+        try {
+            $resource = Cdn_Resources::whereId($id)->where('status', -1)->first();
+
+            if (!$resource or (Auth::user()->role == "user" && $resource->org_id != User_org::where('user_id', '=', Auth::user()->id)->first()->org_id)) {
+                $error = Lang::get('lang.not_found');
+                return response()->json(compact('error'));
+            }
+            $xns = new XnsController();
+            $rs = $xns->delResourceCName($id);
+            if ($rs->getData()->result) {
+                $resource->status = 1;
+                $result = $resource->save();
+                return response()->json(compact('result'));
+            } else {
+                $result = $rs->getData()->error;
+                $error = Lang::get('lang.for_some_reason_your_request_failed');
+                return response()->json(compact('result', 'error'));
+            }
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+            return response()->json(compact('error'));
+        }      
     }
 }

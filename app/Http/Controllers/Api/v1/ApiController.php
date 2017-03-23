@@ -1588,14 +1588,17 @@ class ApiController extends Controller
     {
         try {
             $ar_resources = array();
-            if ($resources = $this->resources->where('status', 1)->orWhere('update_status', 1)->orWhere('update_status', 3)->orWhere('force_update', 1)->orderBy('updated_at', 'desc')->paginate(100)) {
+            if ($resources = $this->resources->where('status', 1)->orWhere('update_status', '>', 0)->orWhere('force_update', 1)->orderBy('updated_at', 'desc')->paginate(100)) {
                 foreach ($resources as $resource)
                 {
                     $j_origin = json_decode($resource->origin, true);
                     //foreach ($j_origin as $origin) {
                     //    $ar_origin[] = $origin['ip'];
                     //}
-                    if ($resource->status == 1) {
+                    if ($resource->update_status == 2) {
+                        $status = 'deleting';
+                    }
+                    elseif ($resource->status == 1) {
                         $status = 'pending';
                     } elseif ($resource->update_status == 1 or $resource->update_status == 3) {
                         $status = 'updating';
@@ -1703,6 +1706,11 @@ class ApiController extends Controller
                     $result = $resource->save();
                 } elseif ($old_status == 'active' && $resource->force_update == 1) {
                     $resource->force_update = 0;
+                    $result = $resource->save();
+                } elseif ($old_status == 'deleting' && $resource->update_status == 2) {
+                    $resource->force_update = 0;
+                    $resource->update_status = 0;
+                    $resource->status = 0;
                     $result = $resource->save();
                 }
 

@@ -46,8 +46,8 @@ foreach($segments as $seg){
             toggleActiveClass(classname);
         });
 
-        $('.suspended').on('click', function(){
-            show = 'suspended';
+        $('.active').on('click', function(){
+            show = 'active';
             classname = '.'+show;
             filterTable(show);
             toggleActiveClass(classname);
@@ -60,8 +60,22 @@ foreach($segments as $seg){
             toggleActiveClass(classname);
         });
 
-        $('.active').on('click', function(){
-            show = 'active';
+        $('.suspended').on('click', function(){
+            show = 'suspended';
+            classname = '.'+show;
+            filterTable(show);
+            toggleActiveClass(classname);
+        });
+
+        $('.deleting').on('click', function(){
+            show = 'deleting';
+            classname = '.'+show;
+            filterTable(show);
+            toggleActiveClass(classname);
+        });
+
+        $('.revert-dns').on('click', function(){
+            show = 'revert-dns';
             classname = '.'+show;
             filterTable(show);
             toggleActiveClass(classname);

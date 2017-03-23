@@ -44,4 +44,20 @@ class Cdn_Resources extends BaseModel
     {
          return $this->default_max_age;
     }
+
+    public function getHostFromCName()
+    {
+        preg_match('/^(.*)\.'.$this->get_cdn_domain().'$/', $this->cname, $matches);
+        return isset($matches[1]) ? $matches[1] : false;
+    }
+
+    public function suspend_cdn_hostname()
+    {
+        $this->cdn_hostname = 'x-'.$this->id.'-'.$this->cdn_hostname;
+    }
+
+    public function revert_suspend_cdn_hostname()
+    {
+        $this->cdn_hostname = str_replace('x-'.$this->id.'-', '', $this->cdn_hostname);
+    }
 }

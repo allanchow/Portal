@@ -41,7 +41,7 @@ return [
       |   Login Page
       |--------------------------------------
      */
-    'login_to_start_your_session'            => 'Login to start your session',
+    'login_to_start_your_session'            => 'Login to start',
     'login'                                  => 'Login',
     'remember'                               => 'Remember me',
     'signmein'                               => 'Sign me in',
@@ -949,6 +949,8 @@ return [
     'only_active'        => 'Only active',
     'only_pending'       => 'Only pending',
     'only_suspended'     => 'Only suspended',
+    'only_deleting'      => 'Only deleting',
+    'only_revert-dns'    => 'Only revert DNS',
     'pending'            => 'Pending',
     'suspended'          => 'Suspended',
     'updating'           => 'Updating',
@@ -961,6 +963,8 @@ return [
     'force_update'       => 'Force update',
     'not_allowed'        => 'Not allowed',
     'error'              => 'Error',
+    'revert_dns'         => 'Revert DNS',
+    'cancel_revert_dns'  => 'Cancel revert DNS',
 
     //API Error
     'E1001'              => 'E1001: CNAME is null',

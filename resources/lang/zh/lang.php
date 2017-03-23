@@ -120,7 +120,7 @@ return [
       | customize your views to better match your application.
       |
      */
-    'admin_panel' => 'Admin Panel',
+    'admin_panel' => '管理面板',
     /*
       |--------------------------------------
       |  Emails Create Page
@@ -492,7 +492,7 @@ return [
     'file-error'         => '文件或無效文件中出錯',
     'delete-success'     => '語言包已成功刪除',
     'lang-doesnot-exist' => '語言包不存在',
-    'active-lang-error'  => '語言包在活動時無法刪除',
+    'active-lang-error'  => '語言包在生效時無法刪除',
     'language-error'     => '在您的lang目錄中找不到語言包。',
     'lang-fallback-lang' => '無法刪除系統的defualt後備語言',
 
@@ -657,7 +657,7 @@ return [
     'form_name'                             => '表單名稱',
     'view_this_form'                        => '查看此表單',
     'delete_from'                           => '刪除表單',
-    'are_you_sure_you_want_to_delete'       => '你確定你要刪除',
+    'are_you_sure_you_want_to_delete'       => '你確定要刪除',
     'close'                                 => '關閉',
     'instructions'                          => '說明',
     'instructions_on_creating_form'         => "選擇要添加到下面的表單中的字段類型，然後點擊“類型”下拉菜單。如果類型為select，checkbox或radio，不要忘記設置字段選項。用逗號分隔每個選項。創建表單後，您可以通過單擊“保存表單”按鈕來保存表單",
@@ -946,10 +946,12 @@ return [
     'origin'             => '來源',
     'cname'              => 'CName',
     'all_status'         => '所有狀態',
-    'only_active'        => '只有活動',
-    'only_pending'       => '僅待處理',
-    'only_suspended'     => '只有暫停',
-    'pending'            => '待定',
+    'only_active'        => '僅生效',
+    'only_pending'       => '僅處理中',
+    'only_suspended'     => '僅暫停',
+    'only_deleting'      => '僅刪除中',
+    'only_revert-dns'    => '僅DNS回原',
+    'pending'            => '處理中',
     'suspended'          => '已停用',
     'updating'           => '更新中',
     'deleting'           => '刪除中',
@@ -961,6 +963,8 @@ return [
     'force_update'       => '強制更新',
     'not_allowed'        => '不允許',
     'error'              => '錯誤',
+    'revert_dns'         => 'DNS回原',
+    'cancel_revert_dns'  => '取消DNS回原',
 
     //API Error
     'E1001'              => 'E1001: CNAME為空白',
@@ -1154,7 +1158,7 @@ return [
     'minutes'                                        => '分鐘',
     'in_minutes'                                     => '分鐘',
     'add_another_owner'                              => '添加其他所有者',
-    'user-not-found'                                 => '找不到用戶或用戶處於非活動狀態。請重試或添加新用戶。',
+    'user-not-found'                                 => '找不到用戶或用戶處於無效狀態。請重試或添加新用戶。',
     'change-success'                                 => '成功！工單所有者已被更改',
     'user-exists'                                    => '用戶已存在。嘗試搜索現有用戶',
     'valid-email'                                    => '輸入一個有效的電子郵件地址。',
@@ -1214,7 +1218,7 @@ return [
     'ext'                       => 'EXT',
     'profile_pic'               => '個人資料圖片',
     'agent_sign'                => '代理簽名',
-    'inactive'                  => '不活動',
+    'inactive'                  => '無效',
     'male'                      => '男',
     'female'                    => '女',
     'old_password'              => '舊密碼',
@@ -1534,7 +1538,7 @@ return [
     'delete_successfully'                                       => '成功刪除',
     'user_priority_status'                                      => '用戶優先序狀態',
     'current'                                                   => '當前:',
-    'active_user_can_select_the_priority_while_creating_ticket' => '活動用戶可以在創建工單時選擇優先序',
+    'active_user_can_select_the_priority_while_creating_ticket' => '有效用戶可以在創建工單時選擇優先序',
 
     /* --------------------------------------------------------------------------------------------
      * Approval Updated
@@ -1605,9 +1609,9 @@ return [
      'activate'                     => '啟用',
      'system-email-not-configured'  => '我們無法處理電子郵件請求，因為系統沒有配置的用於發送郵件的電子郵件。請聯繫並報告系統管理員',
      'assign-ticket'                => '分配工單',
-     'can-not-inactive-group'       => '無法使此組處於非活動狀態，因為它分配了代理。請將這些代理分配給其他組，然後重試',
+     'can-not-inactive-group'       => '無法停用此群組，因為它分配了代理。請將這些代理分配給其他組，然後重試',
      'internal-note-has-been-added' => '內部注釋已添加到工單',
-     'active-users'                 => '活動用戶',
+     'active-users'                 => '有效用戶',
      'deleted-users'                => '已刪除用戶',
      'view-option'                  => '查看選項',
      'accoutn-not-verified'         => '用戶帳戶未驗證',
@@ -1624,7 +1628,7 @@ return [
      'only-agents'         => '代理用戶',
      'only-users'          => '客戶端用戶',
      'banned-users'        => '禁止用戶',
-     'inactive-users'      => '非活動用戶',
+     'inactive-users'      => '無效用戶',
      'all-users'           => '全部用戶',
      'search'              => '搜索...',
      //update 21-12-2016

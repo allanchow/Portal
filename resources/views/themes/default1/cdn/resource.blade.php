@@ -42,6 +42,27 @@ class="active"
 {!! Form::model($resource, ['url' => 'resource/'.$resource->id,'method' => 'PATCH'] )!!}
 @endif
 <!-- <section class="content"> -->
+<link href="{{asset('lb-faveo/plugins/pace/pace.css')}}" rel="stylesheet" type="text/css" />
+<style>
+.modal {
+  text-align: center;
+}
+
+@media screen and (min-width: 768px) { 
+  .modal:before {
+    display: inline-block;
+    vertical-align: middle;
+    content: " ";
+    height: 100%;
+  }
+}
+
+.modal-dialog {
+  display: inline-block;
+  text-align: left;
+  vertical-align: middle;
+}
+</style>
 <div class="box box-primary">
     <div class="box-body">
         <div class="row">
@@ -53,7 +74,9 @@ class="active"
                 <div class="col-xs-6 form-group">
                     {!! Form::label('status',Lang::get('lang.status')) !!}       
                     <p>
-                    @if ($resource->status == 0)
+                    @if ($resource->status == -1)
+                        <span class="label label-default">{!! Lang::get('lang.revert_dns') !!}</span>
+                    @elseif ($resource->status == 0)
                         <span class="label label-danger">{!! Lang::get('lang.suspended') !!}</span>
                     @elseif ($resource->status == 1)
                         <span class="label label-warning">{!! Lang::get('lang.pending') !!}</span>
@@ -66,6 +89,9 @@ class="active"
                         <span class="label label-warning">{!! Lang::get('lang.deleting') !!}</span>
                     @elseif ($resource->update_status == 3 and (Auth::user()->role == "admin" or Auth::user()->role == "agent"))
                         <span class="label label-warning">{!! Lang::get('lang.pending') !!}</span>
+                    @endif
+                    @if ($resource->force_update == 1 and (Auth::user()->role == "admin" or Auth::user()->role == "agent"))
+                        <span class="label label-warning">{!! Lang::get('lang.force_update') !!}</span>
                     @endif
                     @if ($resource->error_msg != '')
                         <span class="label label-danger">{!! Lang::get('lang.error') !!}</span>
@@ -108,6 +134,149 @@ class="active"
                 <div class="col-xs-4 form-group">
                     {!! Form::label('created_at',Lang::get('lang.created')) !!}
                     <p>{{ $resource->created_at }}</p>
+                </div>
+                <div class="col-xs-4 form-group">
+                    <label>{!! Lang::get('lang.admin_panel') !!}</label>
+                    <p>
+                        <div class="input-group input-group-btn">
+                            <label class="btn btn-sm btn-warning dropdown-toggle" data-toggle="dropdown">{{Lang::get('lang.action')}}
+                                <span class="fa fa-caret-down"></span></label>
+                            <ul class="dropdown-menu">
+                                @if ($resource->status > 0 and (Auth::user()->role == "admin" or Auth::user()->role == "agent"))
+                                    <li><a href="#" id="force_update_button">{{Lang::get('lang.force_update')}}</a></li>
+                                @endif
+                                
+                                @if (!(($resource->status == 1 or ($resource->update_status > 0 && $resource->update_status < 3)) && $resource->error_msg == ''))
+                                    @if ($resource->status > 0)
+                                        <li><a href="#" id="revert_button">{{Lang::get('lang.revert_dns')}}</a></li>
+                                    @endif
+                                    @if ($resource->status == -1)
+                                        <li><a href="#" id="cancel_revert_button">{{Lang::get('lang.cancel_revert_dns')}}</a></li>
+                                    @endif
+                                    @if ($resource->status <> 0)
+                                        <li><a href="#" id="delete_button">{{Lang::get('lang.delete')}}</a></li>
+                                    @endif
+                                @endif
+                                
+                            </ul>
+                        </div>
+                        <script src="{{asset("lb-faveo/plugins/pace/pace.js")}}" type="text/javascript"></script>
+                        <script type="text/javascript">
+                            @if ($resource->status > 0 and (Auth::user()->role == "admin" or Auth::user()->role == "agent"))
+                            $('#force_update_button').on('click', function(){
+                                $.post("{{url('resources-force-update')}}", {id:"{{ $resource->id }}"}, function (data) {
+                                    if (data.error) {
+                                        alert(data.error);
+                                    } else {
+                                        alert(data.msg);
+                                        location.reload();
+                                    }
+                                });
+                            });
+                            @endif
+                            @if (!(($resource->status == 1 or ($resource->update_status > 0 && $resource->update_status < 3)) && $resource->error_msg == ''))
+                                @if ($resource->status > 0)
+                                $('#revert_button').on('click', function(){
+                                    $('#dg_confirm_bt').html('{{Lang::get('lang.revert_dns')}}');
+                                    $('#dg_confirm').modal({
+                                        backdrop: 'static',
+                                        keyboard: false
+                                    })
+                                    .one('click', '#dg_confirm_bt', function(e) {
+                                        Pace.track(function(){
+                                        $.ajax({
+                                            type: 'POST',
+                                            dataType: 'json',
+                                            url: "{!! route('resource.revert-dns', $resource->id) !!}",
+                                            success: function (data) {
+                                                if (data.error) {
+                                                    alert(data.error);
+                                                } else {
+                                                    alert('{{Lang::get('lang.success')}}');
+                                                    window.location.href = "{!! route('resource.index') !!}";
+                                                }
+                                            }
+                                        });
+                                        });
+                                    });
+                                });
+                                @endif
+                                @if ($resource->status == -1)
+                                $('#cancel_revert_button').on('click', function(){
+                                    $('#dg_confirm_bt').html('{{Lang::get('lang.cancel_revert_dns')}}');
+                                    $('#dg_confirm').modal({
+                                        backdrop: 'static',
+                                        keyboard: false
+                                    })
+                                    .one('click', '#dg_confirm_bt', function(e) {
+                                        Pace.track(function(){
+                                        $.ajax({
+                                            type: 'POST',
+                                            dataType: 'json',
+                                            url: "{!! route('resource.cancel-revert-dns', $resource->id) !!}",
+                                            success: function (data) {
+                                                if (data.error) {
+                                                    alert(data.error);
+                                                } else {
+                                                    alert('{{Lang::get('lang.success')}}');
+                                                    window.location.href = "{!! route('resource.index') !!}";
+                                                }
+                                            }
+                                        });
+                                        });
+                                    });
+                                });
+                                @endif
+                                @if ($resource->status <> 0)
+                                $('#delete_button').on('click', function(){
+                                    $('#dg_confirm_bt').html('{{Lang::get('lang.delete')}}');
+                                    $('#dg_confirm').modal({
+                                        backdrop: 'static',
+                                        keyboard: false
+                                    })
+                                    .one('click', '#dg_confirm_bt', function(e) {
+                                        Pace.track(function(){
+                                        $.ajax({
+                                            type: 'POST',
+                                            dataType: 'json',
+                                            data: {
+                                                _method: 'DELETE'
+                                            },
+                                            url: "{!! route('resource.destroy', $resource->id) !!}",
+                                            success: function (data) {
+                                                if (data.error) {
+                                                    alert(data.error);
+                                                } else {
+                                                    alert('{{Lang::get('lang.delete_successfully')}}');
+                                                    window.location.href = "{!! route('resource.index') !!}";
+                                                }
+                                            }
+                                        });
+                                        });
+                                    });
+                                });
+                                @endif
+                            @endif
+                        
+                        </script>
+                    </p>
+                </div>
+                <div id="dg_confirm" class="modal fade">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="dg_confirm_label">&nbsp;</h4>
+                            </div>
+                            <div class="modal-body">
+                                {{Lang::get('lang.are_you_sure')}}?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" data-dismiss="modal" class="btn btn-primary" id="dg_confirm_bt">{{Lang::get('lang.delete')}}</button>
+                                <button type="button" data-dismiss="modal" class="btn">{{Lang::get('lang.cancel')}}</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         @endif

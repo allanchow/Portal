@@ -80,7 +80,9 @@
             </span>
         --}}
         @endif
-        <?php $system = App\Model\helpdesk\Settings\System::where('id', '=', '1')->first();            
+        <?php 
+        //$system = App\Model\helpdesk\Settings\System::where('id', '=', '1')->first();
+        $system = null;
         ?>
         {{--
         @if($system != null) 
@@ -110,8 +112,7 @@
 <script type="text/javascript"> $(function(){ $('.dialogerror, .dialoginfo, .dialogalert').fadeIn('slow');$("form").bind("submit", function(e){$(this).find("input:submit").attr("disabled", "disabled");});});</script>
 <script type="text/javascript" >try {if (top.location.hostname != self.location.hostname) { throw 1; }} catch (e) { top.location.href = self.location.href; }</script>
 </div></div>
- <div class="login-box" style=" width: 500px;
-    height: 150px;"  valign = "center">
+ <div class="login-box" style="min-width:250px"  valign = "center">
  <div class="form-border">
      
                 <div align="center">
@@ -158,36 +159,28 @@
 
  
 <div class="row">
-        <div class="col-xs-12">
-
-    <div class="col-xs-4">
-
-<div>
-            <label>
-                <input type="checkbox" name="remember"> {!! Lang::get("lang.remember") !!}
-            </label>
-        </div>  </div>
-    <!-- /.col -->
-
-    <div class="col-xs-6">
- 
-<a href="{{url('password/email')}}">{!! Lang::get("lang.iforgot") !!}</a><br> 
-
-</div>
-{{--
- <div class="col-xs-2">
- 
-<a href="{{url('auth/register')}}" class="text-center">{!! Lang::get("lang.register") !!}</a>
-
-
-</div>
---}}
-            <div class="col-md-12">
-                @include('themes.default1.client.layout.social-login')
+    <div class="col-xs-12">
+        <div class="col-md-12">
+            <div>
+                <label>
+                    <input type="checkbox" name="remember"> {!! Lang::get("lang.remember") !!}
+                </label>
             </div>
-
-<!-- /.login-page -->
-  </div><!-- /.col -->
+        </div>
+        <!-- /.col -->
+        <div class="col-md-12">
+            <a href="{{url('password/email')}}">{!! Lang::get("lang.iforgot") !!}</a><br> 
+        </div>
+        {{--
+        <div class="col-xs-2">
+            <a href="{{url('auth/register')}}" class="text-center">{!! Lang::get("lang.register") !!}</a>
+        </div>
+        --}}
+        <div class="col-md-12">
+            @include('themes.default1.client.layout.social-login')
+        </div>
+        <!-- /.login-page -->
+    </div><!-- /.col -->
 </div>
 
 

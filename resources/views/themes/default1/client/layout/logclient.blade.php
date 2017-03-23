@@ -44,7 +44,7 @@
             <header id="masthead" class="site-header" role="banner">
                 
                 <div class="container" style="">
-                    <div id="logo" class="site-logo text-center" style="font-size: 30px;">
+                    <div id="logo" class="site-logo text-center" style="font-size: 25px;">
                         <?php
                         $company = App\Model\helpdesk\Settings\Company::where('id', '=', '1')->first();
                         $system = App\Model\helpdesk\Settings\System::where('id', '=', '1')->first();
@@ -55,91 +55,15 @@
                             <a href="{{url('/')}}" rel="home">
                                 @endif
                                 @if($company->use_logo == 1)
-                                <img src="{{asset('uploads/company')}}{{'/'}}{{$company->logo}}" alt="User Image" width="200px" height="200px"/>
-                                @else
+                                <img src="{{asset('uploads/company')}}{{'/'}}{{$company->logo}}" alt="User Image" width="80px" height="80px"/>
+                                @endif
                                 @if($system->name)
                                 {!! $system->name !!}
                                 @else
                                 <b>SUPPORT</b> CENTER
                                 @endif
-                                @endif
                             </a>
                     </div><!-- #logo -->
-                    <div id="navbar" class="navbar-wrapper text-center">
-                        <nav class="navbar navbar-default site-navigation" role="navigation">
-                            <ul class="nav navbar-nav navbar-menu">
-                                {{--
-                                <li @yield('home')><a href="{{url('/')}}">{!! Lang::get('lang.home') !!}</a></li>
-                                @if($system->first()->status == 1)
-                                <li @yield('submit')><a href="{{URL::route('form')}}">{!! Lang::get('lang.submit_a_ticket') !!}</a></li>
-                                @endif
-                                <li @yield('kb')><a href="{!! url('knowledgebase') !!}">{!! Lang::get('lang.knowledge_base') !!}</a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="{{route('category-list')}}">{!! Lang::get('lang.categories') !!}</a></li>
-                                        <li><a href="{{route('article-list')}}">{!! Lang::get('lang.articles') !!}</a></li>
-                                    </ul>
-                                </li>
-                                --}}
-                                <?php $pages = App\Model\kb\Page::where('status', '1')->where('visibility', '1')->get();
-                                ?>
-                                @foreach($pages as $page)
-                                <li><a href="{{route('pages',$page->slug)}}">{{$page->name}}</a></li>
-                                @endforeach
-                                @if(Auth::user())
-                                <li @yield('myticket')><a href="{{url('mytickets')}}">{!! Lang::get('lang.my_tickets') !!}</a></li>
-
-                                {{-- <li @yield('contact')><a href="{{route('contact')}}">Contact us</a></li> --}}
-                                <li @yield('profile')><a href="#" >{!! Lang::get('lang.my_profile') !!}</a>
-                                    <ul class="dropdown-menu">
-                                        <li>
-                                            <div class="banner-wrapper user-menu text-center clearfix">
-                                                <img src="{{Auth::user()->profile_pic}}"class="img-circle" alt="User Image" height="80" width="80"/>
-                                                <h3 class="banner-title text-info h4">{{Auth::user()->first_name." ".Auth::user()->last_name}}</h3>
-                                                <div class="banner-content">
-                                                    {{-- <a href="{{url('kb/client-profile')}}" class="btn btn-custom btn-xs">{!! Lang::get('lang.edit_profile') !!}</a> --}} <a href="{{url('auth/logout')}}" class="btn btn-custom btn-xs">{!! Lang::get('lang.log_out') !!}</a>
-                                                </div>
-                                                @if(Auth::user())
-                                                @if(Auth::user()->role != 'user')
-                                                <div class="banner-content">
-                                                    <a href="{{url('dashboard')}}" class="btn btn-custom btn-xs">{!! Lang::get('lang.dashboard') !!}</a>
-                                                </div>
-                                                @endif
-                                                @endif
-                                                @if(Auth::user())
-                                                @if(Auth::user()->role == 'user')
-                                                <div class="banner-content">
-                                                    <a href="{{url('client-profile')}}" class="btn btn-custom btn-xs">{!! Lang::get('lang.profile') !!}</a>
-                                                </div>
-                                                @endif
-                                                @endif
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ul><!-- .navbar-user -->
-                            @else
-                            
-                           
-                        
-                            
-                     
-                            @endif
-                        </nav><!-- #site-navigation -->
-                    </div><!-- #navbar -->
-                    {{--
-                    <div id="header-search" class="site-search clearfix" style="padding-bottom:5px"><!-- #header-search -->
-                        {!!Form::open(['method'=>'get','action'=>'Client\kb\UserController@search','class'=>'search-form clearfix'])!!}
-                        <div class="form-border">
-                            <div class="form-inline ">
-                                <div class="form-group">
-                                    <input type="text" name="s" id="s" class="search-field form-control input-lg" title="Enter search term" placeholder="{!! Lang::get('lang.have_a_question?_type_your_search_term_here') !!}" required />
-                                </div>
-                                <button type="submit" class="search-submit btn btn-custom btn-lg pull-right check-s">{!! Lang::get('lang.search') !!}</button>
-                            </div>
-                        </div>
-                        {!! Form::close() !!}
-                    </div>
-                    --}}
                 </div>
             </header>
             <!-- Left side column. contains the logo and sidebar -->

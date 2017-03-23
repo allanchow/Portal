@@ -149,6 +149,7 @@ class ComposerStaticInit1bacc9bd2a82216bf11bc15e6aee6c79
         array (
             'Collective\\Html\\' => 16,
             'Collective\\Bus\\' => 15,
+            'CloudXNS\\' => 9,
             'ClassPreloader\\' => 15,
             'Carbon\\' => 7,
         ),
@@ -433,6 +434,10 @@ class ComposerStaticInit1bacc9bd2a82216bf11bc15e6aee6c79
         'Collective\\Bus\\' => 
         array (
             0 => __DIR__ . '/..' . '/laravelcollective/bus/src',
+        ),
+        'CloudXNS\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/cloudxns/cloud-xns-api-sdk-php/src',
         ),
         'ClassPreloader\\' => 
         array (
@@ -1598,6 +1603,7 @@ class ComposerStaticInit1bacc9bd2a82216bf11bc15e6aee6c79
         'ClassPreloader\\Parser\\FileVisitor' => __DIR__ . '/..' . '/classpreloader/classpreloader/src/Parser/FileVisitor.php',
         'ClassPreloader\\Parser\\NodeTraverser' => __DIR__ . '/..' . '/classpreloader/classpreloader/src/Parser/NodeTraverser.php',
         'ClassPreloader\\Parser\\StrictTypesVisitor' => __DIR__ . '/..' . '/classpreloader/classpreloader/src/Parser/StrictTypesVisitor.php',
+        'CloudXNS\\Api' => __DIR__ . '/..' . '/cloudxns/cloud-xns-api-sdk-php/src/Api.php',
         'Collective\\Bus\\BusServiceProvider' => __DIR__ . '/..' . '/laravelcollective/bus/src/BusServiceProvider.php',
         'Collective\\Bus\\Dispatcher' => __DIR__ . '/..' . '/laravelcollective/bus/src/Dispatcher.php',
         'Collective\\Bus\\HandlerResolver' => __DIR__ . '/..' . '/laravelcollective/bus/src/HandlerResolver.php',

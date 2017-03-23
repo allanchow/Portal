@@ -450,6 +450,9 @@ Route::group(['middleware' => ['web']], function () {
             $PhpMailController = new App\Http\Controllers\Common\PhpMailController;
             return $PhpMailController->sendmail(1, $to = ['name' => $name, 'email' => $email], $message = ['subject' => null, 'scenario' => 'registration-notification'], $template_variables = ['user' => $name, 'email_address' => $email, 'user_password' => $password]);
         });
+
+        Route::get('/xns/test', ['as'=>'xns.test', 'uses'=>'Xns\XnsController@test']);
+        Route::get('/xns/import-host', ['as'=>'xns.import-host', 'uses'=>'Xns\XnsController@importHost']);
     });
 
         /*
@@ -528,6 +531,8 @@ Route::group(['middleware' => ['web']], function () {
         Route::resource('resource', 'Cdn\CdnController');
         Route::get('resource-list', ['as' => 'resource.list', 'uses' => 'Cdn\CdnController@resource_list']);
         Route::post('resources-force-update', ['as' => 'resource.list', 'uses' => 'Cdn\CdnController@forceUpdate']);
+        Route::post('resources-revert-dns/{id}', ['as' => 'resource.revert-dns', 'uses' => 'Xns\XnsController@revertResourceDNS']);
+        Route::post('resources-cancel-revert-dns/{id}', ['as' => 'resource.cancel-revert-dns', 'uses' => 'Cdn\CdnController@cancelRevertDns']);
         //Route::get('create-resource', ['as' => 'create-resource',  'uses' =>'Client\helpdesk\CdnController@getResource']);
     });
     Route::get('checkticket', 'Client\helpdesk\ClientTicketController@getCheckTicket'); /* Check your Ticket */
