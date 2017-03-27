@@ -28,6 +28,14 @@ $status = $segments[2];
         {
             return jQuery('#chumper').dataTable({
                 "sPaginationType": "full_numbers",
+                "oLanguage": {
+                    "oPaginate": {
+                        "sFirst": '&laquo;',
+                        "sPrevious": '&lsaquo;',
+                        "sNext": '&rsaquo;',
+                        "sLast": '&raquo;'
+                    }
+                },
                 "bProcessing": true,
                 "bServerSide": true,
                 "lengthMenu": [[10, 25, 50, 100, 500], [10, 25, 50, 100, 500]],

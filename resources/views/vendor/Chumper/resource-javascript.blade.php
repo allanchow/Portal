@@ -24,6 +24,14 @@ foreach($segments as $seg){
                         "t"+
                         "<'row'<'col-xs-6'i><'col-xs-6'p>>",
                 "sPaginationType": "full_numbers",
+                "oLanguage": {
+                    "oPaginate": {
+                        "sFirst": '&laquo;',
+                        "sPrevious": '&lsaquo;',
+                        "sNext": '&rsaquo;',
+                        "sLast": '&raquo;'
+                    }
+                },
                 "bProcessing": true,
                 "bServerSide": true,
                 "order": [[3, "desc"]],
