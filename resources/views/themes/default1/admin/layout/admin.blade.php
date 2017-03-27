@@ -67,7 +67,7 @@
         ?>
         <div class="wrapper">
             <header class="main-header">
-                <a href="/" class="logo"><img src="{{ asset('lb-faveo/media/images/logo.png') }}" width="100px"></a>
+                <a href="/" class="logo"><img src="{{ asset('lb-faveo/media/images/logo.png') }}" height="40"></a>
                 <!-- Header Navbar: style can be found in header.less -->
                 <nav class="navbar navbar-static-top" role="navigation">
                     <!-- Sidebar toggle button-->
@@ -196,22 +196,17 @@
                 <!-- sidebar: style can be found in sidebar.less -->
                 <section class="sidebar">
                     <div class="user-panel">
-                        <div class = "row">
-                            <div class="col-xs-3"></div>
-                            <div class="col-xs-2" style="width:50%;">
-                                <a href="{!! url('profile') !!}">
-                                    <img src="{{Auth::user()->profile_pic}}" class="img-circle" alt="User Image" />
-                                </a>
-                            </div>
+                        <div class="pull-left">
+                            <a href="{!! url('profile') !!}"><img src="{{Auth::user()->profile_pic}}" class="img-circle" alt="User Image" style="max-width: 45px"/></a>
                         </div>
-                        <div class="info" style="text-align:center;">
+                        <div class="pull-left info">
                             @if(Auth::user())
                             <p>{!! Auth::user()->first_name !!}{!! " ". Auth::user()->last_name !!}</p>
                             @endif
                             @if(Auth::user() && Auth::user()->active==1)
-                            <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+                            <a href="{{url('auth/logout')}}"><i class="fa fa-circle text-success"></i> Online</a>
                             @else
-                            <a href="#"><i class="fa fa-circle"></i> Offline</a>
+                            <a href="{{url('auth/login')}}"><i class="fa fa-circle"></i> Offline</a>
                             @endif
                         </div>
                     </div>

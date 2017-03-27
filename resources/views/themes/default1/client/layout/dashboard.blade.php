@@ -185,29 +185,21 @@
                 <!-- sidebar: style can be found in sidebar.less -->
                 <section class="sidebar">
                     <div class="user-panel">
+                        <div class="pull-left">
                         @if (trim($__env->yieldContent('profileimg')))
-                        <h1>@yield('profileimg')</h1>
+                            @yield('profileimg')
                         @else
-                        <div class = "row">
-                            <div class="col-xs-3"></div>
-                            <div class="col-xs-2" style="width:50%;">
-                                <a href="{!! url('client-profile') !!}">
-                                    <img src="{{$auth_user_profile_pic}}" class="img-circle" alt="User Image" />
-                                </a>
-                            </div>
-                        </div>
+                            <a href="{!! url('client-profile') !!}"><img src="{{$auth_user_profile_pic}}" class="img-circle" alt="User Image"  style="max-width: 45px"/></a>
                         @endif
-                        <div class="info" style="text-align:center;">
+                        </div>
+                        <div class="pull-left info">
                             @if($auth_user_id)
                             <p>{{$auth_name}}</p>
                             @endif
                             @if($auth_user_id && $auth_user_active==1)
-                            <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+                            <a href="{{url('auth/logout')}}"><i class="fa fa-circle text-success"></i> Online</a>
                             @else
-                            <a href="#"><i class="fa fa-circle"></i> Offline</a>
-                            @endif
-                            @if($auth_user_id)
-                            <p><a href="{{url('auth/logout')}}" class="btn btn-danger btn-xs"><b>{!! Lang::get('lang.sign_out') !!}</b></a></p>
+                            <a href="{{url('auth/login')}}"><i class="fa fa-circle"></i> Offline</a>
                             @endif
                         </div>
                     </div>
