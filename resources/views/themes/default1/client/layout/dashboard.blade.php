@@ -234,23 +234,25 @@
             <div class="content-wrapper">
                 <!-- Content Header (Page header) -->
                 <div class="tab-content" style="background-color: white;padding: 0 0px 0 20px">
-                    <div class="collapse navbar-collapse" id="navbar-collapse">
-                        <div class="tabs-content">
-                            <div class="tabs-pane @yield('dashboard-bar')"  id="tabA">
-                                <ul class="nav navbar-nav">
-                                </ul>
-                            </div>
-                            <div class="tabs-pane @yield('cdn-bar')" id="tabB">
-                                <ul class="nav navbar-nav">
-                                    <li id="bar" @yield('resources')><a href="{{ url('/resources')}}" id="load-open">{!! Lang::get('lang.resources') !!}</a></li>
-                                    <li id="bar" @yield('newresource')><a href="{{ route('resource.create')}}" >{!! Lang::get('lang.create_resource') !!}</a></li>
-                                </ul>
-                            </div>
-                            <div class="tabs-pane @yield('ticket-bar')" id="tabC">
-                                <ul class="nav navbar-nav">
-                                    <li id="bar" @yield('mytickets')><a href="{{ url('/mytickets')}}" id="load-open">{!! Lang::get('lang.tickets') !!}</a></li>
-                                    <li id="bar" @yield('newticket')><a href="{{ url('/create-ticket')}}" >{!! Lang::get('lang.create_ticket') !!}</a></li>
-                                </ul>
+                    <div class="navbar-collapse" id="navbar-collapse">
+                        <div class="navbar-custom-menu">
+                            <div class="tabs-content">
+                                <div class="tabs-pane @yield('dashboard-bar')"  id="tabA">
+                                    <ul class="nav navbar-nav">
+                                    </ul>
+                                </div>
+                                <div class="tabs-pane @yield('cdn-bar')" id="tabB">
+                                    <ul class="nav navbar-nav">
+                                        <li id="bar" @yield('resources')><a href="{{ url('/resources')}}" id="load-open">{!! Lang::get('lang.resources') !!}</a></li>
+                                        <li id="bar" @yield('newresource')><a href="{{ route('resource.create')}}" >{!! Lang::get('lang.create_resource') !!}</a></li>
+                                    </ul>
+                                </div>
+                                <div class="tabs-pane @yield('ticket-bar')" id="tabC">
+                                    <ul class="nav navbar-nav">
+                                        <li id="bar" @yield('mytickets')><a href="{{ url('/mytickets')}}" id="load-open">{!! Lang::get('lang.tickets') !!}</a></li>
+                                        <li id="bar" @yield('newticket')><a href="{{ url('/create-ticket')}}" >{!! Lang::get('lang.create_ticket') !!}</a></li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>

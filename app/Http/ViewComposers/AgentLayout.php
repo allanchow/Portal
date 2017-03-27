@@ -77,7 +77,7 @@ class AgentLayout
 
     public function resources()
     {
-        return $this->resources->select('id', 'org_id');
+        return $this->resources->select('id', 'org_id')->where('status', '<>', 0)->where('update_status', '<>', 2);
     }
 
     public function departments()
