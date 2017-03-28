@@ -58,6 +58,7 @@ class CdnController extends Controller
         $table = \ Datatable::table()
         ->addColumn(Lang::get('lang.cdn_hostname'),
             Lang::get('lang.cname'),
+            Lang::get('lang.type'),
             Lang::get('lang.status'),
             Lang::get('lang.created'),
             Lang::get('lang.action'))
@@ -97,7 +98,7 @@ class CdnController extends Controller
             $resources = $resources->where('update_status', '<>', 2);
         }
 
-        $resources = $resources->select('id', 'cdn_hostname', 'cname', 'status', 'update_status', 'force_update', 'created_at', 'error_msg');
+        $resources = $resources->select('id', 'cdn_hostname', 'cname', 'file_type', 'status', 'update_status', 'force_update', 'created_at', 'error_msg');
 
         if ($search !== '') {
             $resources = $resources->where(function ($query) use ($search) {
@@ -111,6 +112,13 @@ class CdnController extends Controller
                         ->removeColumn('id', 'update_status', 'force_update', 'error_msg')
                         ->addColumn('cdn_hostname', function ($model) {
                                 return '<a href="'.route('resource.edit', $model->id).'">'.$model->cdn_hostname.'</a>';
+                        })
+                        ->addColumn('file_type', function ($model) {
+                            if (json_decode($model->file_type)) {
+                                return '<span class="label label-primary">'.\Lang::get('lang.website').'</span>';
+                            } else {
+                                return '<span class="label label-warning">'.\Lang::get('lang.dynamic').'</span>';
+                            }
                         })
                         ->addColumn('status', function ($model) {
                             $status = $model->status;
@@ -154,6 +162,9 @@ class CdnController extends Controller
                 $org = new Organization;
                 $resource->org_id = User_org::where('user_id', '=', Auth::user()->id)->first()->org_id;
             }
+            $resource->max_age = $resource->get_default_max_age();
+            $resource->file_type = json_encode($resource->get_default_file_type());
+            $resource->file_type_to_string();
             $ext_view = $this->ext_view;
             $mode = 'create';
 
@@ -179,14 +190,26 @@ class CdnController extends Controller
             if ($resource->validate_origin($ar_origin) === false) {
                 return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_ip'));
             }
+
+            if ($request->input('host_header') != '' && !$resource->validate_host_header($request->input('host_header'))) {
+                return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_host_header'));
+            }
+
             $resource->cdn_hostname = $request->input('cdn_hostname');
             $resource->org_id = $request->input('org_id');
-            if ($request->has('file_type') && $request->input('file_type') != '') {
-                $resource->file_type = $request->input('file_type');
+            if ($request->has('host_header')) {
+                $resource->host_header = $request->input('host_header');
+            }
+            if (!is_null($request->input('file_type'))) {
+                if ($request->input('file_type') == '') {
+                    $resource->file_type = json_encode([]);
+                } else {
+                    $resource->file_type = json_encode(explode(",", $request->input('file_type')));
+                }
             } else {
                 $resource->file_type = json_encode($resource->get_default_file_type());
             }
-            if ($request->has('max_age') && $request->input('max_age') != '') {
+            if ($request->has('max_age')) {
                 $resource->max_age = $request->input('max_age');
             } else {
                 $resource->max_age = $resource->get_default_max_age();
@@ -228,6 +251,7 @@ class CdnController extends Controller
                 $ar_origin[] = $origin['ip'];
             }
             $resource->origin = implode("\n", $ar_origin);
+            $resource->file_type_to_string();
             $org = Organization::lists('name', 'id')->toArray();
             $ext_view = $this->ext_view;
             $mode = 'edit';
@@ -250,6 +274,10 @@ class CdnController extends Controller
                 return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_hostname'));
             }
 
+            if ($request->input('host_header') != '' && !$resource->validate_host_header($request->input('host_header'))) {
+                return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_host_header'));
+            }
+
             $i_origin = explode("\n", str_replace(',', "\n", $request->input('origin')));
             foreach ($i_origin as $origin) {
                 $origin = trim($origin);
@@ -261,7 +289,40 @@ class CdnController extends Controller
                 return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_ip'));
             }
             $new_origin = json_encode($ar_origin);
-            if ($resource->origin == $new_origin && $resource->cdn_hostname == $request->input('cdn_hostname') && $resource->error_msg == '') {
+            $resource->org_id = $request->input('org_id');
+
+            $has_change = false;
+
+            if ($request->has('host_header')) {
+                if ($resource->host_header != $request->input('host_header')) {
+                    $has_change = true;
+                }
+                $resource->host_header = $request->input('host_header');
+            }
+
+
+            if (!is_null($request->input('file_type'))) {
+
+                if ($request->input('file_type') == '') {
+                    $file_type = json_encode([]);
+                } else {
+                    $file_type = json_encode(explode(",", $request->input('file_type')));
+                }
+
+                if ($resource->file_type != $file_type) {
+                    $has_change = true;
+                }
+                $resource->file_type = $file_type;
+            }
+
+            if ($request->has('max_age')) {
+                if ($resource->max_age != $request->input('max_age')) {
+                    $has_change = true;
+                }
+                $resource->max_age = $request->input('max_age');
+            }
+
+            if ($resource->origin == $new_origin && $resource->cdn_hostname == $request->input('cdn_hostname') && $resource->error_msg == '' && !$has_change) {
                 return redirect()->back()->withInput()->with('fails', Lang::get('lang.error-no_change'));
             }
             $resource->cdn_hostname = $request->input('cdn_hostname');

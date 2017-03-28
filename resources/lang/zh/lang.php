@@ -941,8 +941,8 @@ return [
     'edit_resource'      => '編輯資源',
     'cdn_hostname'       => '主機名',
     'file_type'          => '文件類型',
-    'max-age'            => '最大生存周期',
-    'host_header'        => '主機 header',
+    'max-age'            => '緩存效期',
+    'host_header'        => '主機標題',
     'origin'             => '來源',
     'cname'              => 'CName',
     'all_status'         => '所有狀態',
@@ -959,12 +959,17 @@ return [
 	  'error-no_change'    => '您尚未進行任何更改',
     'invalid_ip'         => 'IP無效',
     'invalid_hostname'   => '主機名無效',
+    'invalid_host_header'=> '主機標題無效',
     'wait_few_mins'      => '請等待數分鐘才會生效',
     'force_update'       => '強制更新',
     'not_allowed'        => '不允許',
     'error'              => '錯誤',
     'revert_dns'         => 'DNS回原',
     'cancel_revert_dns'  => '取消DNS回原',
+    'second'             => '秒',
+    'leave_blank'        => '留白不變',
+    'dynamic'            => '動態',
+
 
     //API Error
     'E1001'              => 'E1001: CNAME為空白',

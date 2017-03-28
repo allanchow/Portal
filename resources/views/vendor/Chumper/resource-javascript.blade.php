@@ -22,7 +22,7 @@ foreach($segments as $seg){
             return jQuery('#chumper').dataTable({
                 "sDom": "<'row'<'col-xs-6'l><'col-xs-6'>r>"+
                         "t"+
-                        "<'row'<'col-xs-6'i><'col-xs-6'p>>",
+                        "<'row'<'col-md-6'i><'col-md-6'p>>",
                 "sPaginationType": "full_numbers",
                 "oLanguage": {
                     "oPaginate": {

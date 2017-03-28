@@ -29,6 +29,11 @@ class Cdn_Resources extends BaseModel
         return preg_match('/^([^-*]|\*\.)((?!\.-|-\.|'.$this->cdn_domain.'|'.$this->exclude_domain.')[a-zA-Z0-9\-\.])*(\.\*|)$/', $hostname);
     }
 
+    public function validate_host_header($hostname)
+    {
+        return preg_match('/^[a-zA-Z0-9\-\.]+$/', $hostname);
+    }
+
     public function get_cdn_domain()
     {
          return $this->cdn_domain;
@@ -59,5 +64,10 @@ class Cdn_Resources extends BaseModel
     public function revert_suspend_cdn_hostname()
     {
         $this->cdn_hostname = str_replace('x-'.$this->id.'-', '', $this->cdn_hostname);
+    }
+
+    public function file_type_to_string()
+    {
+        $this->file_type = implode(',', json_decode($this->file_type, true));
     }
 }

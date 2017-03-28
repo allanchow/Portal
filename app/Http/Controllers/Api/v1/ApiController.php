@@ -1608,7 +1608,9 @@ class ApiController extends Controller
                     $ar_resources[] = array(
                                        'resource_id' => $resource->id,
                                        'cdn_hostname' => $resource->cdn_hostname,
+                                       'host_header' => $resource->host_header,
                                        'file_type' => json_decode($resource->file_type, true),
+                                       'max_age' => $resource->max_age,
                                        'origin' => $j_origin,
                                        'cname' => $resource->cname,
                                        'status' => $status
