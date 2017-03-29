@@ -86,7 +86,7 @@ class CdnController extends Controller
             $resources = $resources->where('status', 0);
         } elseif ($type === 'deleting' && (Auth::user()->role == "agent" || Auth::user()->role == "admin")) {
             $resources = $resources->where('update_status', 2);
-        } elseif ($type === 'revert-dns'){
+        } elseif ($type === 'dns_to_origin'){
             $resources = $resources->where('status', -1);
         } else {
             $resources = $resources->where('status', '<>', 0);
@@ -124,7 +124,7 @@ class CdnController extends Controller
                             $status = $model->status;
                             $update_status = $model->update_status;
                             if ($status == -1) {
-                                $stat = '<span class="label label-default">'.\Lang::get('lang.revert_dns').'</span>';
+                                $stat = '<span class="label label-default">'.\Lang::get('lang.dns_to_origin').'</span>';
                             } elseif ($status == 0) {
                                 $stat = '<span class="label label-danger">'.\Lang::get('lang.suspended').'</span>';
                             } elseif ($status == 1) {
@@ -219,17 +219,7 @@ class CdnController extends Controller
             $resource->update_status = 0;
             // saving inputs
             if ($resource->save() == true) {
-                if (\App::environment('production')) {
-                    $int_id = str_pad($resource->id, 6, "0", STR_PAD_LEFT);
-                    $resource->cname = "cdn-{$int_id}.{$resource->get_cdn_domain()}";
-                } else {
-                    if ($resource->id > 100000) {
-                        $int_id = $resource->id;
-                    } else {
-                        $int_id = 900000 + $resource->id;
-                    }
-                    $resource->cname = "uat-cdn-{$int_id}.{$resource->get_cdn_domain()}";
-                }
+                $resource->createCName();
                 $resource->save();
             }
 

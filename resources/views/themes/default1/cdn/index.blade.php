@@ -49,7 +49,7 @@ class="active"
                             <li class="all"><a href="#" class="all">{{Lang::get('lang.all_status')}}</a></li>
                             <li><a href="#" class="active">{{Lang::get('lang.only_active')}}</a></li>
                             <li><a href="#" class="pending">{{Lang::get('lang.only_pending')}}</a></li>
-                            <li><a href="#" class="revert-dns">{{Lang::get('lang.only_revert-dns')}}</a></li>
+                            <li><a href="#" class="dns_to_origin">{{Lang::get('lang.only_dns_to_origin')}}</a></li>
                             @if (Auth::user()->role == "admin" or Auth::user()->role == "agent")
                                 <li><a href="#" class="suspended">{{Lang::get('lang.only_suspended')}}</a></li>
                                 <li><a href="#" class="deleting">{{Lang::get('lang.only_deleting')}}</a></li>

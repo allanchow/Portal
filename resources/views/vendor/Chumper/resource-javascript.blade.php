@@ -82,8 +82,8 @@ foreach($segments as $seg){
             toggleActiveClass(classname);
         });
 
-        $('.revert-dns').on('click', function(){
-            show = 'revert-dns';
+        $('.dns_to_origin').on('click', function(){
+            show = 'dns_to_origin';
             classname = '.'+show;
             filterTable(show);
             toggleActiveClass(classname);

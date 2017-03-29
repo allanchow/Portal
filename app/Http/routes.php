@@ -531,8 +531,8 @@ Route::group(['middleware' => ['web']], function () {
         Route::resource('resource', 'Cdn\CdnController');
         Route::get('resource-list', ['as' => 'resource.list', 'uses' => 'Cdn\CdnController@resource_list']);
         Route::post('resources-force-update', ['as' => 'resource.list', 'uses' => 'Cdn\CdnController@forceUpdate']);
-        Route::post('resources-revert-dns/{id}', ['as' => 'resource.revert-dns', 'uses' => 'Xns\XnsController@revertResourceDNS']);
-        Route::post('resources-cancel-revert-dns/{id}', ['as' => 'resource.cancel-revert-dns', 'uses' => 'Cdn\CdnController@cancelRevertDns']);
+        Route::post('resources-dns-to-origin/{id}', ['as' => 'resource.dns-to-origin', 'uses' => 'Xns\XnsController@revertResourceDNS']);
+        Route::post('resources-cancel-dns-to-origin/{id}', ['as' => 'resource.cancel-dns-to-origin', 'uses' => 'Cdn\CdnController@cancelRevertDns']);
         //Route::get('create-resource', ['as' => 'create-resource',  'uses' =>'Client\helpdesk\CdnController@getResource']);
     });
     Route::get('checkticket', 'Client\helpdesk\ClientTicketController@getCheckTicket'); /* Check your Ticket */
@@ -781,6 +781,7 @@ Route::group(['middleware' => ['web']], function () {
             Route::get('resources', 'Api\v1\ApiController@getResources');
             Route::get('get_processing_resources', 'Api\v1\ApiController@getProcessingResources');
             Route::post('update_resource_status', 'Api\v1\ApiController@updateResourceStatus');
+            Route::post('resource', 'Api\v1\ApiController@createResource');
         });
         /*
          * FCM token response

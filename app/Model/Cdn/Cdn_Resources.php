@@ -70,4 +70,19 @@ class Cdn_Resources extends BaseModel
     {
         $this->file_type = implode(',', json_decode($this->file_type, true));
     }
+
+    public function createCName()
+    {
+        if (\App::environment('production')) {
+            $int_id = str_pad($this->id, 6, "0", STR_PAD_LEFT);
+            $this->cname = "cdn-{$int_id}.{$this->get_cdn_domain()}";
+        } else {
+            if ($this->id > 100000) {
+                $int_id = $this->id;
+            } else {
+                $int_id = 900000 + $this->id;
+            }
+            $this->cname = "uat-cdn-{$int_id}.{$this->get_cdn_domain()}";
+        }
+    }
 }

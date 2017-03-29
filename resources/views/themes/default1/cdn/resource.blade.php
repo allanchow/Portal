@@ -80,7 +80,7 @@ class="active"
                     {!! Form::label('status',Lang::get('lang.status')) !!}       
                     <p>
                     @if ($resource->status == -1)
-                        <span class="label label-default">{!! Lang::get('lang.revert_dns') !!}</span>
+                        <span class="label label-default">{!! Lang::get('lang.dns_to_origin') !!}</span>
                     @elseif ($resource->status == 0)
                         <span class="label label-danger">{!! Lang::get('lang.suspended') !!}</span>
                     @elseif ($resource->status == 1)
@@ -169,10 +169,10 @@ class="active"
                                 
                                 @if (!(($resource->status == 1 or ($resource->update_status > 0 && $resource->update_status < 3)) && $resource->error_msg == ''))
                                     @if ($resource->status > 0)
-                                        <li><a href="#" id="revert_button">{{Lang::get('lang.revert_dns')}}</a></li>
+                                        <li><a href="#" id="dns_to_origin_button">{{Lang::get('lang.dns_to_origin')}}</a></li>
                                     @endif
                                     @if ($resource->status == -1)
-                                        <li><a href="#" id="cancel_revert_button">{{Lang::get('lang.cancel_revert_dns')}}</a></li>
+                                        <li><a href="#" id="cancel_dns_to_origin_button">{{Lang::get('lang.cancel_dns_to_origin')}}</a></li>
                                     @endif
                                     @if ($resource->status <> 0)
                                         <li><a href="#" id="delete_button">{{Lang::get('lang.delete')}}</a></li>
@@ -241,8 +241,8 @@ class="active"
                 @endif
                 @if (!(($resource->status == 1 or ($resource->update_status > 0 && $resource->update_status < 3)) && $resource->error_msg == ''))
                     @if ($resource->status > 0)
-                    $('#revert_button').on('click', function(){
-                        $('#dg_confirm_bt').html('{{Lang::get('lang.revert_dns')}}');
+                    $('#dns_to_origin_button').on('click', function(){
+                        $('#dg_confirm_bt').html('{{Lang::get('lang.dns_to_origin')}}');
                         $('#dg_confirm').modal({
                             backdrop: 'static',
                             keyboard: false
@@ -252,7 +252,7 @@ class="active"
                             $.ajax({
                                 type: 'POST',
                                 dataType: 'json',
-                                url: "{!! route('resource.revert-dns', $resource->id) !!}",
+                                url: "{!! route('resource.dns-to-origin', $resource->id) !!}",
                                 success: function (data) {
                                     if (data.error) {
                                         alert(data.error);
@@ -267,8 +267,8 @@ class="active"
                     });
                     @endif
                     @if ($resource->status == -1)
-                    $('#cancel_revert_button').on('click', function(){
-                        $('#dg_confirm_bt').html('{{Lang::get('lang.cancel_revert_dns')}}');
+                    $('#cancel_dns_to_origin_button').on('click', function(){
+                        $('#dg_confirm_bt').html('{{Lang::get('lang.cancel_dns_to_origin')}}');
                         $('#dg_confirm').modal({
                             backdrop: 'static',
                             keyboard: false
@@ -278,7 +278,7 @@ class="active"
                             $.ajax({
                                 type: 'POST',
                                 dataType: 'json',
-                                url: "{!! route('resource.cancel-revert-dns', $resource->id) !!}",
+                                url: "{!! route('resource.cancel-dns-to-origin', $resource->id) !!}",
                                 success: function (data) {
                                     if (data.error) {
                                         alert(data.error);
