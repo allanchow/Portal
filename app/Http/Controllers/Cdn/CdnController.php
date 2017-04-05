@@ -102,8 +102,9 @@ class CdnController extends Controller
 
         if ($search !== '') {
             $resources = $resources->where(function ($query) use ($search) {
-                $query->where('cdn_hostname', 'LIKE', '%'.$search.'%');
-                $query->orWhere('cname', 'LIKE', '%'.$search.'%');
+                $query->where('cdn_hostname', 'LIKE', '%'.$search.'%')
+                    ->orWhere('cname', 'LIKE', '%'.$search.'%')
+                    ->orWhere('created_at', 'LIKE', '%'.$search.'%');
             });
         }
 
