@@ -11,6 +11,7 @@ use App\Http\Requests\Cdn\CdnRequest;
 use App\Http\Requests\Cdn\CdnUpdateRequest;
 // models
 use App\Model\Cdn\Cdn_Resources;
+use App\Model\Cdn\NgxAccessCdn;
 use App\Model\helpdesk\Agent_panel\Organization;
 use App\Model\helpdesk\Agent_panel\User_org;
 // classes
@@ -42,9 +43,9 @@ class CdnController extends Controller
     public function __construct(PhpMailController $PhpMailController)
     {
         //$this->middleware('board');
-        $this->PhpMailController = $PhpMailController;
         // checking authentication
         $this->middleware('auth');
+        $this->PhpMailController = $PhpMailController;
 		if (Auth::user()->role == "user") {
             $this->ext_view = 'themes.default1.client.layout.dashboard';
         }
@@ -402,5 +403,19 @@ class CdnController extends Controller
             $error = $e->getMessage();
             return response()->json(compact('error'));
         }      
+    }
+
+    public function getHourlyByteSentReport()
+    {
+        //$t = DB::connection('mongodb');
+        //dd($t->collection('logs.ngx-access-cdn')->where('request_at_ms', '>', 1490589000)->get());
+        //dd(DB::collection('ngx-access-cdn')->first());
+        $log = new NgxAccessCdn();
+        $rs = $log->take(10)->get();
+        dd($rs);
+        foreach ($rs as $data) {
+            var_dump($data->_id, $data->request_at_ms);
+        }
+
     }
 }

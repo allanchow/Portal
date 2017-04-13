@@ -960,6 +960,7 @@ return [
     'invalid_ip'            => 'Invalid IP',
     'invalid_hostname'      => 'Invalid hostname',
     'invalid_host_header'   => 'Invalid host header',
+    'hash_error'            => 'Hash error',
     'wait_few_mins'         => 'Please wait for few mins to take effect.',
     'force_update'          => 'Force update',
     'not_allowed'           => 'Not allowed',

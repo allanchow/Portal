@@ -4,11 +4,6 @@ namespace App\Http\Requests\Cdn;
 
 use App\Http\Requests\Request;
 
-/**
- * AgentRequest.
- *
- * @author  Ladybird <info@ladybirdweb.com>
- */
 class CdnUpdateRequest extends Request
 {
     /**
@@ -29,7 +24,7 @@ class CdnUpdateRequest extends Request
     public function rules()
     {
         return [
-            'cdn_hostname'   => 'required|unique:cdn_resources,cdn_hostname,'.$this->segment(2),
+            'cdn_hostname' => 'required|unique:cdn_resources,cdn_hostname,'.$this->segment(2),
             'org_id' => 'required',
             'origin' => 'required',
         ];

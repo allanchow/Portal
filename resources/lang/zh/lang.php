@@ -960,6 +960,7 @@ return [
     'invalid_ip'           => 'IP無效',
     'invalid_hostname'     => '主機名無效',
     'invalid_host_header'  => '主機標題無效',
+    'hash_error'           => 'Hash 錯誤',
     'wait_few_mins'        => '請等待數分鐘才會生效',
     'force_update'         => '強制更新',
     'not_allowed'          => '不允許',

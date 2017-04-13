@@ -17,6 +17,9 @@ class Cdn_Resources extends BaseModel
     public function validate_origin($ar_origin)
     {
         foreach ($ar_origin as $origin){
+            if (! isset($origin['ip'])) {
+                return false;
+            }
             if (filter_var($origin['ip'], FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
                 return false;
             }

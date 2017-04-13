@@ -4,11 +4,6 @@ namespace App\Http\Requests\Cdn;
 
 use App\Http\Requests\Request;
 
-/**
- * GroupRequest.
- *
- * @author  Ladybird <info@ladybirdweb.com>
- */
 class CdnRequest extends Request
 {
     /**

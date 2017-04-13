@@ -274,9 +274,9 @@ Route::group(['middleware' => ['web']], function () {
          * Labels
          */
 
-        Route::resource('labels', 'Admin\helpdesk\Label\LabelController');
-        Route::get('labels-ajax', ['as'=>'labels.ajax', 'uses'=>'Admin\helpdesk\Label\LabelController@ajaxTable']);
-        Route::get('labels/delete/{id}', ['as' => 'labels.destroy', 'uses' => 'Admin\helpdesk\Label\LabelController@destroy']);
+        //Route::resource('labels', 'Admin\helpdesk\Label\LabelController');
+        //Route::get('labels-ajax', ['as'=>'labels.ajax', 'uses'=>'Admin\helpdesk\Label\LabelController@ajaxTable']);
+        //Route::get('labels/delete/{id}', ['as' => 'labels.destroy', 'uses' => 'Admin\helpdesk\Label\LabelController@destroy']);
     });
     /*
       |------------------------------------------------------------------
@@ -414,11 +414,11 @@ Route::group(['middleware' => ['web']], function () {
         Route::patch('/merge-tickets/{id}', ['as' => 'merge.tickets', 'uses' => 'Agent\helpdesk\TicketController@mergeTickets']);
         //To get department tickets data
         //open tickets of department
-        Route::get('/get-open-tickets/{id}', ['as' => 'get.dept.open', 'uses' => 'Agent\helpdesk\Ticket2Controller@getOpenTickets']);
+        //Route::get('/get-open-tickets/{id}', ['as' => 'get.dept.open', 'uses' => 'Agent\helpdesk\Ticket2Controller@getOpenTickets']);
         //close tickets of deartment
-        Route::get('/get-closed-tickets/{id}', ['as' => 'get.dept.close', 'uses' => 'Agent\helpdesk\Ticket2Controller@getCloseTickets']);
+        //Route::get('/get-closed-tickets/{id}', ['as' => 'get.dept.close', 'uses' => 'Agent\helpdesk\Ticket2Controller@getCloseTickets']);
         //in progress ticket of department
-        Route::get('/get-under-process-tickets/{id}', ['as' => 'get.dept.inprocess', 'uses' => 'Agent\helpdesk\Ticket2Controller@getInProcessTickets']);
+        //Route::get('/get-under-process-tickets/{id}', ['as' => 'get.dept.inprocess', 'uses' => 'Agent\helpdesk\Ticket2Controller@getInProcessTickets']);
 
         // route for graphical reporting
         Route::get('report', ['as' => 'report.index', 'uses' => 'Agent\helpdesk\ReportController@index']); /* To show dashboard pages */
@@ -434,16 +434,16 @@ Route::group(['middleware' => ['web']], function () {
         /*
          * Label
          */
-        Route::get('labels-ticket', ['as'=>'labels.ticket', 'uses'=>'Admin\helpdesk\Label\LabelController@attachTicket']);
-        Route::get('json-labels', ['as'=>'labels.json', 'uses'=>'Admin\helpdesk\Label\LabelController@getLabel']);
-        Route::get('filter', ['as'=>'filter', 'uses'=>'Agent\helpdesk\Filter\FilterController@getFilter']);
+        //Route::get('labels-ticket', ['as'=>'labels.ticket', 'uses'=>'Admin\helpdesk\Label\LabelController@attachTicket']);
+        //Route::get('json-labels', ['as'=>'labels.json', 'uses'=>'Admin\helpdesk\Label\LabelController@getLabel']);
+        //Route::get('filter', ['as'=>'filter', 'uses'=>'Agent\helpdesk\Filter\FilterController@getFilter']);
 
         /*
          * Tags
          */
 
-        Route::get('add-tag', ['as'=>'tag.add', 'uses'=>'Agent\helpdesk\Filter\TagController@addToFilter']);
-        Route::get('get-tag', ['as'=>'tag.get', 'uses'=>'Agent\helpdesk\Filter\TagController@getTag']);
+        //Route::get('add-tag', ['as'=>'tag.add', 'uses'=>'Agent\helpdesk\Filter\TagController@addToFilter']);
+        //Route::get('get-tag', ['as'=>'tag.get', 'uses'=>'Agent\helpdesk\Filter\TagController@getTag']);
 
         Route::get('resendEmail/{name}/{email}/{password}', function ($name, $email, $password) {
             //Auth\PasswordController@getEmail);
@@ -533,7 +533,7 @@ Route::group(['middleware' => ['web']], function () {
         Route::post('resources-force-update', ['as' => 'resource.list', 'uses' => 'Cdn\CdnController@forceUpdate']);
         Route::post('resources-dns-to-origin/{id}', ['as' => 'resource.dns-to-origin', 'uses' => 'Xns\XnsController@revertResourceDNS']);
         Route::post('resources-cancel-dns-to-origin/{id}', ['as' => 'resource.cancel-dns-to-origin', 'uses' => 'Cdn\CdnController@cancelRevertDns']);
-        //Route::get('create-resource', ['as' => 'create-resource',  'uses' =>'Client\helpdesk\CdnController@getResource']);
+        Route::get('houly-bsent', ['as' => 'resource.hourly.bsent', 'uses' => 'Cdn\CdnController@getHourlyByteSentReport']);
     });
     Route::get('checkticket', 'Client\helpdesk\ClientTicketController@getCheckTicket'); /* Check your Ticket */
     Route::get('myticket', ['as' => 'ticket', 'uses' => 'Client\helpdesk\GuestController@getMyticket']); /* Get my tickets */
@@ -778,10 +778,12 @@ Route::group(['middleware' => ['web']], function () {
         });
 
         Route::group(['prefix' => 'cdn'], function () {
-            Route::get('resources', 'Api\v1\ApiController@getResources');
+            Route::get('resources/{id?}', 'Api\v1\ApiController@getResources');
             Route::get('get_processing_resources', 'Api\v1\ApiController@getProcessingResources');
             Route::post('update_resource_status', 'Api\v1\ApiController@updateResourceStatus');
             Route::post('resource', 'Api\v1\ApiController@createResource');
+            Route::post('resource/{id}', 'Api\v1\ApiController@updateResource');
+            Route::delete('resource/{id}', 'Api\v1\ApiController@destroyResource');
         });
         /*
          * FCM token response
@@ -803,7 +805,7 @@ Route::group(['middleware' => ['web']], function () {
         $api_control->ticketDetailEvent($details);
     });
 
-    Route::get('test', ['as' => 'test', 'uses' => 'Common\PushNotificationController@response']);
+    //Route::get('test', ['as' => 'test', 'uses' => 'Common\PushNotificationController@response']);
 
     Route::get('mail/config/service', ['as' => 'mail.config.service', 'uses' => 'Job\MailController@serviceForm']);
     /*

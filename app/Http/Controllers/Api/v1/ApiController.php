@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Agent\helpdesk\TicketController as CoreTicketController;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Xns\XnsController;
 //use Illuminate\Support\Facades\Request as Value;
 use App\Http\Requests\helpdesk\TicketRequest;
 use App\Model\helpdesk\Agent\Department;
@@ -1529,42 +1530,47 @@ class ApiController extends Controller
      *
      * @return type json
      */
-    public function getResources()
+    public function getResources($id = null)
     {
         try {
-            $type = $this->request->input('type');
             $ar_resources = array();
             $resources = $this->resources;
             $user = \JWTAuth::parseToken()->authenticate();
 
-            if ($type === 'active') {
-                $resources = $resources->where('status', 2);
-            } elseif ($type === 'pending') {
-                if ($user->role == "user") {
-                    $resources = $resources->where('status', 1);
-                } else {
-                    $resources = $resources->where('status', 1)->orWhere('update_status', 3);
-                }
-            } elseif ($type === 'updating') {
-                $resources = $resources->where('update_status', 1)->where('status', '<>', 0);
-            } elseif ($type === 'suspended' && ($user->role == "agent" || $user->role == "admin")) {
-                $resources = $resources->where('status', 0);
-            } elseif ($type === 'deleting' && ($user->role == "agent" || $user->role == "admin")) {
-                $resources = $resources->where('update_status', 2);
-            } elseif ($type === 'dns_to_origin'){
-                $resources = $resources->where('status', -1);
+            if ($id) {
+                $resources = $resources->where('id', $id);
             } else {
-                $resources = $resources->where('status', '<>', 0);
+                $type = $this->request->input('type');
+                if ($type === 'active') {
+                    $resources = $resources->where('status', 2);
+                } elseif ($type === 'pending') {
+                    if ($user->role == "user") {
+                        $resources = $resources->where('status', 1);
+                    } else {
+                        $resources = $resources->where('status', 1)->orWhere('update_status', 3);
+                    }
+                } elseif ($type === 'updating') {
+                    $resources = $resources->where('update_status', 1)->where('status', '<>', 0);
+                } elseif ($type === 'suspended' && ($user->role == "agent" || $user->role == "admin")) {
+                    $resources = $resources->where('status', 0);
+                } elseif ($type === 'deleting' && ($user->role == "agent" || $user->role == "admin")) {
+                    $resources = $resources->where('update_status', 2);
+                } elseif ($type === 'dns_to_origin'){
+                    $resources = $resources->where('status', -1);
+                } else {
+                    $resources = $resources->where('status', '<>', 0);
+                }
+    
             }
-
 
             if ($user->role == 'user')
             {
-                $resources = $resources->where('org_id', User_org::where('user_id', '=', $user->id)->first()->org_id)->where('update_status', '<>', 2);
+                $resources = $resources->where('org_id', $this->user_org->where('user_id', '=', $user->id)->first()->org_id)->where('update_status', '<>', 2);
             } elseif ($type != 'deleting') {
                 $resources = $resources->where('update_status', '<>', 2);
             }
 
+            $rs_resources = [];
             $total = $resources->count();
             $per_page = 100;
             if ($this->request->has('per_page')) {
@@ -1615,7 +1621,6 @@ class ApiController extends Controller
 
                 }
             }
-
             return response()->json(['resources'=>$rs_resources, 'total'=>$total]);
         } catch (\Exception $e) {
             $error = $e->getMessage();
@@ -1812,29 +1817,41 @@ class ApiController extends Controller
             }
 
             $resource = $this->resources;
-            $resource->cdn_hostname = $this->request->input('resource.cdn_hostname');
-            $resource->org_id = $org_id;
-            $resource->origin = json_encode($this->request->input('resource.origin'));
-            $resource->status = 1;
-            $resource->update_status = 0;
 
-            if ($this->request->has('host_header')) {
-                $resource->host_header = $this->request->input('host_header');
+            if ($this->request->has('resource.host_header')) {
+                $resource->host_header = $this->request->input('resource.host_header');
+                if (!$resource->validate_host_header($resource->host_header)) {
+                    return response()->json(['error' => \Lang::get('lang.invalid_host_header')]);
+                }
             }
-            if (!is_null($this->request->input('file_type'))) {
+
+            if (!is_null($this->request->input('resource.file_type'))) {
+                $file_type = $this->request->input('file_type');
                 if ($this->request->input('file_type') == '') {
                     $this->resource->file_type = json_encode([]);
                 } else {
-                    $resource->file_type = json_encode(explode(",", $this->request->input('file_type')));
+                    $resource->file_type = json_encode(explode(",", $file_type));
                 }
             } else {
                 $resource->file_type = json_encode($resource->get_default_file_type());
             }
-            if ($this->request->has('max_age')) {
-                $resource->max_age = $this->request->input('max_age');
+
+            if ($this->request->has('resource.max_age')) {
+                $resource->max_age = $this->request->input('resource.max_age');
             } else {
                 $resource->max_age = $resource->get_default_max_age();
             }
+
+            $origin = $this->request->input('resource.origin');
+            $resource->origin = json_encode($origin);
+            if ($resource->validate_origin((array)$origin) === false) {
+                return response()->json(['error' => \Lang::get('lang.invalid_ip')]);
+            }
+
+            $resource->cdn_hostname = $this->request->input('resource.cdn_hostname');
+            $resource->org_id = $org_id;
+            $resource->status = 1;
+            $resource->update_status = 0;
 
             if ($result = $resource->save()) {
 
@@ -1882,6 +1899,211 @@ class ApiController extends Controller
         } catch (\TokenExpiredException $e) {
             $error = $e->getMessage();
 
+            return response()->json(compact('error'));
+        }
+    }
+
+    public function updateResource($id)
+    {
+        try {
+            $user = \JWTAuth::parseToken()->authenticate();
+
+            if ($user->role == 'user') {
+                $org_id = $this->user_org->where('user_id', '=', $user->id)->first()->org_id;
+                $v = \Validator::make($this->request->all(), [
+                    'resource'                 => 'required',
+                    'resource.cdn_hostname'    => 'required|unique:cdn_resources,cdn_hostname,'.$id,
+                    'resource.origin'          => 'required',
+                    'resource.origin.*.ip'     => 'required',
+                    'resource.hash'            => 'required',
+                ]);
+            } else {
+                $org_id = $this->request->input('resource.org_id');
+                $v = \Validator::make($this->request->all(), [
+                    'resource'                 => 'required',
+                    'resource.cdn_hostname'    => 'required|unique:cdn_resources,cdn_hostname,'.$id,
+                    'resource.origin'          => 'required',
+                    'resource.origin.*.ip'     => 'required',
+                    'resource.hash'            => 'required',
+                ]);              
+            }
+            if ($v->fails()) {
+                $error = $v->errors();
+
+                return response()->json(compact('error'));
+            }
+
+            $resource = $this->resources->whereId($id)->first();
+
+            if (!$resource or ($user->role == "user" && $resource->org_id != $this->user_org->where('user_id', '=', $user->id)->first()->org_id)) {
+                return response()->json(['error' => \Lang::get('lang.not_found')]);
+            }
+
+            if (hash('sha1', serialize([$resource->id, $resource->created_at])) != $this->request->input('resource.hash')) {
+                return response()->json(['error' => \Lang::get('lang.hash_error')]);
+            }
+
+            if ($this->request->has('resource.host_header')) {
+                $resource->host_header = $this->request->input('resource.host_header');
+                if (!$resource->validate_host_header($resource->host_header)) {
+                    return response()->json(['error' => \Lang::get('lang.invalid_host_header')]);
+                }
+            }
+
+            if (!is_null($this->request->input('resource.file_type'))) {
+                $file_type = $this->request->input('file_type');
+                if ($this->request->input('file_type') == '') {
+                    $this->resource->file_type = json_encode([]);
+                } else {
+                    $resource->file_type = json_encode(explode(",", $file_type));
+                }
+            } else {
+                $resource->file_type = json_encode($resource->get_default_file_type());
+            }
+
+            if ($this->request->has('resource.max_age')) {
+                $resource->max_age = $this->request->input('resource.max_age');
+            } else {
+                $resource->max_age = $resource->get_default_max_age();
+            }
+
+            $origin = $this->request->input('resource.origin');
+            $resource->origin = json_encode($origin);
+            if ($resource->validate_origin((array)$origin) === false) {
+                return response()->json(['error' => \Lang::get('lang.invalid_ip')]);
+            }
+
+            $resource->cdn_hostname = $this->request->input('resource.cdn_hostname');
+            $resource->org_id = $org_id;
+            $resource->update_status = 1;
+
+            if ($result = $resource->save()) {
+                $j_origin = json_decode($resource->origin, true);
+                $status = 'updating';
+
+                if ($user->role == 'user') {
+                    $ar_resources = array(
+                        'resource_id' => $resource->id,
+                        'cdn_hostname' => $resource->cdn_hostname,
+                        'origin' => $j_origin,
+                        'cname' => $resource->cname,
+                        'status' => $status,
+                        'created_at' => $resource->created_at
+                    );
+                } else {
+                    $ar_resources = array(
+                        'resource_id' => $resource->id,
+                        'cdn_hostname' => $resource->cdn_hostname,
+                        'host_header' => $resource->host_header,
+                        'file_type' => json_decode($resource->file_type, true),
+                        'max_age' => $resource->max_age,
+                        'origin' => $j_origin,
+                        'cname' => $resource->cname,
+                        'status' => $status,
+                        'created_at' => $resource->created_at
+                    );
+                }
+                $ar_resources['hash'] = hash('sha1', serialize([$resource->id, $resource->created_at]));
+                return response()->json(['resource' => $ar_resources]);
+            } else {
+                return response()->json(compact('result'));
+            }
+            
+
+        } catch (\Exception $e) {
+            $error = $e->getMessage();
+            $error_code = $e->getLine();
+
+            return response()->json(compact('error', 'error_code'));
+        } catch (\TokenExpiredException $e) {
+            $error = $e->getMessage();
+
+            return response()->json(compact('error'));
+        }    
+    }
+
+    public function destroyResource($id)
+    {
+        try {
+            $user = \JWTAuth::parseToken()->authenticate();
+
+            if ($user->role == 'user') {
+                $org_id = $this->user_org->where('user_id', '=', $user->id)->first()->org_id;
+                $v = \Validator::make($this->request->all(), [
+                    'resource'                 => 'required',
+                    'resource.cdn_hostname'    => 'required',
+                    'resource.hash'            => 'required',
+                ]);
+            } else {
+                $org_id = $this->request->input('resource.org_id');
+                $v = \Validator::make($this->request->all(), [
+                    'resource'                 => 'required',
+                    'resource.cdn_hostname'    => 'required',
+                    'resource.hash'            => 'required',
+                ]);              
+            }
+
+            if ($v->fails()) {
+                $error = $v->errors();
+
+                return response()->json(compact('error'));
+            }
+
+            $resource = $this->resources->whereId($id)->where('status', '<>', 0)->first();
+
+            if (!$resource or ($user->role == "user" && $resource->org_id != $this->user_org->where('user_id', '=', $user->id)->first()->org_id)) {
+                $error = Lang::get('lang.not_found');
+                return response()->json(compact('error'));
+            }
+
+            if (hash('sha1', serialize([$resource->id, $resource->created_at])) != $this->request->input('resource.hash')) {
+                return response()->json(['error' => \Lang::get('lang.hash_error')]);
+            }
+
+            $xns = new XnsController();
+            $rs = $xns->delResourceCName($id);
+            if ($rs->getData()->result) {
+                $orig_hostname = $resource->cdn_hostname;
+                $resource->suspend_cdn_hostname();
+                $resource->update_status = 2;
+                if ($result = $resource->save()) {
+                    $j_origin = json_decode($resource->origin, true);
+                    $status = 'deleting';
+    
+                    if ($user->role == 'user') {
+                        $ar_resources = array(
+                            'resource_id' => $resource->id,
+                            'cdn_hostname' => $orig_hostname,
+                            'origin' => $j_origin,
+                            'cname' => $resource->cname,
+                            'status' => $status,
+                            'created_at' => $resource->created_at
+                        );
+                    } else {
+                        $ar_resources = array(
+                            'resource_id' => $resource->id,
+                            'cdn_hostname' => $orig_hostname,
+                            'host_header' => $resource->host_header,
+                            'file_type' => json_decode($resource->file_type, true),
+                            'max_age' => $resource->max_age,
+                            'origin' => $j_origin,
+                            'cname' => $resource->cname,
+                            'status' => $status,
+                            'created_at' => $resource->created_at
+                        );
+                    }
+                    $ar_resources['hash'] = hash('sha1', serialize([$resource->id, $resource->created_at]));
+                    return response()->json(['resource' => $ar_resources]);
+                } else {
+                    return response()->json(compact('result'));
+                }
+            } else {
+                $result = $rs->getData()->error;
+                $error = Lang::get('lang.for_some_reason_your_request_failed');
+                return response()->json(compact('result', 'error'));
+            }
+        } catch (Exception $e) {
+            $error = $e->getMessage();
             return response()->json(compact('error'));
         }
     }
