@@ -1935,7 +1935,7 @@ class ApiController extends Controller
 
             $resource = $this->resources->whereId($id)->first();
 
-            if (!$resource or ($user->role == "user" && $resource->org_id != $this->user_org->where('user_id', '=', $user->id)->first()->org_id)) {
+            if (!$resource or ($user->role == "user" && $resource->org_id != $org_id)) {
                 return response()->json(['error' => \Lang::get('lang.not_found')]);
             }
 
@@ -2051,7 +2051,7 @@ class ApiController extends Controller
 
             $resource = $this->resources->whereId($id)->where('status', '<>', 0)->first();
 
-            if (!$resource or ($user->role == "user" && $resource->org_id != $this->user_org->where('user_id', '=', $user->id)->first()->org_id)) {
+            if (!$resource or ($user->role == "user" && $resource->org_id != $org_id)) {
                 $error = Lang::get('lang.not_found');
                 return response()->json(compact('error'));
             }

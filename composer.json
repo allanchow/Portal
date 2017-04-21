@@ -37,8 +37,7 @@
         "torann/geoip": "^1.0",
         "yajra/laravel-datatables-oracle": "~6.0",
         "geoip2/geoip2": "^2.4",
-        "phirational/laravel-geoip2": "^1.1",
-        "cloudxns/cloud-xns-api-sdk-php": "*"
+        "jenssegers/mongodb": "^3.2"
     },
     "require-dev": {
         "phpunit/phpunit": "~4.0",

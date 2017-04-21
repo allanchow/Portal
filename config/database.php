@@ -80,6 +80,13 @@ return [
             'port'     => env('DB_PORT', ''),
             'prefix'   => '',
         ],
+        'mongodb' => [
+            'name'     => 'mongodb',
+            'driver'   => 'mongodb',
+            'host'     => env('MONGODB_HOST', 'localhost'),
+            'port'     => env('MONGODB_PORT', 2717),
+            'database' => env('MONGODB_DATABASE'),
+        ],
     ],
     /*
       |--------------------------------------------------------------------------

@@ -23,6 +23,8 @@ return array(
     'Mremi\\UrlShortener' => array($vendorDir . '/mremi/url-shortener/src'),
     'Math' => array($vendorDir . '/phpseclib/phpseclib/phpseclib'),
     'Maatwebsite\\Excel\\' => array($vendorDir . '/maatwebsite/excel/src'),
+    'Jenssegers\\Mongodb' => array($vendorDir . '/jenssegers/mongodb/src'),
+    'Jenssegers\\Eloquent' => array($vendorDir . '/jenssegers/mongodb/src'),
     'JakubOnderka\\PhpConsoleHighlighter' => array($vendorDir . '/jakub-onderka/php-console-highlighter/src'),
     'JakubOnderka\\PhpConsoleColor' => array($vendorDir . '/jakub-onderka/php-console-color/src'),
     'Guzzle\\Tests' => array($vendorDir . '/guzzle/guzzle/tests'),

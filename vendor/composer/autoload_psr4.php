@@ -51,6 +51,7 @@ return array(
     'PhpParser\\' => array($vendorDir . '/nikic/php-parser/lib/PhpParser'),
     'Nicolaslopezj\\Searchable\\' => array($vendorDir . '/nicolaslopezj/searchable/src'),
     'Monolog\\' => array($vendorDir . '/monolog/monolog/src/Monolog'),
+    'MongoDB\\' => array($vendorDir . '/mongodb/mongodb/src'),
     'MaxMind\\Db\\' => array($vendorDir . '/maxmind-db/reader/src/MaxMind/Db'),
     'MaxMind\\' => array($vendorDir . '/maxmind/web-service-common/src'),
     'League\\OAuth1\\' => array($vendorDir . '/league/oauth1-client/src'),
