@@ -225,15 +225,18 @@ class CdnController extends Controller
             if ($resource->save() == true) {
                 $resource->createCName();
                 $resource->save();
-            }
 
-            if ($request->has('ssl_cert') && $request->has('ssl_key')) {
-                $ssl = new CdnSSL();
-                $ssl->cert = Crypt::encrypt($request->input('ssl_cert'));
-                $ssl->key = Crypt::encrypt($request->input('ssl_key'));
-                $ssl->save();
-            }
+                if ($request->has('ssl_cert') && $request->has('ssl_key')) {
+                    $ssl = new CdnSSL();
+                    $ssl->resource_id = $resource->id;
+                    $ssl->type = 'U';
+                    $ssl->status = '2';
+                    $ssl->cert = Crypt::encrypt($request->input('ssl_cert'));
+                    $ssl->key = Crypt::encrypt($request->input('ssl_key'));
+                    $ssl->save();
+                }
 
+            }
             return redirect('resources')->with('success', Lang::get('lang.added_successfully')."; ".Lang::get('lang.wait_few_mins'));
         } catch (Exception $e) {
             return redirect()->back()->withInput()->with('fails', $e->getMessage());
@@ -345,6 +348,8 @@ class CdnController extends Controller
                 $ssl_key = Crypt::encrypt($request->input('ssl_key'));
                 if (!($ssl->cert == $ssl_cert && $ssl->key == $ssl_key)) {
                     $has_change = true;
+                    $ssl->type = 'U';
+                    $ssl->status = '2';
                     $ssl->cert = $ssl_cert;
                     $ssl->key = $ssl_key;
                     $ssl->save();
@@ -364,7 +369,7 @@ class CdnController extends Controller
 
             return redirect()->route('resource.edit', $resource->id)->with('success', Lang::get('lang.updated_successfully').'; '.Lang::get('lang.wait_few_mins'));
         } catch (Exception $e) {
-            return redirect()->route('resource.edit', $resource->id)->with('fails', $e->getMessage());
+            return redirect()->back()->withInput()->with('fails', $e->getMessage());
         }
     }
 

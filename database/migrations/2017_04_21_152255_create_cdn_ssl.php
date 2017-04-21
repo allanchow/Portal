@@ -19,6 +19,7 @@ class CreateCdnSsl extends Migration
             $table->text('key');
             $table->tinyInteger('status'); //0=Suspended, 1=Pending, 2=Active
             $table->timestamps();
+            $table->primary('resource_id');
         });
         Schema::table('cdn_ssl', function (Blueprint $table) {
             $table->foreign('resource_id', 'cdn_ssl_resource_ibfk_1')->references('id')->on('cdn_resources')->onUpdate('NO ACTION')->onDelete('CASCADE');
