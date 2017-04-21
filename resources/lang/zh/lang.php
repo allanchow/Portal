@@ -970,6 +970,9 @@ return [
     'second'               => '秒',
     'leave_blank'          => '留白不變',
     'dynamic'              => '動態',
+    'ssl_cert'             => 'SSL證書',
+    'ssl_private_key'      => 'SSL私鑰',
+    'pem_content'          => 'PEM內容',
 
 
     //API Error

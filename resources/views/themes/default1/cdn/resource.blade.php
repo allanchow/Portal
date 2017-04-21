@@ -145,6 +145,16 @@ class="active"
         </div>
         @endif
         <div class="row">
+            <div class="col-md-4 form-group {{ $errors->has('ssl_cert') ? 'has-error' : '' }}">
+                {!! Form::label('ssl_cert',Lang::get('lang.ssl_cert')) !!}         <span class="text-red"> * ({!! Lang::get('lang.pem_content') !!})</span>
+                {!! Form::textarea('ssl_cert',null,['class' => 'form-control']) !!}
+            </div>
+            <div class="col-md-4 form-group {{ $errors->has('ssl_key') ? 'has-error' : '' }}">
+                {!! Form::label('ssl_key',Lang::get('lang.ssl_private_key')) !!}         <span class="text-red"> * ({!! Lang::get('lang.pem_content') !!})</span>
+                {!! Form::textarea('ssl_key',null,['class' => 'form-control']) !!}
+            </div>
+        </div>
+        <div class="row">
             <div class="col-md-4 form-group {{ $errors->has('origin') ? 'has-error' : '' }}">
                 {!! Form::label('origin',Lang::get('lang.origin')) !!}         <span class="text-red"> * ({!! Lang::get('lang.one_ip_per_line') !!})</span>
                 {!! Form::textarea('origin',null,['class' => 'form-control']) !!}

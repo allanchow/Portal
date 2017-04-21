@@ -24,6 +24,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Crypt;
 
 /**
  * -----------------------------------------------------------------------------
@@ -1639,7 +1640,7 @@ class ApiController extends Controller
     {
         try {
             $ar_resources = array();
-            if ($resources = $this->resources->where('status', 1)->orWhere('update_status', '>', 0)->orWhere('force_update', 1)->orderBy('updated_at', 'desc')->paginate(100)) {
+            if ($resources = $this->resources->leftJoin('cdn_ssl', 'cdn_resources.id', '=', 'cdn_ssl.resource_id')->where('cdn_resources.status', 1)->orWhere('cdn_resources.update_status', '>', 0)->orWhere('cdn_resources.force_update', 1)->orderBy('cdn_resources.updated_at', 'desc')->paginate(100)) {
                 foreach ($resources as $resource)
                 {
                     $j_origin = json_decode($resource->origin, true);
@@ -1656,16 +1657,31 @@ class ApiController extends Controller
                     } else {
                         $status = 'active';
                     }
-                    $ar_resources[] = array(
-                        'resource_id' => $resource->id,
-                        'cdn_hostname' => $resource->cdn_hostname,
-                        'host_header' => $resource->host_header,
-                        'file_type' => json_decode($resource->file_type, true),
-                        'max_age' => $resource->max_age,
-                        'origin' => $j_origin,
-                        'cname' => $resource->cname,
-                        'status' => $status
-                    );
+                    if (empty($resource->cert) && empty($resource->key)) {
+                        $ar_resources[] = array(
+                            'resource_id' => $resource->id,
+                            'cdn_hostname' => $resource->cdn_hostname,
+                            'host_header' => $resource->host_header,
+                            'file_type' => json_decode($resource->file_type, true),
+                            'max_age' => $resource->max_age,
+                            'origin' => $j_origin,
+                            'cname' => $resource->cname,
+                            'status' => $status
+                        );
+                    } else {
+                        $ar_resources[] = array(
+                            'resource_id' => $resource->id,
+                            'cdn_hostname' => $resource->cdn_hostname,
+                            'host_header' => $resource->host_header,
+                            'file_type' => json_decode($resource->file_type, true),
+                            'max_age' => $resource->max_age,
+                            'origin' => $j_origin,
+                            'cname' => $resource->cname,
+                            'ssl_cert'=>Crypt::decrypt($resource->cert),
+                            'ssl_key'=>Crypt::decrypt($resource->key),
+                            'status' => $status
+                        );
+                    }
                 }
             }
 

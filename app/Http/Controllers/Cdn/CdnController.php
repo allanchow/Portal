@@ -11,6 +11,7 @@ use App\Http\Requests\Cdn\CdnRequest;
 use App\Http\Requests\Cdn\CdnUpdateRequest;
 // models
 use App\Model\Cdn\Cdn_Resources;
+use App\Model\Cdn\CdnSSL;
 use App\Model\Cdn\NgxAccessCdn;
 use App\Model\helpdesk\Agent_panel\Organization;
 use App\Model\helpdesk\Agent_panel\User_org;
@@ -25,6 +26,7 @@ use Illuminate\Http\Request;
 use Input;
 use Lang;
 use Redirect;
+use Crypt;
 
 /**
  * CdnController.
@@ -225,6 +227,13 @@ class CdnController extends Controller
                 $resource->save();
             }
 
+            if ($request->has('ssl_cert') && $request->has('ssl_key')) {
+                $ssl = new CdnSSL();
+                $ssl->cert = Crypt::encrypt($request->input('ssl_cert'));
+                $ssl->key = Crypt::encrypt($request->input('ssl_key'));
+                $ssl->save();
+            }
+
             return redirect('resources')->with('success', Lang::get('lang.added_successfully')."; ".Lang::get('lang.wait_few_mins'));
         } catch (Exception $e) {
             return redirect()->back()->withInput()->with('fails', $e->getMessage());
@@ -235,6 +244,18 @@ class CdnController extends Controller
     {
         try {
             $resource = $resources->where('id', '=', $id)->first();
+            if (is_null($ssl = CdnSSL::where('resource_id', $id)->first())){
+                $ssl = new CdnSSL();
+            }
+
+            if (!empty($ssl->cert)){
+                $resource->ssl_cert = Crypt::decrypt($ssl->cert);    
+            }
+            
+            if (!empty($ssl->key)){
+                $resource->ssl_key = Crypt::decrypt($ssl->key);
+            }
+
             if (!$resource or (Auth::user()->role == "user" && $resource->org_id != User_org::where('user_id', '=', Auth::user()->id)->first()->org_id)) {
                 return redirect()->route('resources')->with('fails', Lang::get('lang.not_found'));
             }
@@ -258,6 +279,11 @@ class CdnController extends Controller
     {
         try {
 			$resource = Cdn_Resources::whereId($id)->first();
+            if (is_null($ssl = CdnSSL::where('resource_id', $id)->first())){
+                $ssl = new CdnSSL();
+                $ssl->resource_id = $id;
+            }
+
             if (!$resource or (Auth::user()->role == "user" && $resource->org_id != User_org::where('user_id', '=', Auth::user()->id)->first()->org_id)) {
                 return redirect()->route('resources')->with('fails', Lang::get('lang.not_found'));
             }
@@ -314,9 +340,21 @@ class CdnController extends Controller
                 $resource->max_age = $request->input('max_age');
             }
 
+            if ($request->has('ssl_cert') && $request->has('ssl_key')) {
+                $ssl_cert = Crypt::encrypt($request->input('ssl_cert'));
+                $ssl_key = Crypt::encrypt($request->input('ssl_key'));
+                if (!($ssl->cert == $ssl_cert && $ssl->key == $ssl_key)) {
+                    $has_change = true;
+                    $ssl->cert = $ssl_cert;
+                    $ssl->key = $ssl_key;
+                    $ssl->save();
+                }
+            }
+
             if ($resource->origin == $new_origin && $resource->cdn_hostname == $request->input('cdn_hostname') && $resource->error_msg == '' && !$has_change) {
                 return redirect()->back()->withInput()->with('fails', Lang::get('lang.error-no_change'));
             }
+
             $resource->cdn_hostname = $request->input('cdn_hostname');
             $resource->origin = $new_origin;
             $resource->update_status = 1;

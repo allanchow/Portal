@@ -970,6 +970,9 @@ return [
     'second'                => 'second',
     'leave_blank'           => 'Leave blank to leave unchanged',
     'dynamic'               => 'Dynamic',
+    'ssl_cert'             => 'SSL Cert.',
+    'ssl_private_key'      => 'SSL Private Key',
+    'pem_content'          => 'PEM Content',
 
     //API Error
     'E1001'              => 'E1001: CNAME is null',
