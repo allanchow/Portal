@@ -23,10 +23,18 @@ class CdnUpdateRequest extends Request
      */
     public function rules()
     {
-        return [
-            'cdn_hostname' => 'required|unique:cdn_resources,cdn_hostname,'.$this->segment(2),
-            'org_id' => 'required',
-            'origin' => 'required',
-        ];
+        if ($this->segment(2) === "0")
+        {
+            return [
+                'org_id' => 'required',
+                'origin' => 'required',
+            ];
+        } else {
+            return [
+                'cdn_hostname' => 'required|unique:cdn_resources,cdn_hostname,'.$this->segment(2),
+                'org_id' => 'required',
+                'origin' => 'required',
+            ];
+        }
     }
 }
