@@ -1640,7 +1640,7 @@ class ApiController extends Controller
     {
         try {
             $ar_resources = array();
-            if ($resources = $this->resources->leftJoin('cdn_ssl', 'cdn_resources.id', '=', 'cdn_ssl.resource_id')->where('cdn_resources.status', 1)->orWhere('cdn_resources.update_status', '>', 0)->orWhere('cdn_resources.force_update', 1)->orderBy('cdn_resources.updated_at', 'desc')->paginate(100)) {
+            if ($resources = $this->resources->leftJoin('cdn_ssl', 'cdn_resources.id', '=', 'cdn_ssl.resource_id')->where('cdn_resources.status', 1)->orWhere('cdn_resources.update_status', '>', 0)->orWhere('cdn_resources.force_update', 1)->orderBy('cdn_resources.updated_at', 'desc')->select('cdn_resources.*', 'cdn_ssl.cert', 'cdn_ssl.key')->paginate(100)) {
                 foreach ($resources as $resource)
                 {
                     $j_origin = json_decode($resource->origin, true);
