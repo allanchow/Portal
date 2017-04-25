@@ -26,6 +26,7 @@ return array(
     'AddForeignKeysToTicketsTable' => $baseDir . '/database/migrations/2016_02_16_140454_add_foreign_keys_to_tickets_table.php',
     'AddForeignKeysToUserAssignOrganizationTable' => $baseDir . '/database/migrations/2016_02_16_140454_add_foreign_keys_to_user_assign_organization_table.php',
     'AddForeignKeysToUsersTable' => $baseDir . '/database/migrations/2016_02_16_140454_add_foreign_keys_to_users_table.php',
+    'AddHttpToCdnResources' => $baseDir . '/database/migrations/2017_04_24_181553_add_http_to_cdn_resources.php',
     'AddLangToUsersTable' => $baseDir . '/database/migrations/2017_03_10_131418_add_lang_to_users_table.php',
     'AddLoginToUsersTable' => $baseDir . '/database/migrations/2017_03_16_174257_add_login_to_users_table.php',
     'AddXnsHostIdToCdnResourcesTable' => $baseDir . '/database/migrations/2017_03_20_121500_add_xns_host_id_to_cdn_resources_table.php',
