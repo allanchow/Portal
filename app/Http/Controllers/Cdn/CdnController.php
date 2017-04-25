@@ -440,7 +440,7 @@ class CdnController extends Controller
     {
         if (Auth::user()->role == "agent" or Auth::user()->role == "admin") {
             try {
-                if ($request->has('id') && ($id = $request->input('id'))) {
+                if (is_numeric($id = $request->input('id'))) {
                     $result = $resources->where('id', $id)->where('status', '>', 0)->update(['force_update' => 1, 'error_msg' => '']);
                 } else {
                     $result = $resources->where('force_update', 0)->where('status', '>', 0)->update(['force_update' => 1, 'error_msg' => '']);
