@@ -237,13 +237,24 @@ class CdnController extends Controller
             $resource->origin = json_encode($ar_origin);
             $resource->status = 1;
             $resource->update_status = 0;
+
+            if ($request->has('ssl_cert') && $request->has('ssl_key')) {
+                $ssl = new CdnSSL();
+                if (!$ssl->validate_cert($request->input('ssl_cert'))) {
+                    return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_ssl_cert'));
+                }
+
+                if (!$ssl->validate_key($request->input('ssl_key'))) {
+                    return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_ssl_key'));
+                }
+            }
+
             // saving inputs
             if ($resource->save() == true) {
                 $resource->createCName();
                 $resource->save();
 
                 if ($request->has('ssl_cert') && $request->has('ssl_key')) {
-                    $ssl = new CdnSSL();
                     $ssl->resource_id = $resource->id;
                     $ssl->type = 'U';
                     $ssl->status = '2';
@@ -371,6 +382,15 @@ class CdnController extends Controller
             }
 
             if ($request->has('ssl_cert') && $request->has('ssl_key')) {
+
+                if (!$ssl->validate_cert($request->input('ssl_cert'))) {
+                    return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_ssl_cert'));
+                }
+
+                if (!$ssl->validate_key($request->input('ssl_key'))) {
+                    return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_ssl_key'));
+                }
+
                 $ssl_cert = Crypt::encrypt($request->input('ssl_cert'));
                 $ssl_key = Crypt::encrypt($request->input('ssl_key'));
                 if (!($ssl->cert == $ssl_cert && $ssl->key == $ssl_key)) {
