@@ -1652,8 +1652,14 @@ class ApiController extends Controller
                     }
                     elseif ($resource->status == 1) {
                         $status = 'pending';
-                    } elseif ($resource->update_status == 1 or $resource->update_status == 3) {
+                    } elseif ($resource->update_status == 1) {
                         $status = 'updating';
+                    } elseif ($resource->update_status == 3) {
+                        if ($resource->status == 0) {
+                            $status = 'deleting';
+                        } else {
+                            $status = 'updating';
+                        }
                     } else {
                         $status = 'active';
                     }
@@ -1767,7 +1773,7 @@ class ApiController extends Controller
                     $result = $resource->save();
                 }
 
-                if ($old_status != 'deleting' && $this->request->has('pop_error') && $this->request->input('pop_error') == 1) {
+                if ($this->request->has('pop_error') && $this->request->input('pop_error') == 1) {
                     $resource->update_status = 3;
                 }
 
