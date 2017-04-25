@@ -975,6 +975,7 @@ return [
     'dynamic'              => '動態',
     'ssl_cert'             => 'SSL證書',
     'ssl_private_key'      => 'SSL私鑰',
+    'http_only'            => '只使用HTTP',
     'pem_content'          => 'PEM內容',
 
 

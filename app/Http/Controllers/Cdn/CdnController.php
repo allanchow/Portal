@@ -227,12 +227,7 @@ class CdnController extends Controller
                 $resource->max_age = $resource->get_default_max_age();
             }
 
-            if ($request->has('http')) {
-                if ($resource->http != $request->input('http')) {
-                    $has_change = true;
-                }
-                $resource->http = $request->input('http');
-            }
+            $resource->http = $request->input('http');
 
             $resource->origin = json_encode($ar_origin);
             $resource->status = 1;
@@ -254,7 +249,7 @@ class CdnController extends Controller
                 $resource->createCName();
                 $resource->save();
 
-                if ($request->has('ssl_cert') && $request->has('ssl_key')) {
+                if ($resource->http > 0) {
                     $ssl->resource_id = $resource->id;
                     $ssl->type = 'U';
                     $ssl->status = '2';
@@ -374,13 +369,6 @@ class CdnController extends Controller
                 $resource->max_age = $request->input('max_age');
             }
 
-            if ($request->has('http')) {
-                if ($resource->http != $request->input('http')) {
-                    $has_change = true;
-                }
-                $resource->http = $request->input('http');
-            }
-
             if ($request->has('ssl_cert') && $request->has('ssl_key')) {
 
                 if (!$ssl->validate_cert($request->input('ssl_cert'))) {
@@ -403,11 +391,12 @@ class CdnController extends Controller
                 }
             }
 
-            if ($resource->origin == $new_origin && $resource->cdn_hostname == $request->input('cdn_hostname') && $resource->error_msg == '' && !$has_change) {
+            if ($resource->origin == $new_origin && $resource->cdn_hostname == $request->input('cdn_hostname') && $resource->http == $request->input('http') && $resource->error_msg == '' && !$has_change) {
                 return redirect()->back()->withInput()->with('fails', Lang::get('lang.error-no_change'));
             }
 
             $resource->cdn_hostname = $request->input('cdn_hostname');
+            $resource->http = $request->input('http');
             $resource->origin = $new_origin;
             $resource->update_status = 1;
             $resource->error_msg = null;

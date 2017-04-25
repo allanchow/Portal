@@ -962,7 +962,7 @@ return [
     'invalid_host_header'   => 'Invalid host header',
     'invalid_file_type'     => 'Invalid file type',
     'invalid_ssl_cert'      => 'Invalid ssl cert',
-    'invalid_ssl_key'      => 'Invalid ssl key',
+    'invalid_ssl_key'       => 'Invalid ssl key',
     'hash_error'            => 'Hash error',
     'wait_few_mins'         => 'Please wait for few mins to take effect.',
     'force_update'          => 'Force update',
@@ -973,9 +973,10 @@ return [
     'second'                => 'second',
     'leave_blank'           => 'Leave blank to leave unchanged',
     'dynamic'               => 'Dynamic',
-    'ssl_cert'             => 'SSL Cert.',
-    'ssl_private_key'      => 'SSL Private Key',
-    'pem_content'          => 'PEM Content',
+    'ssl_cert'              => 'SSL Cert.',
+    'ssl_private_key'       => 'SSL Private Key',
+    'http_only'             => 'HTTP Only',
+    'pem_content'           => 'PEM Content',
 
     //API Error
     'E1001'              => 'E1001: CNAME is null',

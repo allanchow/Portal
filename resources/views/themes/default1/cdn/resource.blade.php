@@ -146,8 +146,8 @@ class="active"
         @endif
         <div class="row">
             <div class="col-md-4 form-group {{ $errors->has('organization') ? 'has-error' : '' }}">
-                {!! Form::label('http', 'HTTP') !!}
-                {!! Form::select('http',['1' => '1','2' => '2'],null,['class' => 'form-control']) !!}
+                {!! Form::label('http', 'HTTP / HTTPS') !!}
+                {!! Form::select('http',['0' => 'HTTP', '1' => 'HTTPS','2' => 'HTTP/2'],null,['class' => 'form-control']) !!}
                 
             </div>
         </div>

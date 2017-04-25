@@ -13,7 +13,7 @@ class AddHttpToCdnResources extends Migration
     public function up()
     {
         Schema::table('cdn_resources', function (Blueprint $table) {
-            $table->tinyInteger('http')->unsigned()->default(1)->after('cname');
+            $table->tinyInteger('http')->unsigned()->default(0)->after('cname');
         });
     }
 

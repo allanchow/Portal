@@ -1665,10 +1665,10 @@ class ApiController extends Controller
                         'max_age' => $resource->max_age,
                         'origin' => $j_origin,
                         'cname' => $resource->cname,
-                        'http' => $resource->http,
                         'status' => $status
                     );
-                    if (!(empty($resource->cert) && empty($resource->key))) {
+                    if ($resource->http > 0) {
+                        $rs_resource['http'] = $resource->http;
                         $rs_resource['ssl_cert'] = Crypt::decrypt($resource->cert);
                         $rs_resource['ssl_key'] = Crypt::decrypt($resource->key);
                     }
