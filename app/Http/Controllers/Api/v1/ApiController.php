@@ -1657,31 +1657,22 @@ class ApiController extends Controller
                     } else {
                         $status = 'active';
                     }
-                    if (empty($resource->cert) && empty($resource->key)) {
-                        $ar_resources[] = array(
-                            'resource_id' => $resource->id,
-                            'cdn_hostname' => $resource->cdn_hostname,
-                            'host_header' => $resource->host_header,
-                            'file_type' => json_decode($resource->file_type, true),
-                            'max_age' => $resource->max_age,
-                            'origin' => $j_origin,
-                            'cname' => $resource->cname,
-                            'status' => $status
-                        );
-                    } else {
-                        $ar_resources[] = array(
-                            'resource_id' => $resource->id,
-                            'cdn_hostname' => $resource->cdn_hostname,
-                            'host_header' => $resource->host_header,
-                            'file_type' => json_decode($resource->file_type, true),
-                            'max_age' => $resource->max_age,
-                            'origin' => $j_origin,
-                            'cname' => $resource->cname,
-                            'ssl_cert'=>Crypt::decrypt($resource->cert),
-                            'ssl_key'=>Crypt::decrypt($resource->key),
-                            'status' => $status
-                        );
+                    $rs_resource = array(
+                        'resource_id' => $resource->id,
+                        'cdn_hostname' => $resource->cdn_hostname,
+                        'host_header' => $resource->host_header,
+                        'file_type' => json_decode($resource->file_type, true),
+                        'max_age' => $resource->max_age,
+                        'origin' => $j_origin,
+                        'cname' => $resource->cname,
+                        'http' => $resource->http,
+                        'status' => $status
+                    );
+                    if (!(empty($resource->cert) && empty($resource->key))) {
+                        $rs_resource['ssl_cert'] = Crypt::decrypt($resource->cert);
+                        $rs_resource['ssl_key'] = Crypt::decrypt($resource->key);
                     }
+                    $ar_resources[] = $rs_resource;
                 }
             }
 

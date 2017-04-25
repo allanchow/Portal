@@ -201,23 +201,39 @@ class CdnController extends Controller
 
             $resource->cdn_hostname = $request->input('cdn_hostname');
             $resource->org_id = $request->input('org_id');
+
             if ($request->has('host_header')) {
                 $resource->host_header = $request->input('host_header');
             }
+
             if (!is_null($request->input('file_type'))) {
                 if ($request->input('file_type') == '') {
                     $resource->file_type = json_encode([]);
                 } else {
-                    $resource->file_type = json_encode(explode(",", $request->input('file_type')));
+
+                    $ar_file_type = explode(",", $request->input('file_type'));
+                    if (!$resource->validate_file_type($ar_file_type)) {
+                        return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_file_type'));
+                    }
+                    $resource->file_type = json_encode($ar_file_type);
                 }
             } else {
                 $resource->file_type = json_encode($resource->get_default_file_type());
             }
+
             if ($request->has('max_age')) {
                 $resource->max_age = $request->input('max_age');
             } else {
                 $resource->max_age = $resource->get_default_max_age();
             }
+
+            if ($request->has('http')) {
+                if ($resource->http != $request->input('http')) {
+                    $has_change = true;
+                }
+                $resource->http = $request->input('http');
+            }
+
             $resource->origin = json_encode($ar_origin);
             $resource->status = 1;
             $resource->update_status = 0;
@@ -327,7 +343,11 @@ class CdnController extends Controller
                 if ($request->input('file_type') == '') {
                     $file_type = json_encode([]);
                 } else {
-                    $file_type = json_encode(explode(",", $request->input('file_type')));
+                    $ar_file_type = explode(",", $request->input('file_type'));
+                    if (!$resource->validate_file_type($ar_file_type)) {
+                        return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_file_type'));
+                    }
+                    $file_type = json_encode($ar_file_type);
                 }
 
                 if ($resource->file_type != $file_type) {
@@ -341,6 +361,13 @@ class CdnController extends Controller
                     $has_change = true;
                 }
                 $resource->max_age = $request->input('max_age');
+            }
+
+            if ($request->has('http')) {
+                if ($resource->http != $request->input('http')) {
+                    $has_change = true;
+                }
+                $resource->http = $request->input('http');
             }
 
             if ($request->has('ssl_cert') && $request->has('ssl_key')) {

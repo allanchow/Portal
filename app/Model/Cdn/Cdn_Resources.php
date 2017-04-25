@@ -16,7 +16,7 @@ class Cdn_Resources extends BaseModel
 
     public function validate_origin($ar_origin)
     {
-        foreach ($ar_origin as $origin){
+        foreach ($ar_origin as $origin) {
             if (! isset($origin['ip'])) {
                 return false;
             }
@@ -35,6 +35,16 @@ class Cdn_Resources extends BaseModel
     public function validate_host_header($hostname)
     {
         return preg_match('/^[a-zA-Z0-9\-\.]+$/', $hostname);
+    }
+
+    public function validate_file_type($ar_file_type)
+    {
+        foreach ($ar_file_type as $file_type) {
+            if (!preg_match('/^[a-zA-Z0-9\-_]+$/', $file_type)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public function get_cdn_domain()

@@ -142,6 +142,11 @@ class="active"
                 {!! Form::label('file_type',Lang::get('lang.file_type')) !!}<br>
                 <input id="file_type" name="file_type" type="text" value="{{ $resource->file_type }}" class="form-control" data-role="tagsinput">
             </div>
+            <div class="col-md-4 form-group {{ $errors->has('organization') ? 'has-error' : '' }}">
+                {!! Form::label('http', 'HTTP') !!}
+                {!! Form::select('http',['1' => '1','2' => '2'],null,['class' => 'form-control']) !!}
+                
+            </div>
         </div>
         @endif
         <div class="row">
