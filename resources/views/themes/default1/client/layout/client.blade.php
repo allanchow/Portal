@@ -86,10 +86,10 @@
                                 <li><a href="{{route('pages',$page->slug)}}">{{$page->name}}</a></li>
                                 @endforeach
                                 @if(Auth::user())
-                                <li @yield('myticket')><a href="{{url('mytickets')}}">{!! Lang::get('lang.my_tickets') !!}</a></li>
+                                <!--li @yield('myticket')><a href="{{url('mytickets')}}">{!! Lang::get('lang.my_tickets') !!}</a></li-->
 
                                 {{-- <li @yield('contact')><a href="{{route('contact')}}">Contact us</a></li> --}}
-                                <li @yield('profile')><a href="#" >{!! Lang::get('lang.my_profile') !!}</a>
+                                <!--li @yield('profile')><a href="#" >{!! Lang::get('lang.my_profile') !!}</a>
                                     <ul class="dropdown-menu">
                                         <li>
                                             <div class="banner-wrapper user-menu text-center clearfix">
@@ -115,7 +115,7 @@
                                             </div>
                                         </li>
                                     </ul>
-                                </li>
+                                </li-->
                             </ul><!-- .navbar-user -->
                             @else
                             </ul>
