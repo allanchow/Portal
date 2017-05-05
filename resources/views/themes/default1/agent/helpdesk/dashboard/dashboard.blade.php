@@ -228,6 +228,50 @@ class="active"
         </table>
     </div>
 </div>
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title">{!! Lang::get('lang.report') !!}</h3>
+    </div>
+    <div class="box-body">
+        <form id="summary_report">
+            <div  class="form-group">
+                <div class="row">
+                    <div class='col-sm-2'>
+                        {!! Form::label('date', Lang::get('lang.date').':',['class' => 'lead']) !!}
+                        {!! Form::text('report_date',null,['class'=>'form-control','id'=>'report_date'])!!}
+                    </div>
+                    <script type="text/javascript">
+                        $(function () {
+                            var timestring1 = "02/01/2017";
+                            var timestring2 = "{!! date('m/d/Y', strtotime('-1 day')) !!}";
+                            $('#report_date').datetimepicker({
+                                format: 'DD-MM-YYYY',
+                                minDate: moment(timestring1).startOf('day'),
+                                maxDate: moment(timestring2).startOf('day')
+                            });
+                        });
+                    </script>
+                    <div class='col-sm-2'>
+                    <?php
+                        $resource_list = $resources->selectRaw('CONCAT(id, " - ", cdn_hostname) as full_resource, id')->pluck('full_resource', 'id')->toArray();
+                    ?>
+                        {!! Form::label('resource', Lang::get('lang.resource').':',['class' => 'lead']) !!}
+                        {!! Form::select('resource_id',[''=>Lang::get('lang.select'),Lang::get('lang.resource')=>$resource_list],null,['class' => 'form-control','id'=>'resource_id']) !!}
+                    </div>
+                    <div class='col-sm-1'>
+                        {!! Form::label('filter', '&nbsp;', ['class' => 'lead']) !!}<br>
+                        <input type="submit" class="btn btn-primary">
+                    </div>
+                </div>
+            </div>
+        </form>
+        <!--<div id="legendDiv"></div>-->
+        <div class="chart">
+            <!--canvas class="chart-data" id="report-graph" width="1000" height="500"></canvas-->
+            <img id="report-graph" src='/blank.png' onerror="this.src='/404.png'">
+        </div>
+    </div><!-- /.box-body -->
+</div><!-- /.box -->
 <div id="refresh"> 
     <script src="{{asset("lb-faveo/plugins/chartjs/Chart.min.js")}}" type="text/javascript"></script>
 </div>
@@ -494,6 +538,20 @@ class="active"
                                 // stop the form from submitting the normal way and refreshing the page
                                 event.preventDefault();
                             });
+
+                                $('#summary_report').submit(function (event) {
+                                    var report_date = $('#report_date').val();
+                                    var resource_id = $('#resource_id').val();
+                                    if (report_date == '' || resource_id == '') {
+                                        alert('{{ Lang::get('lang.date_resource_empty') }}');
+                                    } else {
+                                        $('#report-graph').attr("src", 'summary-report/' + report_date + '/' + resource_id);
+                        
+                                    }
+                                    return false;
+                                    event.preventDefault();
+                                });
+
                         });
 </script>
 <script type="text/javascript">
