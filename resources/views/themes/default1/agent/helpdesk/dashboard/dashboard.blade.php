@@ -230,7 +230,7 @@ class="active"
 </div>
 <div class="box box-info">
     <div class="box-header with-border">
-        <h3 class="box-title">{!! Lang::get('lang.report') !!}</h3>
+        <h3 class="box-title">CDN {!! Lang::get('lang.report') !!}</h3>
     </div>
     <div class="box-body">
         <form id="summary_report">
