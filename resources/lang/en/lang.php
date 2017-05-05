@@ -937,6 +937,7 @@ return [
     //CDN
     'Cdn'                   => 'CDN',
     'resources'             => 'Resources',
+    'resource'              => 'Resource',
     'create_resource'       => 'Create resource',
     'edit_resource'         => 'Edit resource',
     'cdn_hostname'          => 'CDN hostname',
@@ -977,6 +978,7 @@ return [
     'ssl_private_key'       => 'SSL Private Key',
     'http_only'             => 'HTTP Only',
     'pem_content'           => 'PEM Content',
+    'date_resource_empty'   => 'Date or resource cannot be empty',
 
     //API Error
     'E1001'              => 'E1001: CNAME is null',

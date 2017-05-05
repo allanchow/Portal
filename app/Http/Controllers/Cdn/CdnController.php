@@ -497,4 +497,35 @@ class CdnController extends Controller
         }
 
     }
+
+    public function getSummaryReport($date, $id)
+    {
+        set_error_handler(null);
+        set_exception_handler(null);
+        //$id = 4;
+        $id = str_pad($id, 6, "0", STR_PAD_LEFT);
+        $ts = strtotime($date);
+        $month = date('Y-m', $ts);
+        $date = date('Y-m-d', $ts);
+        $path = '/var/www/portal-dev/public/reports/'.$month.'/'.$date.'/';
+        $url_path = 'http://customer-report/'.$month.'/'.$date.'/';
+        $file = $date.'_'.$id.'-report.png';
+        $filename = $path.$file;
+        if (is_file($filename)){
+            echo file_get_contents($filename);
+        } else {
+            if (!is_dir($path)) {
+                mkdir($path , 0777, true);
+            }
+            if ($content = file_get_contents($url_path.$file)){
+                if (@file_put_contents($filename, $content))
+                {
+                    echo $content;
+                    exit;
+                }
+                
+            }
+        }
+        abort(404);
+    }
 }

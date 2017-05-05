@@ -63,6 +63,6 @@ class ClientLayout
 
     public function resources()
     {
-        return $this->resources->select('id', 'org_id')->where('org_id', $this->user_org->where('user_id', '=', Auth::user()->id)->first()->org_id)->where('update_status', '<>', 2)->where('status', '<>', 0);
+        return $this->resources->select('id', 'org_id', 'cdn_hostname')->where('org_id', $this->user_org->where('user_id', '=', Auth::user()->id)->first()->org_id)->where('update_status', '<>', 2)->where('status', '<>', 0);
     }
 }

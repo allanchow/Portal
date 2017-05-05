@@ -977,6 +977,7 @@ return [
     'ssl_private_key'      => 'SSL私鑰',
     'http_only'            => '只使用HTTP',
     'pem_content'          => 'PEM內容',
+    'date_resource_empty'  => '日期或資源不能為空白',
 
 
     //API Error
