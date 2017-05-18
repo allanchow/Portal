@@ -167,7 +167,9 @@ class CdnController extends Controller
                 $resource->org_id = User_org::where('user_id', '=', Auth::user()->id)->first()->org_id;
             }
             $resource->max_age = $resource->get_default_max_age();
-            $resource->file_type = json_encode($resource->get_default_file_type());
+            $request = new Request();
+            $file_type = is_null(old('file_type')) ? $resource->get_default_file_type() : explode(",", old('file_type'));
+            $resource->file_type = json_encode($file_type);
             $resource->file_type_to_string();
             $ext_view = $this->ext_view;
             $mode = 'create';
@@ -182,21 +184,30 @@ class CdnController extends Controller
     {
         try {
             if (!$resource->validate_hostname($request->input('cdn_hostname'))) {
-                return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_hostname'));
+                $errors['cdn_hostname'] = Lang::get('lang.invalid_hostname');
             }
             $i_origin = explode("\n", str_replace(',', "\n", $request->input('origin')));
+            $origin_type = null;
             foreach ($i_origin as $origin) {
                 $origin = trim($origin);
                 if ($origin != '') {
-                    $ar_origin[] = ['ip'=>$origin];
+                    if ($origin_type === null && !$resource->validate_ip($origin) && $resource->validate_domain($origin) && $origin != $request->input('cdn_hostname')){
+                        $ar_origin[] = ['domain'=>$origin];
+                        $origin_type = 'domain';
+                        break;
+                    } else {
+                        $ar_origin[] = ['ip'=>$origin];
+                        $origin_type = 'ip';
+                    }
                 }
             }
-            if ($resource->validate_origin($ar_origin) === false) {
-                return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_ip'));
+
+            if ($origin_type == 'ip' && $resource->validate_origin($ar_origin) === false) {
+                $errors['origin'] = Lang::get('lang.invalid_origin');
             }
 
             if ($request->input('host_header') != '' && !$resource->validate_host_header($request->input('host_header'))) {
-                return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_host_header'));
+                $errors['host_header'] = Lang::get('lang.invalid_host_header');
             }
 
             $resource->cdn_hostname = $request->input('cdn_hostname');
@@ -212,8 +223,9 @@ class CdnController extends Controller
                 } else {
 
                     $ar_file_type = explode(",", $request->input('file_type'));
+
                     if (!$resource->validate_file_type($ar_file_type)) {
-                        return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_file_type'));
+                        $errors['file_type'] = Lang::get('lang.invalid_file_type');
                     }
                     $resource->file_type = json_encode($ar_file_type);
                 }
@@ -236,30 +248,34 @@ class CdnController extends Controller
             if ($request->has('ssl_cert') && $request->has('ssl_key')) {
                 $ssl = new CdnSSL();
                 if (!$ssl->validate_cert($request->input('ssl_cert'))) {
-                    return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_ssl_cert'));
+                    $errors['ssl_cert'] = Lang::get('lang.invalid_ssl_cert');
                 }
 
                 if (!$ssl->validate_key($request->input('ssl_key'))) {
-                    return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_ssl_key'));
+                    $errors['ssl_key'] = Lang::get('lang.invalid_ssl_key');
                 }
             }
 
-            // saving inputs
-            if ($resource->save() == true) {
-                $resource->createCName();
-                $resource->save();
-
-                if ($resource->http > 0) {
-                    $ssl->resource_id = $resource->id;
-                    $ssl->type = 'U';
-                    $ssl->status = '2';
-                    $ssl->cert = Crypt::encrypt($request->input('ssl_cert'));
-                    $ssl->key = Crypt::encrypt($request->input('ssl_key'));
-                    $ssl->save();
+            if (isset($errors)) {
+                return redirect()->back()->withInput()->withErrors($errors);
+            } else {
+                // saving inputs
+                if ($resource->save() == true) {
+                    $resource->createCName();
+                    $resource->save();
+    
+                    if ($resource->http > 0) {
+                        $ssl->resource_id = $resource->id;
+                        $ssl->type = 'U';
+                        $ssl->status = '2';
+                        $ssl->cert = Crypt::encrypt($request->input('ssl_cert'));
+                        $ssl->key = Crypt::encrypt($request->input('ssl_key'));
+                        $ssl->save();
+                    }
+    
                 }
-
+                return redirect('resources')->with('success', Lang::get('lang.added_successfully')."; ".Lang::get('lang.wait_few_mins'));
             }
-            return redirect('resources')->with('success', Lang::get('lang.added_successfully')."; ".Lang::get('lang.wait_few_mins'));
         } catch (Exception $e) {
             return redirect()->back()->withInput()->with('fails', $e->getMessage());
         }
@@ -286,9 +302,12 @@ class CdnController extends Controller
             }
             $j_origin = json_decode($resource->origin, true);
             foreach ($j_origin as $origin) {
-                $ar_origin[] = $origin['ip'];
+                $ar_origin[] = isset($origin['ip']) ? $origin['ip'] : $origin['domain'];
             }
             $resource->origin = implode("\n", $ar_origin);
+            if (!is_null(old('file_type'))){
+                $resource->file_type = json_encode(explode(",", old('file_type')));
+            }
             $resource->file_type_to_string();
             $org = Organization::lists('name', 'id')->toArray();
             $ext_view = $this->ext_view;
@@ -314,22 +333,30 @@ class CdnController extends Controller
             }
 
             if (!$resource->validate_hostname($request->input('cdn_hostname'))) {
-                return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_hostname'));
+                $errors['cdn_hostname'] = Lang::get('lang.invalid_hostname');
             }
 
             if ($request->input('host_header') != '' && !$resource->validate_host_header($request->input('host_header'))) {
-                return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_host_header'));
+                $errors['host_header'] = Lang::get('lang.invalid_host_header');
             }
 
             $i_origin = explode("\n", str_replace(',', "\n", $request->input('origin')));
+            $origin_type = null;
             foreach ($i_origin as $origin) {
                 $origin = trim($origin);
                 if ($origin != '') {
-                    $ar_origin[] = ['ip'=>$origin];
+                    if ($origin_type === null && !$resource->validate_ip($origin) && $resource->validate_domain($origin) && $origin != $request->input('cdn_hostname')){
+                        $ar_origin[] = ['domain'=>$origin];
+                        $origin_type = 'domain';
+                        break;
+                    } else {
+                        $ar_origin[] = ['ip'=>$origin];
+                        $origin_type = 'ip';
+                    }
                 }
             }
-            if ($resource->validate_origin($ar_origin) === false) {
-                return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_ip'));
+            if ($origin_type == 'ip' && $resource->validate_origin($ar_origin) === false) {
+                $errors['origin'] = Lang::get('lang.invalid_origin');
             }
             $new_origin = json_encode($ar_origin);
             $resource->org_id = $request->input('org_id');
@@ -351,7 +378,7 @@ class CdnController extends Controller
                 } else {
                     $ar_file_type = explode(",", $request->input('file_type'));
                     if (!$resource->validate_file_type($ar_file_type)) {
-                        return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_file_type'));
+                        $errors['file_type'] = Lang::get('lang.invalid_file_type');
                     }
                     $file_type = json_encode($ar_file_type);
                 }
@@ -372,11 +399,11 @@ class CdnController extends Controller
             if ($request->has('ssl_cert') && $request->has('ssl_key')) {
 
                 if (!$ssl->validate_cert($request->input('ssl_cert'))) {
-                    return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_ssl_cert'));
+                    $errors['ssl_cert'] = Lang::get('lang.invalid_ssl_cert');
                 }
 
                 if (!$ssl->validate_key($request->input('ssl_key'))) {
-                    return redirect()->back()->withInput()->with('fails', Lang::get('lang.invalid_ssl_key'));
+                    $errors['ssl_key'] = Lang::get('lang.invalid_ssl_key');
                 }
 
                 $ssl_cert = Crypt::encrypt($request->input('ssl_cert'));
@@ -391,19 +418,23 @@ class CdnController extends Controller
                 }
             }
 
-            if ($resource->origin == $new_origin && $resource->cdn_hostname == $request->input('cdn_hostname') && $resource->http == $request->input('http') && $resource->error_msg == '' && !$has_change) {
-                return redirect()->back()->withInput()->with('fails', Lang::get('lang.error-no_change'));
+            if (isset($errors)) {
+                return redirect()->back()->withInput()->withErrors($errors);
+            } else {
+                if ($resource->origin == $new_origin && $resource->cdn_hostname == $request->input('cdn_hostname') && $resource->http == $request->input('http') && $resource->error_msg == '' && !$has_change)     {
+                    return redirect()->back()->withInput()->with('fails', Lang::get('lang.error-no_change'));
+                }
+    
+                $resource->cdn_hostname = $request->input('cdn_hostname');
+                $resource->http = $request->input('http');
+                $resource->origin = $new_origin;
+                $resource->update_status = 1;
+                $resource->error_msg = null;
+                // saving inputs
+                $resource->save();
+    
+                return redirect()->route('resource.edit', $resource->id)->with('success', Lang::get('lang.updated_successfully').'; '.Lang::get('lang.wait_few_mins'));
             }
-
-            $resource->cdn_hostname = $request->input('cdn_hostname');
-            $resource->http = $request->input('http');
-            $resource->origin = $new_origin;
-            $resource->update_status = 1;
-            $resource->error_msg = null;
-            // saving inputs
-            $resource->save();
-
-            return redirect()->route('resource.edit', $resource->id)->with('success', Lang::get('lang.updated_successfully').'; '.Lang::get('lang.wait_few_mins'));
         } catch (Exception $e) {
             return redirect()->back()->withInput()->with('fails', $e->getMessage());
         }

@@ -20,7 +20,7 @@ class Cdn_Resources extends BaseModel
             if (! isset($origin['ip'])) {
                 return false;
             }
-            if (filter_var($origin['ip'], FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+            if (!$this->validate_ip($origin['ip'])) {
                 return false;
             }
         }
@@ -31,6 +31,26 @@ class Cdn_Resources extends BaseModel
     {
         return preg_match('/^([^-*]|\*\.)((?!\.-|-\.|'.$this->cdn_domain.'|'.$this->exclude_domain.')[a-zA-Z0-9\-\.])*(\.\*|)$/', $hostname);
     }
+
+    public function validate_ip($ip)
+    {
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+            return false;
+        }
+        return true;
+    }
+
+    public function validate_domain($domain)
+    {
+        if(!substr_count($domain, '.'))
+        {
+            return false;
+        }
+         
+        $domain = 'http://' . $domain;
+        return filter_var($domain, FILTER_VALIDATE_URL);
+    }
+
 
     public function validate_host_header($hostname)
     {

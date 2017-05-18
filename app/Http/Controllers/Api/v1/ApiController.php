@@ -1803,24 +1803,30 @@ class ApiController extends Controller
         try {
             $user = \JWTAuth::parseToken()->authenticate();
 
+            $ar_validate = [
+                'resource'                 => 'required',
+                'resource.cdn_hostname'    => 'required|unique:cdn_resources,cdn_hostname',
+                'resource.origin'          => 'required'
+            ];
+
             if ($user->role == 'user') {
                 $org_id = $this->user_org->where('user_id', '=', $user->id)->first()->org_id;
-                $v = \Validator::make($this->request->all(), [
-                    'resource'                 => 'required',
-                    'resource.cdn_hostname'    => 'required|unique:cdn_resources,cdn_hostname',
-                    'resource.origin'          => 'required',
-                    'resource.origin.*.ip'     => 'required',
-                ]);
             } else {
                 $org_id = $this->request->input('resource.org_id');
-                $v = \Validator::make($this->request->all(), [
-                    'resource'                 => 'required',
-                    'org_id'                   => 'required',
-                    'resource.cdn_hostname'    => 'required|unique:cdn_resources,cdn_hostname',
-                    'resource.origin'          => 'required',
-                    'resource.origin.*.ip'     => 'required',
-                ]);              
+                $ar_validate += [
+                    'resource.org_id' => 'required'
+                ];
             }
+
+            if ($this->request->has('resource.origin.0.domain')) {
+                $ar_validate['resource.origin.*.domain'] = 'required';
+                $origin_type = 'domain';
+            } else {
+                $ar_validate['resource.origin.*.ip'] = 'required';
+                $origin_type = 'ip';
+            }
+            $v = \Validator::make($this->request->all(), $ar_validate);
+
             if ($v->fails()) {
                 $error = $v->errors();
 
@@ -1853,13 +1859,21 @@ class ApiController extends Controller
                 $resource->max_age = $resource->get_default_max_age();
             }
 
+            $resource->cdn_hostname = $this->request->input('resource.cdn_hostname');
+
             $origin = $this->request->input('resource.origin');
             $resource->origin = json_encode($origin);
-            if ($resource->validate_origin((array)$origin) === false) {
-                return response()->json(['error' => \Lang::get('lang.invalid_ip')]);
+            if ($origin_type == 'domain') {
+                $domain = $this->request->input('resource.origin.0.domain');
+                if ($resource->validate_domain($domain) === false || $domain == $resource->cdn_hostname) {
+                    return response()->json(['error' => \Lang::get('lang.invalid_origin')]);
+                }
+            } else {
+                if ($resource->validate_origin((array)$origin) === false) {
+                    return response()->json(['error' => \Lang::get('lang.invalid_origin')]);
+                }
             }
 
-            $resource->cdn_hostname = $this->request->input('resource.cdn_hostname');
             $resource->org_id = $org_id;
             $resource->status = 1;
             $resource->update_status = 0;
@@ -1871,29 +1885,27 @@ class ApiController extends Controller
                     $j_origin = json_decode($resource->origin, true);
                     $status = 'pending';
 
-                    if ($user->role == 'user') {
-                        $ar_resources = array(
-                            'resource_id' => $resource->id,
-                            'cdn_hostname' => $resource->cdn_hostname,
-                            'origin' => $j_origin,
-                            'cname' => $resource->cname,
-                            'status' => $status,
-                            'created_at' => $resource->created_at
-                        );
-                    } else {
-                        $ar_resources = array(
-                            'resource_id' => $resource->id,
-                            'cdn_hostname' => $resource->cdn_hostname,
+                    $ar_resources = [
+                        'resource_id' => $resource->id,
+                        'cdn_hostname' => $resource->cdn_hostname,
+                        'origin' => $j_origin,
+                        'cname' => $resource->cname
+                    ];
+
+                    if ($user->role == 'admin') {
+                        $ar_resources += [
                             'host_header' => $resource->host_header,
-                            'file_type' => json_decode($resource->file_type, true),
-                            'max_age' => $resource->max_age,
-                            'origin' => $j_origin,
-                            'cname' => $resource->cname,
-                            'status' => $status,
-                            'created_at' => $resource->created_at
-                        );
+                            'file_type'   => json_decode($resource->file_type, true),
+                            'max_age'     => $resource->max_age
+                        ];
                     }
-                    $ar_resources['hash'] = hash('sha1', serialize([$resource->id, $resource->created_at]));
+
+                    $ar_resources += [
+                        'status'     => $status,
+                        'created_at' => $resource->created_at,
+                        'hash'       => hash('sha1', serialize([$resource->id, $resource->created_at]))
+                    ];
+
                     return response()->json(['resource' => $ar_resources]);
                 }
                 return response()->json(['error' => 'Create failed']);
@@ -1919,25 +1931,29 @@ class ApiController extends Controller
         try {
             $user = \JWTAuth::parseToken()->authenticate();
 
+            $ar_validate = [
+                'resource'                 => 'required',
+                'resource.cdn_hostname'    => 'required|unique:cdn_resources,cdn_hostname,'.$id,
+                'resource.origin'          => 'required',
+                'resource.origin.*.ip'     => 'required',
+                'resource.hash'            => 'required',
+            ];
+
             if ($user->role == 'user') {
                 $org_id = $this->user_org->where('user_id', '=', $user->id)->first()->org_id;
-                $v = \Validator::make($this->request->all(), [
-                    'resource'                 => 'required',
-                    'resource.cdn_hostname'    => 'required|unique:cdn_resources,cdn_hostname,'.$id,
-                    'resource.origin'          => 'required',
-                    'resource.origin.*.ip'     => 'required',
-                    'resource.hash'            => 'required',
-                ]);
-            } else {
-                $org_id = $this->request->input('resource.org_id');
-                $v = \Validator::make($this->request->all(), [
-                    'resource'                 => 'required',
-                    'resource.cdn_hostname'    => 'required|unique:cdn_resources,cdn_hostname,'.$id,
-                    'resource.origin'          => 'required',
-                    'resource.origin.*.ip'     => 'required',
-                    'resource.hash'            => 'required',
-                ]);              
+            } elseif ($this->request->has('resource.org_id')) {
+                $new_org_id = $this->request->input('resource.org_id');
             }
+
+            if ($this->request->has('resource.origin.0.domain')) {
+                $ar_validate['resource.origin.*.domain'] = 'required';
+                $origin_type = 'domain';
+            } else {
+                $ar_validate['resource.origin.*.ip'] = 'required';
+                $origin_type = 'ip';
+            }
+
+            $v = \Validator::make($this->request->all(), $ar_validate);
             if ($v->fails()) {
                 $error = $v->errors();
 
@@ -1980,41 +1996,48 @@ class ApiController extends Controller
 
             $origin = $this->request->input('resource.origin');
             $resource->origin = json_encode($origin);
-            if ($resource->validate_origin((array)$origin) === false) {
-                return response()->json(['error' => \Lang::get('lang.invalid_ip')]);
+            if ($origin_type == 'domain') {
+                $domain = $this->request->input('resource.origin.0.domain');
+                if ($resource->validate_domain($domain) === false || $domain == $resource->cdn_hostname) {
+                    return response()->json(['error' => \Lang::get('lang.invalid_origin')]);
+                }
+            } else {
+                if ($resource->validate_origin((array)$origin) === false) {
+                    return response()->json(['error' => \Lang::get('lang.invalid_origin')]);
+                }
             }
 
             $resource->cdn_hostname = $this->request->input('resource.cdn_hostname');
-            $resource->org_id = $org_id;
+            if (isset($new_org_id)) {
+                $resource->org_id = $org_id;
+            }
             $resource->update_status = 1;
 
             if ($result = $resource->save()) {
                 $j_origin = json_decode($resource->origin, true);
                 $status = 'updating';
 
-                if ($user->role == 'user') {
-                    $ar_resources = array(
-                        'resource_id' => $resource->id,
-                        'cdn_hostname' => $resource->cdn_hostname,
-                        'origin' => $j_origin,
-                        'cname' => $resource->cname,
-                        'status' => $status,
-                        'created_at' => $resource->created_at
-                    );
-                } else {
-                    $ar_resources = array(
-                        'resource_id' => $resource->id,
-                        'cdn_hostname' => $resource->cdn_hostname,
+                $ar_resources = [
+                    'resource_id' => $resource->id,
+                    'cdn_hostname' => $resource->cdn_hostname,
+                    'origin' => $j_origin,
+                    'cname' => $resource->cname
+                ];
+
+                if ($user->role == 'admin') {
+                    $ar_resources += [
                         'host_header' => $resource->host_header,
-                        'file_type' => json_decode($resource->file_type, true),
-                        'max_age' => $resource->max_age,
-                        'origin' => $j_origin,
-                        'cname' => $resource->cname,
-                        'status' => $status,
-                        'created_at' => $resource->created_at
-                    );
+                        'file_type'   => json_decode($resource->file_type, true),
+                        'max_age'     => $resource->max_age
+                    ];
                 }
-                $ar_resources['hash'] = hash('sha1', serialize([$resource->id, $resource->created_at]));
+
+                $ar_resources += [
+                    'status'     => $status,
+                    'created_at' => $resource->created_at,
+                    'hash'       => hash('sha1', serialize([$resource->id, $resource->created_at]))
+                ];
+
                 return response()->json(['resource' => $ar_resources]);
             } else {
                 return response()->json(compact('result'));
