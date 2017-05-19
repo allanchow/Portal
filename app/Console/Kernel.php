@@ -18,6 +18,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\SendReport',
         'App\Console\Commands\CloseWork',
         'App\Console\Commands\TicketFetch',
+        'App\Console\Commands\GenCdnDailyReport',
     ];
 
     /**
@@ -36,6 +37,7 @@ class Kernel extends ConsoleKernel
             $this->execute($schedule, 'fetching');
             $this->execute($schedule, 'notification');
             $this->execute($schedule, 'work');
+            $this->execute($schedule, 'cdnDailyReport');
         }
     }
 
@@ -52,6 +54,9 @@ class Kernel extends ConsoleKernel
                 break;
             case 'work':
                 $this->getCondition($schedule->command('ticket:close'), $command);
+                break;
+            case 'cdnDailyReport':
+                $this->getCondition($schedule->command('cdnreport:daily'), ['condition'=>'daily', 'at'=>'']);
                 break;
         }
     }

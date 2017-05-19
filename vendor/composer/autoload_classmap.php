@@ -47,6 +47,7 @@ return array(
     'CreateBanlistTable' => $baseDir . '/database/migrations/2016_02_16_140450_create_banlist_table.php',
     'CreateBarNotificationsTable' => $baseDir . '/database/migrations/2016_05_10_102604_create_bar_notifications_table.php',
     'CreateCannedResponseTable' => $baseDir . '/database/migrations/2016_02_16_140450_create_canned_response_table.php',
+    'CreateCdnDailyReportTable' => $baseDir . '/database/migrations/2017_05_19_113131_create_cdn_daily_report_table.php',
     'CreateCdnResourcesTable' => $baseDir . '/database/migrations/2017_02_06_090944_create_cdn_resources_table.php',
     'CreateCdnSsl' => $baseDir . '/database/migrations/2017_04_21_152255_create_cdn_ssl.php',
     'CreateCommonSettingsTable' => $baseDir . '/database/migrations/2016_06_02_072210_create_common_settings_table.php',

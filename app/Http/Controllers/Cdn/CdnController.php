@@ -521,11 +521,11 @@ class CdnController extends Controller
         //dd($t->collection('logs.ngx-access-cdn')->where('request_at_ms', '>', 1490589000)->get());
         //dd(DB::collection('ngx-access-cdn')->first());
         $log = new NgxAccessCdn();
-        $rs = $log->take(10)->get();
-        dd($rs);
+        $rs = $log->orderBy('_id', 'desc')->take(100)->get();
         foreach ($rs as $data) {
-            var_dump($data->_id, $data->request_at_ms);
+            var_dump($data['_id'], $data['tags'][0]);
         }
+        exit;
 
     }
 
@@ -544,6 +544,7 @@ class CdnController extends Controller
         $filename = $path.$file;
         if (is_file($filename)){
             echo file_get_contents($filename);
+            exit;
         } else {
             if (!is_dir($path)) {
                 mkdir($path , 0777, true);

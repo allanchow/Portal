@@ -710,6 +710,7 @@ class ComposerStaticInit1bacc9bd2a82216bf11bc15e6aee6c79
         'CreateBarNotificationsTable' => __DIR__ . '/../..' . '/database/migrations/2016_05_10_102604_create_bar_notifications_table.php',
         'CreateCannedResponseTable' => __DIR__ . '/../..' . '/database/migrations/2016_02_16_140450_create_canned_response_table.php',
         'CreateCdnResourcesTable' => __DIR__ . '/../..' . '/database/migrations/2017_02_06_090944_create_cdn_resources_table.php',
+        'CreateCdnDailyReportTable' => __DIR__ . '/../..' . '/database/migrations/2017_05_19_113131_create_cdn_daily_report_table.php',
         'CreateCdnSsl' => __DIR__ . '/../..' . '/database/migrations/2017_04_21_152255_create_cdn_ssl.php',
         'CreateCommonSettingsTable' => __DIR__ . '/../..' . '/database/migrations/2016_06_02_072210_create_common_settings_table.php',
         'CreateConditionsTable' => __DIR__ . '/../..' . '/database/migrations/2016_07_29_113012_create_conditions_table.php',
