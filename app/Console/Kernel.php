@@ -56,7 +56,7 @@ class Kernel extends ConsoleKernel
                 $this->getCondition($schedule->command('ticket:close'), $command);
                 break;
             case 'cdnDailyReport':
-                $this->getCondition($schedule->command('cdnreport:daily'), ['condition'=>'daily', 'at'=>'']);
+                $this->getCondition($schedule->command('cdnreport:daily'), ['condition'=>'daily', 'at'=>'1:00']);
                 break;
         }
     }
