@@ -533,6 +533,12 @@ class CdnController extends Controller
     {
         set_error_handler(null);
         set_exception_handler(null);
+
+        $resource = Cdn_Resources::whereId($id)->first();
+        if (!$resource or (Auth::user()->role == "user" && $resource->org_id != User_org::where('user_id', '=', Auth::user()->id)->first()->org_id)) {
+            abort(404);
+        }
+
         //$id = 4;
         $id = str_pad($id, 6, "0", STR_PAD_LEFT);
         $ts = strtotime($date);
@@ -543,8 +549,7 @@ class CdnController extends Controller
         $file = $date.'_'.$id.'-report.png';
         $filename = $path.$file;
         if (is_file($filename)){
-            echo file_get_contents($filename);
-            exit;
+            return response()->file($filename);
         } else {
             if (!is_dir($path)) {
                 mkdir($path , 0777, true);
@@ -552,8 +557,7 @@ class CdnController extends Controller
             if ($content = file_get_contents($url_path.$file)){
                 if (@file_put_contents($filename, $content))
                 {
-                    echo $content;
-                    exit;
+                    return response()->file($filename);
                 }
                 
             }
