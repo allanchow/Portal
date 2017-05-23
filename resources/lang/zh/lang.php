@@ -935,8 +935,9 @@ return [
     'ticket_ratings'     => '工單評分: ',
 
     //CDN
-    'Cdn'                => 'CDN',
+    'Cdn'                  => 'CDN',
     'resources'            => '資源',
+    'resource'             => '資源',
     'create_resource'      => '創建資源',
     'edit_resource'        => '編輯資源',
     'cdn_hostname'         => '主機名',
@@ -978,7 +979,9 @@ return [
     'http_only'            => '只使用HTTP',
     'pem_content'          => 'PEM內容',
     'date_resource_empty'  => '日期或資源不能為空白',
-
+    'cdn_summary_report'   => 'CDN摘要報表',
+    'cdn_traffic_report'   => 'CDN流量報表',
+    'all'                  => '全部',
 
     //API Error
     'E1001'              => 'E1001: CNAME為空白',

@@ -55,7 +55,76 @@ class="active"
 </div>
 <div class="box box-info">
     <div class="box-header with-border">
-        <h3 class="box-title">{!! Lang::get('lang.report') !!}</h3>
+        <h3 class="box-title">{!! Lang::get('lang.cdn_traffic_report') !!}</h3>
+    </div>
+    <div class="box-body">
+        <form id="f_traffic">
+            <div  class="form-group">
+                <div class="row">
+                    <div class='col-sm-2'>
+                        {!! Form::label('date', 'Start Date:',['class' => 'lead']) !!}
+                        {!! Form::text('sdate',null,['class'=>'form-control','id'=>'cdn_traffic_sdate'])!!}
+                    </div>
+                    <?php
+                    $start_date = App\Model\Cdn\CdnDailyReport::min('report_date');
+                    $end_date = App\Model\Cdn\CdnDailyReport::max('report_date');
+                    ?>
+                    <script type="text/javascript">
+                        $(function () {
+                            var timestring1 = "{!! $start_date !!}";
+                            var timestring2 = "{!! $end_date !!}";
+                            $('#cdn_traffic_sdate').datetimepicker({
+                                format: 'YYYY-MM-DD',
+                                minDate: moment(timestring1).startOf('day'),
+                                maxDate: moment(timestring2).startOf('day')
+                            });
+                            //                $('#datepicker').datepicker()
+                        });
+                    </script>
+                    <div class='col-sm-2'>
+                        {!! Form::label('start_time', 'End Date:' ,['class' => 'lead']) !!}
+                        {!! Form::text('edate',null,['class'=>'form-control','id'=>'cdn_traffic_edate'])!!}
+                    </div>
+                    <script type="text/javascript">
+                        $(function () {
+                            var timestring1 = "{!! $start_date !!}";
+                            var timestring2 = "{!! $end_date !!}";
+                            $('#cdn_traffic_edate').datetimepicker({
+                                format: 'YYYY-MM-DD',
+                                minDate: moment(timestring1).startOf('day'),
+                                maxDate: moment(timestring2).startOf('day')
+                            });
+                        });
+                    </script>
+                    <div class='col-sm-2'>
+                    <?php
+                        $resource_list = $resources->selectRaw('CONCAT(id, " - ", cdn_hostname) as full_resource, id')->pluck('full_resource', 'id')->toArray();
+                    ?>
+                        {!! Form::label('resource', Lang::get('lang.resource').':',['class' => 'lead']) !!}
+                        {!! Form::select('resource_id',[''=>Lang::get('lang.all'),Lang::get('lang.resource')=>$resource_list],null,['class' => 'form-control','id'=>'cdn_traffic_resource_id']) !!}
+                    </div>
+                    <div class='col-sm-1'>
+                        {!! Form::label('filter', 'Filter:',['class' => 'lead']) !!}<br>
+                        <input type="submit" class="btn btn-primary">
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div id="legend-traffic">
+            <div class="row">
+                <div class="col-md-3"></div> 
+                <div class="col-md-6 col-md-offset-5"><span class="lead">{!! Lang::get('lang.total') !!}: <span id="total-kb" class="lead"></span></span></div> 
+                <div class="col-md-3"></div> 
+            </div>            
+        </div>
+        <div id="chart-traffic" class="chart">
+            <canvas class="chart-data" id="traffic-graph" width="1000" height="250"></canvas>   
+        </div>
+    </div><!-- /.box-body -->
+</div><!-- /.box -->
+<div class="box box-info">
+    <div class="box-header with-border">
+        <h3 class="box-title">{!! Lang::get('lang.cdn_summary_report') !!}</h3>
     </div>
     <div class="box-body">
         <form id="summary_report">
@@ -97,8 +166,96 @@ class="active"
         </div>
     </div><!-- /.box-body -->
 </div><!-- /.box -->
+<div id="refresh"> 
+    <script src="https://portal-dev.allbrightnet.com/lb-faveo/plugins/chartjs/Chart.min.js" type="text/javascript"></script>
+</div>
+<script src="https://portal-dev.allbrightnet.com/lb-faveo/plugins/chartjs/Chart.min.js" type="text/javascript"></script>
 <script type="text/javascript">
     $(document).ready(function () {
+
+        $('#f_traffic').submit(function (event) {
+            var sdate = $('#cdn_traffic_sdate').val();
+            var edate = $('#cdn_traffic_edate').val();
+            var resource_id = $('#cdn_traffic_resource_id').val();
+            if (sdate == '' || edate == '') {
+                alert('{{ Lang::get('lang.date_resource_empty') }}');
+            } else {
+                $.ajax({
+                    type: 'POST',
+                    url: 'chart-cdn-traffic/' + sdate + '/' + edate + '/' + resource_id,
+                    dataType: 'json',
+    
+                    success: function (t_result) {
+                        var report_date = [], total_byte = [], total = 0;
+                        for (var i = 0; i < t_result.length; i++) {
+                            report_date.push(t_result[i].report_date);
+                            total_byte.push(t_result[i].total_byte);
+                            total += t_result[i].total_byte * 1;
+                        }
+    
+                        var reportData = {
+                            labels: report_date,
+                            datasets: [
+                                {
+                                    label: "CDN Traffic (KByte)",
+                                    fillColor: "rgba(60,141,188,0.9)",
+                                    strokeColor: "rgba(60,141,188,0.8)",
+                                    pointColor: "#3b8bba",
+                                    data: total_byte
+                                }
+                            ]
+                        };
+                        $("#traffic-graph").remove();
+                        $("#total-kb").html(total.toLocaleString() + ' KB');
+                        $("#chart-traffic").html("<canvas id='traffic-graph' width='1000' height='250'></canvas>");
+                        Chart.types.Bar.extend({
+                            name: "BarAlt",
+                            draw: function () {
+                                Chart.types.Bar.prototype.draw.apply(this, arguments);
+                                var ctx = this.chart.ctx;
+                                ctx.save();
+                                // text alignment and color
+                                ctx.textAlign = "center";
+                                ctx.textBaseline = "bottom";
+                                ctx.fillStyle = this.options.scaleFontColor;
+                                // position
+                                var x = this.scale.xScalePaddingLeft * 0.3;
+                                var y = this.chart.height / 2;
+                                // change origin
+                                ctx.translate(x, y)
+                                // rotate text
+                                ctx.rotate(-90 * Math.PI / 180);
+                                ctx.fillText(this.datasets[0].label, 0, 0);
+                                ctx.restore();
+                            }
+                        });
+                        var barChartOptions = {
+                            scaleBeginAtZero: true,
+                            scaleShowGridLines: true,
+                            scaleGridLineColor: "rgba(0,0,0,.05)",
+                            scaleGridLineWidth: 1,
+                            scaleShowHorizontalLines: true,
+                            scaleShowVerticalLines: true,
+                            barShowStroke: true,
+                            barStrokeWidth: 2,
+                            barValueSpacing: 5,
+                            barDatasetSpacing: 1,
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            tooltipTemplate: "<%= label %>: <%= value %>KB",
+                            datasetFill: false,
+                            scaleLabel: "          <%=parseInt(value).toLocaleString()%>"
+                        };
+                        var ctx = document.getElementById("traffic-graph").getContext("2d");
+                        var barChart = new Chart(ctx).BarAlt(reportData, barChartOptions);
+                        //document.getElementById("legend-traffic").innerHTML = barChart.generateLegend();
+                    }
+                });
+            }
+            return false;
+            event.preventDefault();
+        });
+
         $('#summary_report').submit(function (event) {
             var report_date = $('#report_date').val();
             var resource_id = $('#resource_id').val();
@@ -111,6 +268,16 @@ class="active"
             return false;
             event.preventDefault();
         });
+
+<?php
+$edate = date('Y-m-d', strtotime('-1 day'.date('Y-m-d')));
+$sdate = date('Y-m-d', strtotime('-1 month'.$edate));
+?>
+        $('#cdn_traffic_sdate').val('{{ $sdate }}');
+        $('#cdn_traffic_edate').val('{{ $edate }}');
+        $('#f_traffic').submit();
+
+
     });
 </script>
 <script src="{{asset("lb-faveo/plugins/moment-develop/moment.js")}}" type="text/javascript"></script>

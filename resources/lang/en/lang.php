@@ -979,6 +979,9 @@ return [
     'http_only'             => 'HTTP Only',
     'pem_content'           => 'PEM Content',
     'date_resource_empty'   => 'Date or resource cannot be empty',
+    'cdn_summary_report'   => 'CDN Summary Report',
+    'cdn_traffic_report'   => 'CDN Traffic Report',
+    'all'                  => 'All',
 
     //API Error
     'E1001'              => 'E1001: CNAME is null',

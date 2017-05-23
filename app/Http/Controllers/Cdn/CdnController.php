@@ -15,6 +15,7 @@ use App\Model\Cdn\CdnSSL;
 use App\Model\Cdn\NgxAccessCdn;
 use App\Model\helpdesk\Agent_panel\Organization;
 use App\Model\helpdesk\Agent_panel\User_org;
+use App\Model\Cdn\CdnDailyReport;
 // classes
 use Auth;
 use Datatables;
@@ -563,5 +564,43 @@ class CdnController extends Controller
             }
         }
         abort(404);
+    }
+
+    public function chartTraffic($sdate = null, $edate = null, $resource_id = '')
+    {
+        if (is_null($sdate) || is_null($edate)) {
+            $format = 'Y-m-d';
+            $end_date = date($format);
+            $end_ts = strtotime($end_date);
+            $start_ts = strtotime(date($format, strtotime('-1 month'.$end_date)));
+        } else {
+            $start_ts = strtotime($sdate);
+            $end_ts = strtotime($edate);
+        }
+        $data = [];
+        //DB::enableQueryLog();
+        if (Auth::user()->role == "user") {
+            $org_id = User_org::where('user_id', '=', Auth::user()->id)->first()->org_id;
+        }
+        for ($i = $start_ts; $i <= $end_ts; $i += 86400) {
+            $thisDate = date('Y-m-d', $i);
+            $report = DB::table('cdn_daily_report')
+                        ->select(DB::raw('report_date, SUM(ROUND(total_byte/1024, 2)) AS total_byte'))
+                        ->leftJoin('cdn_resources', 'cdn_resources.id', '=', 'cdn_daily_report.resource_id')
+                        ->where('report_date', $thisDate);
+            if (Auth::user()->role == "user") {
+                $report = $report->where('cdn_resources.org_id', $org_id);
+            }
+            if (is_numeric($resource_id)){
+                $report = $report->where('cdn_daily_report.resource_id', $resource_id);
+            }
+            $report = $report->groupBy('report_date')
+                        ->first();
+            $total_byte = $report ? $report->total_byte : 0;
+            $data[] = ['report_date' => $thisDate, 'total_byte' => $total_byte];
+        }
+        //var_dump(DB::getQueryLog());
+
+        return response()->json($data);
     }
 }

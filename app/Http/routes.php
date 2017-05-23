@@ -536,6 +536,7 @@ Route::group(['middleware' => ['web']], function () {
         Route::get('houly-bsent', ['as' => 'resource.hourly.bsent', 'uses' => 'Cdn\CdnController@getHourlyByteSentReport']);
         Route::get('daily-bsent/{day?}', ['as' => 'resource.daily.bsent', 'uses' => 'Cdn\CdnReportController@genDailyByteSentReport']);
         Route::get('summary-report/{date}/{id}', ['as' => 'summary.report', 'uses' => 'Cdn\CdnController@getSummaryReport']);
+        Route::post('chart-cdn-traffic/{sdate}/{edate}/{resource_id?}', ['as' => 'post.chart.cdn.traffic', 'uses' => 'Cdn\CdnController@chartTraffic']);
     });
     Route::get('checkticket', 'Client\helpdesk\ClientTicketController@getCheckTicket'); /* Check your Ticket */
     Route::get('myticket', ['as' => 'ticket', 'uses' => 'Client\helpdesk\GuestController@getMyticket']); /* Get my tickets */
