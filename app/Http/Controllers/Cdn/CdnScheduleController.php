@@ -38,7 +38,7 @@ class CdnScheduleController extends Controller
         $ts = time();
         if ($ssl_list = CdnSSL::where('type', 'A')->where('expire_date', '<', $expire_date)->get()){
             foreach ($ssl_list as $ssl) {
-                if ($resource = Cdn_Resources::where('id', $ssl->resource_id)->first()){
+                if ($resource = Cdn_Resources::where('id', $ssl->resource_id)->where('http', '>', 0)->first()){
                     if ($resource->verifyDNS()){
                         `cd {$this->cmd_path};./dehydrated -c -d {$resource->cdn_hostname} >> /tmp/d_log 2>&1`;
                         $cert_file = "{$this->cmd_path}certs/{$resource->cdn_hostname}/fullchain.pem";
