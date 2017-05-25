@@ -1685,7 +1685,7 @@ class ApiController extends Controller
                         'cname' => $resource->cname,
                         'status' => $status
                     );
-                    if ($resource->http > 0 && !empty($rs_resource['ssl_cert']) && !empty($rs_resource['ssl_key']) && $resource->ssl_status == 2) {
+                    if ($resource->http > 0 && !empty($resource->cert) && !empty($resource->key) && $resource->ssl_status == 2) {
                         $rs_resource['http'] = $resource->http;
                         $rs_resource['ssl_cert'] = Crypt::decrypt($resource->cert);
                         $rs_resource['ssl_key'] = Crypt::decrypt($resource->key);
