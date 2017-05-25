@@ -47,9 +47,9 @@ class CdnScheduleController extends Controller
                             $cert = file_get_contents($cert_file);
                             $key = file_get_contents($key_file);
                             $cert_data = openssl_x509_parse($cert);
-                            if ($cert_data['validTo_time_t'] > $ts) {
-                                $expire_date = date('Y-m-d H:i:s', $cert_data['validTo_time_t']);
-                                $ssl->expire_date= $expire_date;
+                            $expire_date = date('Y-m-d H:i:s', $cert_data['validTo_time_t']);
+                            if ($cert_data['validTo_time_t'] > $ts && $ssl->expire_dat != $expire_date) {
+                                $ssl->expire_date = $expire_date;
                                 $ssl->cert = Crypt::encrypt($cert);
                                 $ssl->key = Crypt::encrypt($key);
                                 $ssl->status = 2;
