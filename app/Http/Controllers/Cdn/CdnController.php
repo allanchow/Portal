@@ -104,7 +104,7 @@ class CdnController extends Controller
             $resources = $resources->where('update_status', '<>', 2);
         }
 
-        $resources = $resources->select('cdn_hostname', 'cname', 'file_type', 'cdn_resources.status AS status', 'cdn_resources.created_at AS created_at', 'cdn_ssl.status AS ssl_status', 'update_status', 'force_update', 'error_msg', 'id');
+        $resources = $resources->select('cdn_hostname', 'cname', 'file_type', 'cdn_resources.status AS status', 'cdn_resources.created_at AS created_at', 'cdn_ssl.status AS ssl_status', 'update_status', 'force_update', 'error_msg', 'id', 'http');
 
         if ($search !== '') {
             $resources = $resources->where(function ($query) use ($search) {
@@ -116,7 +116,7 @@ class CdnController extends Controller
 
         return \Datatables::of($resources)
                         /* column username */
-                        ->removeColumn('id', 'update_status', 'force_update', 'error_msg', 'ssl_status')
+                        ->removeColumn('id', 'update_status', 'force_update', 'error_msg', 'ssl_status', 'http')
                         ->addColumn('cdn_hostname', function ($model) {
                                 return '<a href="'.route('resource.edit', $model->id).'">'.$model->cdn_hostname.'</a>';
                         })
