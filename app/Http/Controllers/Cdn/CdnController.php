@@ -146,7 +146,7 @@ class CdnController extends Controller
                             } elseif ($update_status == 3 && (Auth::user()->role == "agent" || Auth::user()->role == "admin")) {
                                 $stat .= ' <span class="label label-warning">'.\Lang::get('lang.pending').'</span>';
                             }
-                            if ($model->ssl_status == 1) {
+                            if ($model->http > 0 && $model->ssl_status == 1) {
                                 $stat .= ' <span class="label label-warning">'.\Lang::get('lang.ssl_pending').'</span>';
                             }
                             if ($model->force_update == 1 && (Auth::user()->role == "agent" || Auth::user()->role == "admin")) {

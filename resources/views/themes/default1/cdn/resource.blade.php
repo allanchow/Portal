@@ -95,7 +95,7 @@ class="active"
                     @elseif ($resource->update_status == 3 and (Auth::user()->role == "admin" or Auth::user()->role == "agent"))
                         <span class="label label-warning">{!! Lang::get('lang.pending') !!}</span>
                     @endif
-                    @if ($resource->ssl_status == 1)
+                    @if ($resource->http > 0 && $resource->ssl_status == 1)
                         <span class="label label-warning">{!! Lang::get('lang.ssl_pending') !!}</span>
                     @endif
                     @if ($resource->force_update == 1 and (Auth::user()->role == "admin" or Auth::user()->role == "agent"))
