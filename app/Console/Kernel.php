@@ -39,7 +39,7 @@ class Kernel extends ConsoleKernel
             $this->execute($schedule, 'notification');
             $this->execute($schedule, 'work');
             $this->execute($schedule, 'cdnDailyReport');
-            $this->execute($schedule, 'getAutoSSL');
+            $this->execute($schedule, 'genAutoSSL');
         }
     }
 
@@ -60,7 +60,7 @@ class Kernel extends ConsoleKernel
             case 'cdnDailyReport':
                 $this->getCondition($schedule->command('cdnreport:daily'), ['condition'=>'dailyAt', 'at'=>'1:00']);
                 break;
-            case 'getAutoSSL':
+            case 'genAutoSSL':
                 $this->getCondition($schedule->command('cdnschedule:autossl'), ['condition'=>'everyMinute', 'at'=>'']);
                 break;
         }
