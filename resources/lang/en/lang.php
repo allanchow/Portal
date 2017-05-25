@@ -976,12 +976,16 @@ return [
     'dynamic'               => 'Dynamic',
     'ssl_cert'              => 'SSL Cert.',
     'ssl_private_key'       => 'SSL Private Key',
+    'ssl_pending'           => 'SSL Pending',
     'http_only'             => 'HTTP Only',
     'pem_content'           => 'PEM Content',
     'date_resource_empty'   => 'Date or resource cannot be empty',
     'cdn_summary_report'   => 'CDN Summary Report',
     'cdn_traffic_report'   => 'CDN Traffic Report',
     'all'                  => 'All',
+    'auto'                 => 'Auto',
+    'auto_ssl_not_support' => 'Auto cert is not supported in wildcard hostname',
+    'ssl_type_tooltip'     => '<table><tr><td valign=top><b>Auto:&nbsp;</b></td><td><font size=1>automatically creates a cert for your Zonealias. (You required to add our CNAME to your DNS record.)</font></td><tr><td align=top><b>Custom:&nbsp;</b></td><td><font size=1>your own SSL</font></td></tr></table>',
 
     //API Error
     'E1001'              => 'E1001: CNAME is null',

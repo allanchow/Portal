@@ -19,6 +19,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\CloseWork',
         'App\Console\Commands\TicketFetch',
         'App\Console\Commands\GenCdnDailyReport',
+        'App\Console\Commands\genAutoSSL',
     ];
 
     /**
@@ -38,6 +39,7 @@ class Kernel extends ConsoleKernel
             $this->execute($schedule, 'notification');
             $this->execute($schedule, 'work');
             $this->execute($schedule, 'cdnDailyReport');
+            $this->execute($schedule, 'getAutoSSL');
         }
     }
 
@@ -57,6 +59,9 @@ class Kernel extends ConsoleKernel
                 break;
             case 'cdnDailyReport':
                 $this->getCondition($schedule->command('cdnreport:daily'), ['condition'=>'dailyAt', 'at'=>'1:00']);
+                break;
+            case 'getAutoSSL':
+                $this->getCondition($schedule->command('cdnschedule:autossl'), ['condition'=>'everyMinute', 'at'=>'']);
                 break;
         }
     }

@@ -182,7 +182,7 @@ class="active"
             } else {
                 $.ajax({
                     type: 'POST',
-                    url: 'chart-cdn-traffic/' + sdate + '/' + edate + '/' + resource_id,
+                    url: '/chart-cdn-traffic/' + sdate + '/' + edate + '/' + resource_id,
                     dataType: 'json',
     
                     success: function (t_result) {

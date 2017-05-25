@@ -76,24 +76,26 @@ class CdnController extends Controller
         $type = $request->input('profiletype');
         $search = $request->input('searchTerm');
 
+        $resources = $resources->leftJoin('cdn_ssl', 'cdn_resources.id', '=', 'cdn_ssl.resource_id');
+
         if ($type === 'active') {
-            $resources = $resources->where('status', 2);
+            $resources = $resources->where('cdn_resources.status', 2);
         } elseif ($type === 'pending') {
             if (Auth::user()->role == "user") {
-                $resources = $resources->where('status', 1);
+                $resources = $resources->where('cdn_resources.status', 1);
             } else {
-                $resources = $resources->where('status', 1)->orWhere('update_status', 3);
+                $resources = $resources->where('cdn_resources.status', 1)->orWhere('update_status', 3);
             }
         } elseif ($type === 'updating') {
             $resources = $resources->where('update_status', 1)->where('status', '<>', 0);
         } elseif ($type === 'suspended' && (Auth::user()->role == "agent" || Auth::user()->role == "admin")) {
-            $resources = $resources->where('status', 0);
+            $resources = $resources->where('cdn_resources.status', 0);
         } elseif ($type === 'deleting' && (Auth::user()->role == "agent" || Auth::user()->role == "admin")) {
             $resources = $resources->where('update_status', 2);
         } elseif ($type === 'dns_to_origin'){
-            $resources = $resources->where('status', -1);
+            $resources = $resources->where('cdn_resources.status', -1);
         } else {
-            $resources = $resources->where('status', '<>', 0);
+            $resources = $resources->where('cdn_resources.status', '<>', 0);
         }
 
         if (Auth::user()->role == "user") {
@@ -102,19 +104,19 @@ class CdnController extends Controller
             $resources = $resources->where('update_status', '<>', 2);
         }
 
-        $resources = $resources->select('id', 'cdn_hostname', 'cname', 'file_type', 'status', 'update_status', 'force_update', 'created_at', 'error_msg');
+        $resources = $resources->select('cdn_hostname', 'cname', 'file_type', 'cdn_resources.status AS status', 'cdn_resources.created_at AS created_at', 'cdn_ssl.status AS ssl_status', 'update_status', 'force_update', 'error_msg', 'id');
 
         if ($search !== '') {
             $resources = $resources->where(function ($query) use ($search) {
                 $query->where('cdn_hostname', 'LIKE', '%'.$search.'%')
                     ->orWhere('cname', 'LIKE', '%'.$search.'%')
-                    ->orWhere('created_at', 'LIKE', '%'.$search.'%');
+                    ->orWhere('cdn_resources.created_at', 'LIKE', '%'.$search.'%');
             });
         }
 
         return \Datatables::of($resources)
                         /* column username */
-                        ->removeColumn('id', 'update_status', 'force_update', 'error_msg')
+                        ->removeColumn('id', 'update_status', 'force_update', 'error_msg', 'ssl_status')
                         ->addColumn('cdn_hostname', function ($model) {
                                 return '<a href="'.route('resource.edit', $model->id).'">'.$model->cdn_hostname.'</a>';
                         })
@@ -143,6 +145,9 @@ class CdnController extends Controller
                                 $stat .= ' <span class="label label-danger">'.\Lang::get('lang.deleting').'</span>';
                             } elseif ($update_status == 3 && (Auth::user()->role == "agent" || Auth::user()->role == "admin")) {
                                 $stat .= ' <span class="label label-warning">'.\Lang::get('lang.pending').'</span>';
+                            }
+                            if ($model->ssl_status == 1) {
+                                $stat .= ' <span class="label label-warning">'.\Lang::get('lang.ssl_pending').'</span>';
                             }
                             if ($model->force_update == 1 && (Auth::user()->role == "agent" || Auth::user()->role == "admin")) {
                                 $stat .= ' <span class="label label-warning">'.\Lang::get('lang.force_update').'</span>';
@@ -184,7 +189,8 @@ class CdnController extends Controller
     public function store(Cdn_Resources $resource, CdnRequest $request)
     {
         try {
-            if (!$resource->validate_hostname($request->input('cdn_hostname'))) {
+            $cdn_hostname = $request->input('cdn_hostname');
+            if (!$resource->validate_hostname($cdn_hostname)) {
                 $errors['cdn_hostname'] = Lang::get('lang.invalid_hostname');
             }
             $i_origin = explode("\n", str_replace(',', "\n", $request->input('origin')));
@@ -192,7 +198,7 @@ class CdnController extends Controller
             foreach ($i_origin as $origin) {
                 $origin = trim($origin);
                 if ($origin != '') {
-                    if ($origin_type === null && !$resource->validate_ip($origin) && $resource->validate_domain($origin) && $origin != $request->input('cdn_hostname')){
+                    if ($origin_type === null && !$resource->validate_ip($origin) && $resource->validate_domain($origin) && $origin != $cdn_hostname){
                         $ar_origin[] = ['domain'=>$origin];
                         $origin_type = 'domain';
                         break;
@@ -211,7 +217,7 @@ class CdnController extends Controller
                 $errors['host_header'] = Lang::get('lang.invalid_host_header');
             }
 
-            $resource->cdn_hostname = $request->input('cdn_hostname');
+            $resource->cdn_hostname = $cdn_hostname;
             $resource->org_id = $request->input('org_id');
 
             if ($request->has('host_header')) {
@@ -241,19 +247,29 @@ class CdnController extends Controller
             }
 
             $resource->http = $request->input('http');
+            $ssl_type = $request->input('ssl_type');
 
             $resource->origin = json_encode($ar_origin);
             $resource->status = 1;
             $resource->update_status = 0;
 
-            if ($request->has('ssl_cert') && $request->has('ssl_key')) {
+            if ($resource->http > 0) {
                 $ssl = new CdnSSL();
-                if (!$ssl->validate_cert($request->input('ssl_cert'))) {
-                    $errors['ssl_cert'] = Lang::get('lang.invalid_ssl_cert');
+                if ($resource->is_wildcard($cdn_hostname))
+                {
+                    $ssl_type = 'U';
                 }
-
-                if (!$ssl->validate_key($request->input('ssl_key'))) {
-                    $errors['ssl_key'] = Lang::get('lang.invalid_ssl_key');
+                if ($ssl_type == 'U') {
+                    if (!$ssl->validate_cert($request->input('ssl_cert'))) {
+                        $errors['ssl_cert'] = Lang::get('lang.invalid_ssl_cert');
+                    }
+       
+                    if (!$ssl->validate_key($request->input('ssl_key'))) {
+                        $errors['ssl_key'] = Lang::get('lang.invalid_ssl_key');
+                    }
+                    $ssl_status = 2;
+                } elseif ($ssl_type == 'A') {
+                    $ssl_status = 1;
                 }
             }
 
@@ -267,10 +283,12 @@ class CdnController extends Controller
     
                     if ($resource->http > 0) {
                         $ssl->resource_id = $resource->id;
-                        $ssl->type = 'U';
-                        $ssl->status = '2';
-                        $ssl->cert = Crypt::encrypt($request->input('ssl_cert'));
-                        $ssl->key = Crypt::encrypt($request->input('ssl_key'));
+                        $ssl->type = $ssl_type;
+                        $ssl->status = $ssl_status;
+                        if ($ssl_type == 'U') {
+                            $ssl->cert = Crypt::encrypt($request->input('ssl_cert'));
+                            $ssl->key = Crypt::encrypt($request->input('ssl_key'));
+                        }
                         $ssl->save();
                     }
     
@@ -290,12 +308,20 @@ class CdnController extends Controller
                 $ssl = new CdnSSL();
             }
 
-            if (!empty($ssl->cert)){
+            if (!empty($ssl->type)){
+                $resource->ssl_type = $ssl->type;    
+            }
+
+            if ($ssl->type == 'U' && !empty($ssl->cert)){
                 $resource->ssl_cert = Crypt::decrypt($ssl->cert);    
             }
             
-            if (!empty($ssl->key)){
+            if ($ssl->type == 'U' && !empty($ssl->key)){
                 $resource->ssl_key = Crypt::decrypt($ssl->key);
+            }
+
+            if (is_numeric($ssl->status)){
+                $resource->ssl_status= $ssl->status;
             }
 
             if (!$resource or (Auth::user()->role == "user" && $resource->org_id != User_org::where('user_id', '=', Auth::user()->id)->first()->org_id)) {
@@ -333,7 +359,8 @@ class CdnController extends Controller
                 return redirect()->route('resources')->with('fails', Lang::get('lang.not_found'));
             }
 
-            if (!$resource->validate_hostname($request->input('cdn_hostname'))) {
+            $cdn_hostname = $request->input('cdn_hostname');
+            if (!$resource->validate_hostname($cdn_hostname)) {
                 $errors['cdn_hostname'] = Lang::get('lang.invalid_hostname');
             }
 
@@ -346,7 +373,7 @@ class CdnController extends Controller
             foreach ($i_origin as $origin) {
                 $origin = trim($origin);
                 if ($origin != '') {
-                    if ($origin_type === null && !$resource->validate_ip($origin) && $resource->validate_domain($origin) && $origin != $request->input('cdn_hostname')){
+                    if ($origin_type === null && !$resource->validate_ip($origin) && $resource->validate_domain($origin) && $origin != $cdn_hostname){
                         $ar_origin[] = ['domain'=>$origin];
                         $origin_type = 'domain';
                         break;
@@ -397,24 +424,47 @@ class CdnController extends Controller
                 $resource->max_age = $request->input('max_age');
             }
 
-            if ($request->has('ssl_cert') && $request->has('ssl_key')) {
+            $ssl_type = $request->input('ssl_type');
 
-                if (!$ssl->validate_cert($request->input('ssl_cert'))) {
-                    $errors['ssl_cert'] = Lang::get('lang.invalid_ssl_cert');
+            if ($request->has('http')) {
+                $ssl_error = 0;
+                if ($resource->is_wildcard($cdn_hostname))
+                {
+                    $ssl_type = 'U';
+                }
+                if ($ssl_type == 'U') {
+                    if (!$ssl->validate_cert($request->input('ssl_cert'))) {
+                        $ssl_error = 1;
+                        $errors['ssl_cert'] = Lang::get('lang.invalid_ssl_cert');
+                    }
+     
+                    if (!$ssl->validate_key($request->input('ssl_key'))) {
+                        $ssl_error = 1;
+                        $errors['ssl_key'] = Lang::get('lang.invalid_ssl_key');
+                    }
+                    $ssl_status = 2;
+                    $ssl_cert = Crypt::encrypt($request->input('ssl_cert'));
+                    $ssl_key = Crypt::encrypt($request->input('ssl_key'));
+                    $expire_date = $ssl->expire_date;
+                } elseif ($ssl_type == 'A') {
+                    if ($ssl->type == 'A')
+                    {
+                        $ssl_status = $ssl->status;
+                        $expire_date = $ssl->expire_date;
+                    } else {
+                        $ssl_status = 1;
+                        $expire_date = '0000-00-00 00:00:00';
+                    }
+                    $ssl_cert = $ssl_key = '';
                 }
 
-                if (!$ssl->validate_key($request->input('ssl_key'))) {
-                    $errors['ssl_key'] = Lang::get('lang.invalid_ssl_key');
-                }
-
-                $ssl_cert = Crypt::encrypt($request->input('ssl_cert'));
-                $ssl_key = Crypt::encrypt($request->input('ssl_key'));
-                if (!($ssl->cert == $ssl_cert && $ssl->key == $ssl_key)) {
+                if (!($ssl->cert == $ssl_cert && $ssl->key == $ssl_key && $ssl->type == $ssl_type) && !$ssl_error) {
                     $has_change = true;
-                    $ssl->type = 'U';
-                    $ssl->status = '2';
+                    $ssl->type = $ssl_type;
+                    $ssl->status = $ssl_status;
                     $ssl->cert = $ssl_cert;
                     $ssl->key = $ssl_key;
+                    $ssl->expire_date = $expire_date;
                     $ssl->save();
                 }
             }
@@ -422,11 +472,11 @@ class CdnController extends Controller
             if (isset($errors)) {
                 return redirect()->back()->withInput()->withErrors($errors);
             } else {
-                if ($resource->origin == $new_origin && $resource->cdn_hostname == $request->input('cdn_hostname') && $resource->http == $request->input('http') && $resource->error_msg == '' && !$has_change)     {
+                if ($resource->origin == $new_origin && $resource->cdn_hostname == $cdn_hostname && $resource->http == $request->input('http') && $resource->error_msg == '' && !$has_change)     {
                     return redirect()->back()->withInput()->with('fails', Lang::get('lang.error-no_change'));
                 }
     
-                $resource->cdn_hostname = $request->input('cdn_hostname');
+                $resource->cdn_hostname = $cdn_hostname;
                 $resource->http = $request->input('http');
                 $resource->origin = $new_origin;
                 $resource->update_status = 1;
@@ -602,5 +652,20 @@ class CdnController extends Controller
         //var_dump(DB::getQueryLog());
 
         return response()->json($data);
+    }
+
+    public function checkHostnameDNS($hostname, $id)
+    {
+        $resource = Cdn_Resources::whereId($id)->first();
+        if (!$resource or (Auth::user()->role == "user" && $resource->org_id != User_org::where('user_id', '=', Auth::user()->id)->first()->org_id)) {
+             $error = Lang::get('lang.not_found');
+            return response()->json(compact('error'));
+        }
+        if ($resource->is_wildcard($hostname)) {
+            $error = Lang::get('lang.auto_ssl_not_support');
+            return response()->json(compact('error'));
+        }
+        $result = dns_get_record($hostname, DNS_CNAME);
+        return response()->json(compact('result'));
     }
 }

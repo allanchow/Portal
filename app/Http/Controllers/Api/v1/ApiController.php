@@ -1640,7 +1640,19 @@ class ApiController extends Controller
     {
         try {
             $ar_resources = array();
-            if ($resources = $this->resources->leftJoin('cdn_ssl', 'cdn_resources.id', '=', 'cdn_ssl.resource_id')->where('cdn_resources.status', 1)->orWhere('cdn_resources.update_status', '>', 0)->orWhere('cdn_resources.force_update', 1)->orderBy('cdn_resources.updated_at', 'desc')->select('cdn_resources.*', 'cdn_ssl.cert', 'cdn_ssl.key')->paginate(100)) {
+
+            if ($resources = $this->resources
+                                      ->leftJoin('cdn_ssl', function($join)
+                                        {
+                                            $join->on('cdn_resources.id', '=', 'cdn_ssl.resource_id');
+                                            $join->on('cdn_ssl.status', '=', \DB::raw('2'));
+                                        })
+                                      ->where('cdn_resources.status', 1)
+                                      ->orWhere('cdn_resources.update_status', '>', 0)
+                                      ->orWhere('cdn_resources.force_update', 1)
+                                      ->orderBy('cdn_resources.updated_at', 'desc')
+                                      ->select('cdn_resources.*', 'cdn_ssl.cert', 'cdn_ssl.key', 'cdn_ssl.status AS ssl_status')
+                                      ->paginate(100)) {
                 foreach ($resources as $resource)
                 {
                     $j_origin = json_decode($resource->origin, true);
@@ -1673,7 +1685,7 @@ class ApiController extends Controller
                         'cname' => $resource->cname,
                         'status' => $status
                     );
-                    if ($resource->http > 0) {
+                    if ($resource->http > 0 && !empty($rs_resource['ssl_cert']) && !empty($rs_resource['ssl_key']) && $resource->ssl_status == 2) {
                         $rs_resource['http'] = $resource->http;
                         $rs_resource['ssl_cert'] = Crypt::decrypt($resource->cert);
                         $rs_resource['ssl_key'] = Crypt::decrypt($resource->key);

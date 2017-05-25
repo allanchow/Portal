@@ -533,8 +533,10 @@ Route::group(['middleware' => ['web']], function () {
         Route::post('resources-force-update', ['as' => 'resource.list', 'uses' => 'Cdn\CdnController@forceUpdate']);
         Route::post('resources-dns-to-origin/{id}', ['as' => 'resource.dns-to-origin', 'uses' => 'Xns\XnsController@revertResourceDNS']);
         Route::post('resources-cancel-dns-to-origin/{id}', ['as' => 'resource.cancel-dns-to-origin', 'uses' => 'Cdn\CdnController@cancelRevertDns']);
+        Route::post('check-hostname-dns/{hostname}/{id}', ['as' => 'resource.check.dns', 'uses' => 'Cdn\CdnController@checkHostnameDNS']);
         Route::get('houly-bsent', ['as' => 'resource.hourly.bsent', 'uses' => 'Cdn\CdnController@getHourlyByteSentReport']);
-        Route::get('daily-bsent/{day?}', ['as' => 'resource.daily.bsent', 'uses' => 'Cdn\CdnReportController@genDailyByteSentReport']);
+        //Route::get('daily-bsent/{day?}', ['as' => 'resource.daily.bsent', 'uses' => 'Cdn\CdnReportController@genDailyByteSentReport']);
+        Route::get('gen-auto-ssl', ['as' => 'cdnssl.gen.auto', 'uses' => 'Cdn\CdnScheduleController@genAutoSSL']);
         Route::get('summary-report/{date}/{id}', ['as' => 'summary.report', 'uses' => 'Cdn\CdnController@getSummaryReport']);
         Route::post('chart-cdn-traffic/{sdate}/{edate}/{resource_id?}', ['as' => 'post.chart.cdn.traffic', 'uses' => 'Cdn\CdnController@chartTraffic']);
     });

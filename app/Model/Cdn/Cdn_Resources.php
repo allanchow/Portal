@@ -51,6 +51,10 @@ class Cdn_Resources extends BaseModel
         return filter_var($domain, FILTER_VALIDATE_URL);
     }
 
+    public function is_wildcard($hostname)
+    {
+        return preg_match('/^[\*|\.]/', $hostname);
+    }
 
     public function validate_host_header($hostname)
     {
@@ -117,5 +121,14 @@ class Cdn_Resources extends BaseModel
             }
             $this->cname = "uat-cdn-{$int_id}.{$this->get_cdn_domain()}";
         }
+    }
+
+    public function verifyDNS()
+    {
+        if ($result = dns_get_record($this->cdn_hostname, DNS_CNAME))
+        {
+            return $result[0]['target'] == $this->cname;
+        }
+        return false;
     }
 }

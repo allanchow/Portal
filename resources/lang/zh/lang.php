@@ -976,12 +976,16 @@ return [
     'dynamic'              => '動態',
     'ssl_cert'             => 'SSL證書',
     'ssl_private_key'      => 'SSL私鑰',
+    'ssl_pending'          => 'SSL處理中',
     'http_only'            => '只使用HTTP',
     'pem_content'          => 'PEM內容',
     'date_resource_empty'  => '日期或資源不能為空白',
     'cdn_summary_report'   => 'CDN摘要報表',
     'cdn_traffic_report'   => 'CDN流量報表',
     'all'                  => '全部',
+    'auto'                 => '自動',
+    'auto_ssl_not_support' => '通配主機名不能使用自動產生證書',
+    'ssl_type_tooltip'     => '<table><tr><td valign=top><b>自動:&nbsp;</b></td><td><font size=1>自動為你的域名產生SSL證書。(你需要將我們的CNAME加到你的DNS記錄)</font></td><tr><td align=top><b>自定義:&nbsp;</b></td><td><font size=1>自定義SSL</font></td></tr></table>',
 
     //API Error
     'E1001'              => 'E1001: CNAME為空白',

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Cdn;
 
 // controllers
 use App\Http\Controllers\Common\PhpMailController;
-use App\Http\Controllers\Cdn\CdnController;
 use App\Http\Controllers\Controller;
 // models
 use App\Model\Cdn\Cdn_Resources;
@@ -18,8 +17,6 @@ use App\Model\Cdn\NgxAccessCdn;
  */
 class CdnReportController extends Controller
 {
-    protected $ext_view = 'themes.default1.client.layout.dashboard';
-
     /**
      * Create a new controller instance.
      *

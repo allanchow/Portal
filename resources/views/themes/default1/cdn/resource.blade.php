@@ -95,6 +95,9 @@ class="active"
                     @elseif ($resource->update_status == 3 and (Auth::user()->role == "admin" or Auth::user()->role == "agent"))
                         <span class="label label-warning">{!! Lang::get('lang.pending') !!}</span>
                     @endif
+                    @if ($resource->ssl_status == 1)
+                        <span class="label label-warning">{!! Lang::get('lang.ssl_pending') !!}</span>
+                    @endif
                     @if ($resource->force_update == 1 and (Auth::user()->role == "admin" or Auth::user()->role == "agent"))
                         <span class="label label-warning">{!! Lang::get('lang.force_update') !!}</span>
                     @endif
@@ -145,13 +148,18 @@ class="active"
         </div>
         @endif
         <div class="row">
-            <div class="col-md-4 form-group {{ $errors->has('organization') ? 'has-error' : '' }}">
+            <div class="col-md-4 form-group {{ $errors->has('http') ? 'has-error' : '' }}">
                 {!! Form::label('http', 'HTTP / HTTPS') !!}
                 {!! Form::select('http',['0' => Lang::get('lang.http_only'), '1' => 'HTTPS','2' => 'HTTP/2'],null,['class' => 'form-control']) !!}
                 
             </div>
+            <div id="d_ssl_type" class="col-md-4 form-group {{ $errors->has('ssl_type') ? 'has-error' : '' }}">
+                {!! Form::label('ssl_type', 'SSL') !!} <span class="text-red" id="s_ssl_type"> </span>  
+                {!! Form::select('ssl_type',['A' => Lang::get('lang.auto'), 'U' => Lang::get('lang.custom')],null,['class' => 'form-control', 'data-toggle' => 'tooltip', 'title' =>  Lang::get('lang.ssl_type_tooltip')]) !!}
+                
+            </div>
         </div>
-        <div class="row">
+        <div class="row" id="row_ssl">
             <div class="col-md-4 form-group {{ $errors->has('ssl_cert') ? 'has-error' : '' }}">
                 {!! Form::label('ssl_cert',Lang::get('lang.ssl_cert')) !!}         <span class="text-red"> * ({!! Lang::get('lang.pem_content') !!})</span>
                 {!! Form::textarea('ssl_cert',null,['class' => 'form-control']) !!}
@@ -241,8 +249,56 @@ class="active"
     @endif
 
         <script type="text/javascript">
+            function display_row_ssl()
+            {
+                if ($('#http').val() != 0 && $('#ssl_type').val() == 'U') {
+                    $('#row_ssl').show();
+                } else {
+                    $('#row_ssl').hide();
+                }
+
+            }
+
+            function display_d_ssl_type()
+            {
+                if ($('#http').val() == 0) {
+                    $('#d_ssl_type').hide();
+                } else {
+                    $('#d_ssl_type').show();
+                    check_auto_ssl();
+                }
+
+            }
+
+            function check_auto_ssl()
+            {
+                var cdn_hostname = $('#cdn_hostname').val();
+                if (cdn_hostname.match(/^[\*|\.]/)){
+                    $('#ssl_type').val('U');
+                    $('#s_ssl_type').html('({{ Lang::get('lang.auto_ssl_not_support') }})');
+                } else {
+                    $('#s_ssl_type').html('');
+                }
+            }
+
+
+
             $(function() {
                 $("[data-mask]").inputmask();
+                display_d_ssl_type();
+                display_row_ssl();
+
+                $('#http').on('change', function(){
+                    display_d_ssl_type();
+                    display_row_ssl();
+                });
+
+                $('#ssl_type').on('change', function(){
+                    if ($(this).val() == 'A'){
+                        check_auto_ssl();
+                    }
+                    display_row_ssl();
+                });
 
                 @if ($resource->status > 0 and (Auth::user()->role == "admin" or Auth::user()->role == "agent"))
                 $('#force_update_button').on('click', function(){

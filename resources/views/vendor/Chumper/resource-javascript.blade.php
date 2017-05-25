@@ -34,7 +34,7 @@ foreach($segments as $seg){
                 },
                 "bProcessing": true,
                 "bServerSide": true,
-                "order": [[3, "desc"]],
+                "order": [[4, "desc"]],
                 "pageLength": 50,
                 "ajax": {
                     url: "{{url('resource-list')}}",
