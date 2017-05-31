@@ -34,7 +34,7 @@ class CdnScheduleController extends Controller
         ini_set('max_execution_time', 1800);
         set_error_handler(null);
         set_exception_handler(null);
-        $expire_date = date('Y-m-d H:i:s', strtotime('+1 week'));
+        $expire_date = date('Y-m-d H:i:s', strtotime('+3 weeks'));
         $ts = time();
         if ($ssl_list = CdnSSL::where('type', 'A')->where('expire_date', '<', $expire_date)->get()){
             foreach ($ssl_list as $ssl) {
