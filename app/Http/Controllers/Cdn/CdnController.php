@@ -426,7 +426,7 @@ class CdnController extends Controller
 
             $ssl_type = $request->input('ssl_type');
 
-            if ($request->has('http')) {
+            if ($request->input('http') > 0) {
                 $ssl_error = 0;
                 if ($resource->is_wildcard($cdn_hostname))
                 {
