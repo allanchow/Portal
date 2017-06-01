@@ -132,7 +132,7 @@
 <!-- Email -->
  <div class="col-xs-12">
 <div class="form-group has-feedback {{ $errors->has('email') ? 'has-error' : '' }}">
-    {!! Form::text('email',null,['placeholder'=> Lang::get("lang.email") ,'class' => 'form-control']) !!}
+    {!! Form::text('email',null,['placeholder'=> Lang::get("lang.email") .' / '. Lang::get("lang.user_name") ,'class' => 'form-control']) !!}
     <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
 
 </div>
