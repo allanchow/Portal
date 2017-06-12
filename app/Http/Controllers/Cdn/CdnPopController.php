@@ -197,6 +197,7 @@ class CdnPopController extends Controller
                                     $cdn_pop->dns_status = 0;
                                 }
                             } else {
+                                $cdnpop->dns_status = 0;
                                 $no_error = false;
                             }
     
@@ -352,6 +353,7 @@ class CdnPopController extends Controller
                 {
                     $cdnpop->dns_status = 2;
                 } else {
+                    $cdnpop->dns_status = 0;
                     $no_error = false;
                 }
             }

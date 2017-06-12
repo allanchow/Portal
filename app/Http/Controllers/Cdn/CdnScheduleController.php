@@ -90,6 +90,17 @@ class CdnScheduleController extends Controller
             }
         }
 
+        if (($cdnpop_list = CdnPop::where('status', 0)->where('dns_status', 0)->get()) && count($cdnpop_list)) {
+            foreach ($cdnpop_list as $cdnpop) {
+                if ($xns->del_cdn_pop($cdnpop))
+                {
+                    $cdnpop->dns_status = 2;
+                    $cdnpop->dns_updated_at = DB::raw('now()');
+                    $cdnpop->save();
+                }
+            }
+        }
+
         if (($cdnpop_list = CdnPop::where('status', 1)->where('dns_status', 0)->get()) && count($cdnpop_list) && (Cdn_Resources::where('force_update', 0)->where('status', '>', 0)->count() > 0) && (Cdn_Resources::where('force_update', 0)->where('status', '>', 0)->update(['force_update' => 1, 'error_msg' => '']) !== false )) {
             foreach ($cdnpop_list as $cdnpop) {
                 $cdnpop->dns_status = 1;
