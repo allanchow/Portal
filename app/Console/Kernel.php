@@ -20,6 +20,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\TicketFetch',
         'App\Console\Commands\GenCdnDailyReport',
         'App\Console\Commands\genAutoSSL',
+        'App\Console\Commands\checkResourcesXns',
     ];
 
     /**
@@ -40,6 +41,7 @@ class Kernel extends ConsoleKernel
             $this->execute($schedule, 'work');
             $this->execute($schedule, 'cdnDailyReport');
             $this->execute($schedule, 'genAutoSSL');
+            $this->execute($schedule, 'checkResourcesXns');
         }
     }
 
@@ -63,7 +65,9 @@ class Kernel extends ConsoleKernel
             case 'genAutoSSL':
                 $this->getCondition($schedule->command('cdnschedule:autossl'), ['condition'=>'everyMinute', 'at'=>'']);
                 break;
-        }
+            case 'checkResourcesXns':
+                $this->getCondition($schedule->command('cdnschedule:checkxns'), ['condition'=>'everyMinute', 'at'=>'']);
+                break;        }
     }
 
     public function getCondition($schedule, $command)

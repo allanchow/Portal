@@ -275,6 +275,12 @@
                             </a>
                         </li>
 
+                        <li @yield('cdnpop')>
+                             <a href="{{ url('cdnpop')}}" id="load-pop">
+                                <i class="fa fa-server"></i> <span>{!! Lang::get('lang.Pop') !!}</span>
+                            </a>
+                        </li>
+
                         <li class="header">{!! Lang::get('lang.Departments') !!}</li>
                         <?php
             $flattened = $department->flatMap(function ($values) {
@@ -358,6 +364,7 @@ $group = App\Model\helpdesk\Agent\Groups::where('id', '=', $agent_group)->first(
                                     <ul class="nav navbar-nav">
                                         <li id="bar" @yield('resources')><a href="{{ url('/resources')}}" id="load-open">{!! Lang::get('lang.resources') !!}</a></li>
                                         <li id="bar" @yield('newresource')><a href="{{ route('resource.create')}}" >{!! Lang::get('lang.create_resource') !!}</a></li>
+                                        <li id="bar" @yield('cdnpop')><a href="{{ url('/cdnpop')}}">{!! Lang::get('lang.Pop') !!}</a></li>
                                     </ul>
                                 </div>
                                 <div class="tabs-pane @yield('tools-bar')" id="tabE">

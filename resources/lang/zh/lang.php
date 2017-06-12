@@ -948,6 +948,7 @@ return [
     'cname'                => 'CName',
     'all_status'           => '所有狀態',
     'only_active'          => '僅生效',
+    'only_inactive'        => '僅無效',
     'only_pending'         => '僅處理中',
     'only_suspended'       => '僅暫停',
     'only_deleting'        => '僅刪除中',
@@ -986,6 +987,12 @@ return [
     'auto'                 => '自動',
     'auto_ssl_not_support' => '通配主機名不能使用自動產生證書',
     'ssl_type_tooltip'     => '<table><tr><td valign=top><b>自動:&nbsp;</b></td><td><font size=1>自動為你的域名產生SSL證書。(你需要將我們的CNAME加到你的DNS記錄)</font></td><tr><td align=top><b>自定義:&nbsp;</b></td><td><font size=1>自定義SSL</font></td></tr></table>',
+    'dns_create_failed'    => 'DNS創建失敗',
+    'Pop'                  => 'POP',
+    'pop_hostname'         => 'POP主機名',
+    'ddos_attacking'       => 'DDOS攻擊',
+    'resume'               => '復原',
+    'update_failed'        => '更新失敗',
 
     //API Error
     'E1001'              => 'E1001: CNAME為空白',

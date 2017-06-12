@@ -534,11 +534,23 @@ Route::group(['middleware' => ['web']], function () {
         Route::post('resources-dns-to-origin/{id}', ['as' => 'resource.dns-to-origin', 'uses' => 'Xns\XnsController@revertResourceDNS']);
         Route::post('resources-cancel-dns-to-origin/{id}', ['as' => 'resource.cancel-dns-to-origin', 'uses' => 'Cdn\CdnController@cancelRevertDns']);
         Route::post('check-hostname-dns/{hostname}/{id}', ['as' => 'resource.check.dns', 'uses' => 'Cdn\CdnController@checkHostnameDNS']);
-        Route::get('houly-bsent', ['as' => 'resource.hourly.bsent', 'uses' => 'Cdn\CdnController@getHourlyByteSentReport']);
-        //Route::get('daily-bsent/{day?}', ['as' => 'resource.daily.bsent', 'uses' => 'Cdn\CdnReportController@genDailyByteSentReport']);
-        Route::get('gen-auto-ssl', ['as' => 'cdnssl.gen.auto', 'uses' => 'Cdn\CdnScheduleController@genAutoSSL']);
+       
         Route::get('summary-report/{date}/{id}', ['as' => 'summary.report', 'uses' => 'Cdn\CdnController@getSummaryReport']);
         Route::post('chart-cdn-traffic/{sdate}/{edate}/{resource_id?}', ['as' => 'post.chart.cdn.traffic', 'uses' => 'Cdn\CdnController@chartTraffic']);
+        Route::group(['middleware' => 'role.agent'], function () {
+            Route::get('gen-auto-ssl', ['as' => 'cdnssl.gen.auto', 'uses' => 'Cdn\CdnScheduleController@genAutoSSL']);
+            Route::get('houly-bsent', ['as' => 'resource.hourly.bsent', 'uses' => 'Cdn\CdnController@getHourlyByteSentReport']);
+            Route::resource('cdnpop', 'Cdn\CdnPopController');
+            Route::get('cdnpop-store', ['as' => 'resource.cdnpop.store', 'uses' => 'Cdn\CdnPopController@store']);
+            Route::get('cdnpop-update/{pop_hostname}', ['as' => 'resource.cdnpop.update', 'uses' => 'Cdn\CdnPopController@update']);
+            Route::get('cdnpop-force-update', ['as' => 'resource.cdnpop.forceupdate', 'uses' => 'Cdn\CdnPopController@forceUpdate']);
+            Route::post('cdnpop-resume', ['as' => 'resource.cdnpop.resume', 'uses' => 'Cdn\CdnPopController@resume']);
+            Route::post('cdnpop-attack', ['as' => 'resource.cdnpop.attack', 'uses' => 'Cdn\CdnPopController@attack']);
+            Route::get('cdnpop-list', ['as' => 'resource.cdnpop.list', 'uses' => 'Cdn\CdnPopController@list']);
+            Route::get('cdnpop-status', ['as' => 'resource.cdnpop.status', 'uses' => 'Cdn\CdnPopController@getStatus']);
+            Route::post('cdnpop-change/{pop_hostname}/{status?}', ['as' => 'resource.cdnpop.change', 'uses' => 'Cdn\CdnPopController@changeStatus']);
+            //Route::get('daily-bsent/{day?}', ['as' => 'resource.daily.bsent', 'uses' => 'Cdn\CdnReportController@genDailyByteSentReport']);
+        });
     });
     Route::get('checkticket', 'Client\helpdesk\ClientTicketController@getCheckTicket'); /* Check your Ticket */
     Route::get('myticket', ['as' => 'ticket', 'uses' => 'Client\helpdesk\GuestController@getMyticket']); /* Get my tickets */
@@ -789,6 +801,7 @@ Route::group(['middleware' => ['web']], function () {
             Route::post('resource', 'Api\v1\ApiController@createResource');
             Route::post('resource/{id}', 'Api\v1\ApiController@updateResource');
             Route::delete('resource/{id}', 'Api\v1\ApiController@destroyResource');
+            Route::post('cdnpop-status/{pop_hostname}/{status}', 'Api\v1\ApiController@changePopStatus');
         });
         /*
          * FCM token response

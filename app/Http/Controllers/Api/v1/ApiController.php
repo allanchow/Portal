@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Agent\helpdesk\TicketController as CoreTicketController;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Cdn\CdnPopController;
 use App\Http\Controllers\Xns\XnsController;
+use App\Http\Controllers\Controller;
 //use Illuminate\Support\Facades\Request as Value;
 use App\Http\Requests\helpdesk\TicketRequest;
 use App\Model\helpdesk\Agent\Department;
@@ -2152,5 +2153,11 @@ class ApiController extends Controller
             $error = $e->getMessage();
             return response()->json(compact('error'));
         }
+    }
+
+    public function changePopStatus($pop_hostname, $status)
+    {
+        $cdnpop = new CdnPopController();
+        return $cdnpop->changeStatus($pop_hostname, $status);
     }
 }

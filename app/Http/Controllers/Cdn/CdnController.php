@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Cdn;
 
 // controllers
+use App\Http\Controllers\Cdn\CdnPopController;
 use App\Http\Controllers\Common\PhpMailController;
 use App\Http\Controllers\Xns\XnsController;
 use App\Http\Controllers\Controller;
@@ -163,6 +164,7 @@ class CdnController extends Controller
                         })
                         ->make();
     }
+
     public function create(Cdn_Resources $resource)
     {
         try {
@@ -277,9 +279,18 @@ class CdnController extends Controller
                 return redirect()->back()->withInput()->withErrors($errors);
             } else {
                 // saving inputs
+                $cdnpop = new CdnPopController();
+                $max_group = $cdnpop->get_max_group();
+                if (!$max_group){
+                    $max_group = 1;
+                }
+                $resource->group = $max_group;
                 if ($resource->save() == true) {
                     $resource->createCName();
-                    $resource->save();
+                    if ($resource->save()){
+                        $xns = new XnsController();
+                        $rs = $xns->addResourceCNameGroup($resource);
+                    }
     
                     if ($resource->http > 0) {
                         $ssl->resource_id = $resource->id;
@@ -553,7 +564,10 @@ class CdnController extends Controller
             $rs = $xns->delResourceCName($id);
             if ($rs->getData()->result) {
                 $resource->status = 1;
-                $result = $resource->save();
+                if ($result = $resource->save())
+                {
+                    $rs = $xns->addResourceCNameGroup($resource);
+                }
                 return response()->json(compact('result'));
             } else {
                 $result = $rs->getData()->error;
@@ -658,7 +672,7 @@ class CdnController extends Controller
     {
         $resource = Cdn_Resources::whereId($id)->first();
         if (!$resource or (Auth::user()->role == "user" && $resource->org_id != User_org::where('user_id', '=', Auth::user()->id)->first()->org_id)) {
-             $error = Lang::get('lang.not_found');
+            $error = Lang::get('lang.not_found');
             return response()->json(compact('error'));
         }
         if ($resource->is_wildcard($hostname)) {

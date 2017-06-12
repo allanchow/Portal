@@ -948,6 +948,7 @@ return [
     'cname'                 => 'CName',
     'all_status'            => 'All status',
     'only_active'           => 'Only active',
+    'only_inactive'         => 'Only inactive',
     'only_pending'          => 'Only pending',
     'only_suspended'        => 'Only suspended',
     'only_deleting'         => 'Only deleting',
@@ -986,6 +987,12 @@ return [
     'auto'                 => 'Auto',
     'auto_ssl_not_support' => 'Auto cert is not supported in wildcard hostname',
     'ssl_type_tooltip'     => '<table><tr><td valign=top><b>Auto:&nbsp;</b></td><td><font size=1>automatically creates a cert for your Zonealias. (You required to add our CNAME to your DNS record.)</font></td><tr><td align=top><b>Custom:&nbsp;</b></td><td><font size=1>your own SSL</font></td></tr></table>',
+    'dns_create_failed'    => 'DNS create failed',
+    'Pop'                  => 'POP',
+    'pop_hostname'         => 'POP Hostname',
+    'ddos_attacking'       => 'DDOS Attacking',
+    'resume'               => 'Resume',
+    'update_failed'        => 'Update failed',
 
     //API Error
     'E1001'              => 'E1001: CNAME is null',

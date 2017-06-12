@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cdn;
 
 // controllers
 use App\Http\Controllers\Common\PhpMailController;
+use App\Http\Controllers\Xns\XnsController;
 use App\Http\Controllers\Controller;
 // models
 use App\Model\Cdn\Cdn_Resources;
@@ -60,6 +61,28 @@ class CdnScheduleController extends Controller
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    public function checkXNS()
+    {
+        ini_set('max_execution_time', 1800);
+        set_error_handler(null);
+        set_exception_handler(null);
+        if ($resources = Cdn_Resources::whereNull('xns_host_id')->where('status', '>', 0)->get()){
+            $xns = new XnsController();
+            if ($host_list = $xns->getHostList()) {
+                foreach ($resources as $resource) {
+                    $host = $resource->getHostFromCName();
+                    if (array_key_exists($host, $host_list)){
+                        $host_id = $host_list[$host]['id'];
+                        $resource->xns_host_id = $host_id;
+                        $resource->save();
+                    } else {
+                        $xns->addResourceCNameGroup($resource);
                     }
                 }
             }

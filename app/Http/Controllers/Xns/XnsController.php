@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 // model
 use App\Model\Xns\Xns;
 use App\Model\Cdn\Cdn_Resources;
+use App\Model\Cdn\CdnPop;
 // classes
 use Auth;
 use Datatables;
@@ -31,6 +32,7 @@ class XnsController extends Controller
 {
     protected $xns_api;
     protected $domain_id;
+    protected $domain_name;
     protected $host_list;
 
     protected $line_list = array(
@@ -50,8 +52,17 @@ class XnsController extends Controller
                                    'sg' => 'sg'
     );
 
+    protected $default_cdn_line = array(
+                                        'hk' => ['default', 'asia'],
+                                        'us' => ['oth'],
+                                        'jp' => ['jp'],
+                                        'kr' => ['kr'],
+                                        'sg' => ['sg']
+    );
 
-    private $per_page = 10;
+    protected $default_line = 'default';
+
+    private $per_page = 2000;
     private $ttl = 60;
     /**
      * Create a new controller instance.
@@ -60,10 +71,12 @@ class XnsController extends Controller
      */
     public function __construct()
     {
-        // checking authentication
-        $this->middleware('auth');
-        // checking if role is agent
-        //$this->middleware('role.agent');
+        if (!\App::runningInConsole()) {
+            // checking authentication
+            $this->middleware('auth');
+            // checking if role is agent
+            //$this->middleware('role.agent');
+        }
         $this->xns_api = new Api();
         $this->initXNS();
     }
@@ -72,10 +85,10 @@ class XnsController extends Controller
     {
         if ($domain_name == '') {
             $cdn_resources = new Cdn_Resources();
-            $domain_name = $cdn_resources->get_cdn_domain();
+            $this->domain_name = $cdn_resources->get_cdn_domain();
         }
         $xns = new XNS();
-        $xns_data = $xns->where('domain_name', $domain_name)->first();
+        $xns_data = $xns->where('domain_name', $this->domain_name)->first();
         $this->xns_api->setApiKey($xns_data->api_key);
         $this->xns_api->setSecretKey($xns_data->secret_key);
         $this->xns_api->setProtocol(true);
@@ -99,6 +112,25 @@ class XnsController extends Controller
             $offset += $this->per_page;
         } while(!is_null($xns_list) && count($xns_list) == $this->per_page);
         return $this->host_list;
+    }
+
+    public function getRecordList($host_id = 0)
+    {
+        $record_list = $xns_list = array();
+        $offset = 0;
+        do
+        {
+            $rs = json_decode($this->xns_api->record->recordList($this->domain_id, $host_id, $offset, $this->per_page), true);
+            if ($xns_list = $rs['data'])
+            {
+                foreach ($xns_list as $record)
+                {
+                    $record_list[$record['host']][] = $record;
+                }
+            }
+            $offset += $this->per_page;
+        } while(!is_null($xns_list) && count($xns_list) == $this->per_page);
+        return $record_list;
     }
 
     public function importHost($id = null)
@@ -152,6 +184,27 @@ class XnsController extends Controller
             $rs = json_decode($this->xns_api->record->recordAdd($this->domain_id, $host, $value, $type, 1, $this->ttl, $this->line_list[$line]), true);
             if ($rs['code'] == 1) {
                 $result = true;
+                $record_id = $rs['record_id'];
+                return response()->json(compact('result', 'record_id'));
+            } else {
+                $error = $rs['code'];
+            }
+            $result = false;
+            return response()->json(compact('result', 'error'));
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+            $result = false;
+            return response()->json(compact('result', 'error'));
+        }
+
+    }
+
+    public function delRecord($record_id)
+    {
+        try {
+            $rs = json_decode($this->xns_api->record->recordDelete($record_id, $this->domain_id), true);
+            if ($rs['code'] == 1) {
+                $result = true;
                 return response()->json(compact('result'));
             } else {
                 $error = $rs['code'];
@@ -164,6 +217,17 @@ class XnsController extends Controller
             return response()->json(compact('result', 'error'));
         }
 
+    }
+
+    public function addResourceCNameGroup(Cdn_Resources $resource) {
+        if ($host = $resource->getHostFromCName()) {
+            $cdnpop = new CdnPop;
+            return $this->addRecord($host, 'CNAME', $cdnpop->get_resource_group($resource->group).'.'.$this->domain_name, $this->default_line, $mx = 1);
+        } else {
+            $error = 'invalid_cname';
+        }
+        $result = false;
+        return response()->json(compact('result', 'error'));
     }
 
     public function delResourceCName($id, $check = true)
@@ -255,5 +319,182 @@ class XnsController extends Controller
             $result = false;
             return response()->json(compact('result', 'error'));            
         }
+    }
+
+    public function add_cdn_pop(CdnPop $cdn_pop) {
+        $region = $cdn_pop->get_region();
+        $this->default_line = 'default';
+        if (!array_key_exists($region, $this->default_cdn_line)) {
+            $rs_line = [$this->default_line];
+        } else {
+            $rs_line = $this->default_cdn_line[$region];
+        }
+
+        if ($host_list = $this->getHostList()) {
+            $pop_group = $cdn_pop->get_pop_group();
+            if (!array_key_exists($pop_group, $host_list)) {
+                if ($region != 'hk') {
+                    return false;
+                }
+                foreach ($rs_line as $line) {
+                    $rs = $this->addRecord($pop_group, 'A', $cdn_pop->ip, $line, $mx = 1);
+                    if (!$rs->getData()->result) {
+                        return false;
+                    }
+                }
+            } else {
+                $host_id = $host_list[$pop_group]['id'];
+                if ($record_list = $this->getRecordList($host_id))
+                {
+                    $not_exists = 1;
+                    foreach ($record_list[$pop_group] as $record) {
+                        if ($record['type'] == 'A' && $record['value'] == $cdn_pop->ip) {
+                            $not_exists = 0;
+                        }
+                    }
+
+                    if ($not_exists) {
+                        foreach ($rs_line as $line) {
+                            $rs = $this->addRecord($pop_group, 'A', $cdn_pop->ip, $line, $mx = 1);
+                            if (!$rs->getData()->result) {
+                                return false;
+                            }
+                        }
+                    }
+
+                }
+                else {
+                    return false;
+                }
+            }
+
+            $group = $cdn_pop->get_group();
+            if (!array_key_exists($group, $host_list)) {
+                $rs = $this->addRecord($group, 'CNAME', $pop_group.'.'.$this->domain_name, $this->default_line, $mx = 1);
+                if (!$rs->getData()->result) {
+                    return false;
+                }                
+            }
+
+            if ($cdn_pop->is_ddos_pop()) {
+                $ddos_pop_group = $cdn_pop->get_ddos_pop_group();
+                if (array_key_exists($ddos_pop_group, $host_list)) {
+
+                    $host_id = $host_list[$ddos_pop_group]['id'];
+
+                    if ($record_list = $this->getRecordList($host_id))
+                    {
+                        $not_exists = 1;
+                        foreach ($record_list[$ddos_pop_group] as $record) {
+                            if ($record['type'] == 'A' && $record['value'] == $cdn_pop->ip) {
+                                $not_exists = 0;
+                            }
+                        }
+                        if ($not_exists) {
+                            $rs = $this->addRecord($ddos_pop_group, 'A', $cdn_pop->ip, $this->default_line, $mx = 1);
+                            if (!$rs->getData()->result) {
+                                return false;
+                            }
+                        }
+
+                    }
+                    else {
+                        return false;
+                    }
+                } else {
+                    $rs = $this->addRecord($ddos_pop_group, 'A', $cdn_pop->ip, $this->default_line, $mx = 1);
+                    if (!$rs->getData()->result) {
+                        return false;
+                    }      
+                }
+            }
+        }
+        return true;
+    }
+
+    public function del_cdn_pop(CdnPop $cdn_pop)
+    {
+        if ($host_list = $this->getHostList()) {
+            $pop_group = $cdn_pop->get_pop_group();
+            if (array_key_exists($pop_group, $host_list)) {
+                $host_id = $host_list[$pop_group]['id'];
+                if ($record_list = $this->getRecordList($host_id))
+                {
+                    foreach ($record_list[$pop_group] as $record) {
+                        if ($record['type'] == 'A' && $record['value'] == $cdn_pop->ip) {
+                            $rs = $this->delRecord($record['record_id']);
+                            if (!$rs->getData()->result) {
+                                return false;
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            if ($cdn_pop->is_ddos_pop()) {
+                $ddos_pop_group = $cdn_pop->get_ddos_pop_group();
+                if (array_key_exists($ddos_pop_group, $host_list)) {
+                    $host_id = $host_list[$ddos_pop_group]['id'];
+
+                    if ($record_list = $this->getRecordList($host_id))
+                    {
+                        foreach ($record_list[$ddos_pop_group] as $record) {
+                            if ($record['type'] == 'A' && $record['value'] == $cdn_pop->ip) {
+                                $rs = $this->delRecord($record['record_id']);
+                                if (!$rs->getData()->result) {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function delHost($host) {
+        if ($host_list = $this->getHostList()) {
+                if (array_key_exists($host, $host_list)) {
+                    $host_id = $host_list[$host]['id'];
+                    $rs = json_decode($this->xns_api->host->hostDelete($host_id), true);
+                    if ($rs['code'] == 1) {
+                        $result = true;
+                        return response()->json(compact('result'));
+                    } else {
+                        $error = $rs['code'];
+                    }
+                } else {
+                    $result = true;
+                    return response()->json(compact('result'));
+                }            
+            $result = false;
+            return response()->json(compact('result', 'error'));
+        } else {
+            $result = false;
+            $error = 'not_found';
+            return response()->json(compact('result', 'error'));
+        }
+    }
+
+    public function addGroupPop($group_id) {
+        $cdnpop = new CdnPop;
+        $group = $cdnpop->get_resource_group($group_id);
+        $pop_group = $cdnpop->get_resource_pop_group($group_id);
+        return $this->addRecord($group, 'CNAME', $pop_group.'.'.$this->domain_name, $this->default_line, $mx = 1);
+    }
+
+    public function addGroupPopDDOS($group_id) {
+        $cdnpop = new CdnPop;
+        $group = $cdnpop->get_resource_group($group_id);
+        $ddos_pop_group = $cdnpop->get_ddos_pop_group();
+        return $this->addRecord($group, 'CNAME', $ddos_pop_group.'.'.$this->domain_name, $this->default_line, $mx = 1);
+    }
+
+    public function getDomainName(){
+        return $this->domain_name;
     }
 }
