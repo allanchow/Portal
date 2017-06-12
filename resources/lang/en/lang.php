@@ -993,6 +993,9 @@ return [
     'ddos_attacking'       => 'DDOS Attacking',
     'resume'               => 'Resume',
     'update_failed'        => 'Update failed',
+    'dns_status'           => 'DNS Status',
+    'completed'            => 'Completed',
+    'pop_updating'         => 'POP updating',
 
     //API Error
     'E1001'              => 'E1001: CNAME is null',

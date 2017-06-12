@@ -9,8 +9,10 @@ use App\Http\Controllers\Controller;
 // models
 use App\Model\Cdn\Cdn_Resources;
 use App\Model\Cdn\CdnSSL;
+use App\Model\Cdn\CdnPop;
 // classes
 use Crypt;
+use DB;
 /**
  * CdnReportController.
  *
@@ -72,8 +74,8 @@ class CdnScheduleController extends Controller
         ini_set('max_execution_time', 1800);
         set_error_handler(null);
         set_exception_handler(null);
+        $xns = new XnsController();
         if ($resources = Cdn_Resources::whereNull('xns_host_id')->where('status', '>', 0)->get()){
-            $xns = new XnsController();
             if ($host_list = $xns->getHostList()) {
                 foreach ($resources as $resource) {
                     $host = $resource->getHostFromCName();
@@ -86,6 +88,24 @@ class CdnScheduleController extends Controller
                     }
                 }
             }
+        }
+
+        if (($cdnpop_list = CdnPop::where('status', 1)->where('dns_status', 0)->get()) && count($cdnpop_list) && (Cdn_Resources::where('force_update', 0)->where('status', '>', 0)->count() > 0) && (Cdn_Resources::where('force_update', 0)->where('status', '>', 0)->update(['force_update' => 1, 'error_msg' => '']) !== false )) {
+            foreach ($cdnpop_list as $cdnpop) {
+                $cdnpop->dns_status = 1;
+                $cdnpop->save();
+            }
+        }
+
+        if (($cdnpop_list = CdnPop::where('status', 1)->where('dns_status', 1)->get()) && count($cdnpop_list) && (Cdn_Resources::where('force_update', 0)->where('status', '>', 0)->count() > 0)) {
+            foreach ($cdnpop_list as $cdnpop) {
+                if ($xns->add_cdn_pop($cdnpop)){
+                    $cdnpop->dns_status = 2;
+                    $cdnpop->dns_updated_at = DB::raw('now()');
+                    $cdnpop->save();
+                }
+            }
+
         }
     }
 }

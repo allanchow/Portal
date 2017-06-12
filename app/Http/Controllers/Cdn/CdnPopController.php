@@ -43,6 +43,7 @@ class CdnPopController extends Controller
         ->addColumn(Lang::get('lang.pop_hostname'),
             'IP',
             Lang::get('lang.status'),
+            Lang::get('lang.dns_status'),
             Lang::get('lang.action'))
             ->noScript();
         return view('themes.default1.cdn.cdnpop_index', compact('table'));
@@ -63,7 +64,7 @@ class CdnPopController extends Controller
             $cdnpop_list = $cdnpop;
         }
 
-        $cdnpop_list = $cdnpop_list->select('pop_hostname', 'ip', 'status', DB::raw('LEFT(RIGHT(pop_hostname, 5), 2) AS region'), DB::raw("{$total_default_pop} AS total_default_pop"));
+        $cdnpop_list = $cdnpop_list->select('pop_hostname', 'ip', 'status', 'dns_status', DB::raw('LEFT(RIGHT(pop_hostname, 5), 2) AS region'), DB::raw("{$total_default_pop} AS total_default_pop"));
 
         if ($search !== '') {
             $cdnpop_list = $cdnpop_list->where(function ($query) use ($search) {
@@ -83,12 +84,22 @@ class CdnPopController extends Controller
                             }
                             return $stat;
                         })
-                        ->addColumn('Actions', function ($model) {
+                        ->addColumn('dns_status', function ($model) {
+                            $dns_status = $model->dns_status;
+                            if ($dns_status == 2) {
+                                $stat = '<span class="label label-primary">'.\Lang::get('lang.completed').'</span>';
+                            } elseif ($dns_status == 1) {
+                                $stat = '<span class="label label-warning">'.\Lang::get('lang.pop_updating').'</span>';
+                            } else {
+                                $stat = '<span class="label label-default">'.\Lang::get('lang.pending').'</span>';
+                            }
+                            return $stat;
+                        })                        ->addColumn('Actions', function ($model) {
                             if (!($model->region == 'hk' && $model->total_default_pop == 1 && $model->status == 1)) {
                                 if ($model->status) {
-                                    return '<button data="'.$model->pop_hostname.'" change=0 class="btn btn-default btn-xs btn_change">'.\Lang::get('lang.active').' -&gt; '.\Lang::get('lang.inactive').'</a>';
+                                    return '<button data="'.$model->pop_hostname.'" change=0 class="btn btn-default btn-xs btn_change"> -&gt; '.\Lang::get('lang.inactive').'</a>';
                                 } else {
-                                    return '<button data="'.$model->pop_hostname.'" change=1 class="btn btn-success btn-xs btn_change">'.\Lang::get('lang.inactive').' -&gt; '.\Lang::get('lang.active').'</a>';
+                                    return '<button data="'.$model->pop_hostname.'" change=1 class="btn btn-success btn-xs btn_change"> -&gt; '.\Lang::get('lang.active').'</a>';
                                 }
                                 
                             }
@@ -119,21 +130,16 @@ class CdnPopController extends Controller
             $cdn_pop->pop_hostname = $request->input('pop_hostname');
             $cdn_pop->ip = $request->input('ip');
             $status = $request->input('status');
-            $cdn_pop->status = 0;
-            if ($rs = $cdn_pop->save()) {
-                if ($status) {
-                    $xns = new XnsController();
-                    if ($rs = $xns->add_cdn_pop($cdn_pop)) {
-                        $cdn_pop->dns_updated_at = DB::raw('now()');
-                        $cdn_pop->status = $status;
-                        if ($rs = $cdn_pop->save())
-                        {
-                            return redirect('cdnpop')->with('success', Lang::get('lang.added_successfully'));
-                        }
-                    } else {
-                        return redirect('cdnpop')->with('warning', Lang::get('lang.added_successfully').';'.Lang::get('lang.dns_create_failed'));
-                    }
-                }
+            $cdn_pop->status = $status;
+            if ($status) {
+                $cdn_pop->dns_status = 0;
+            } else {
+                $cdn_pop->dns_status = 2;
+            }
+            if ($cdn_pop->save()) {
+                return redirect('cdnpop')->with('success', Lang::get('lang.added_successfully'));
+            } else {
+                return redirect('cdnpop')->with('warning', Lang::get('lang.added_successfully').';'.Lang::get('lang.dns_create_failed'));
             }
 //            dd(DB::getQueryLog());
         } catch (Exception $e) {
@@ -178,35 +184,36 @@ class CdnPopController extends Controller
             $ip = $request->input('ip');
             $status = $request->input('status');
             if ($cdn_pop = CdnPop::where('pop_hostname', $pop_hostname)->first()) {
-                $xns = new XnsController();
-                $no_error = true;
+                if (!($cdn_pop->ip == $ip && $cdn_pop->$status == $status)){
+                    $xns = new XnsController();
+                    $no_error = true;
 
-                if (($cdn_pop->ip != $ip || ($cdn_pop->status == 1 && $status == 0))){
-
-                    if (!$xns->del_cdn_pop($cdn_pop)) {
-                        $no_error = false;
-                    }
-                }
-
-                if ($no_error) {
-                    if ($status == 1 && ($cdn_pop->ip != $ip || $cdn_pop->$status == 0)) {
-                        if (!$xns->add_cdn_pop($cdn_pop))
-                        {
-                            $no_error = 0;
+                    if ($cdn_pop->status == 1) {
+                        if ($cdn_pop->ip != $ip || $status == 0) {
+                            if ($xns->del_cdn_pop($cdn_pop)) {
+                                if ($status == 0) {
+                                    $cdn_pop->dns_status = 2;
+                                } else {
+                                    $cdn_pop->dns_status = 0;
+                                }
+                            } else {
+                                $no_error = false;
+                            }
+    
                         }
                     }
-                }
 
-                if ($no_error) {
-                    $cdn_pop->pop_hostname = $pop_hostname;
-                    $cdn_pop->ip = $ip;
-                    $cdn_pop->status = $status;
-                    $cdn_pop->dns_updated_at = DB::raw('now()');
-                    $cdn_pop->status = $status;
-                    if ($cdn_pop->save())
-                    {
-                        return redirect()->route('cdnpop.edit', $cdn_pop->pop_hostname)->with('success', Lang::get('lang.updated_successfully'));
-                    }                            
+                    if ($no_error) {
+                        $cdn_pop->ip = $ip;
+                        $cdn_pop->status = $status;
+                        if ($cdn_pop->save())
+                        {
+                            return redirect()->route('cdnpop.edit', $cdn_pop->pop_hostname)->with('success', Lang::get('lang.updated_successfully'));
+                        }                            
+                    }
+
+                } else {
+                    return redirect()->back()->withInput()->with('fails', Lang::get('lang.error-no_change'));
                 }
             } else {
                 return redirect()->route('cdnpop')->with('fails', Lang::get('lang.not_found'));
@@ -336,13 +343,19 @@ class CdnPopController extends Controller
             } else {
                 $new_status = $status;
             }
-            
+
+            $no_error = true;            
             if ($new_status) {
-                $rs = $xns->add_cdn_pop($cdnpop);
+                $cdnpop->dns_status = 0;
             } else {
-                $rs = $xns->del_cdn_pop($cdnpop);
+                if ($xns->del_cdn_pop($cdnpop))
+                {
+                    $cdnpop->dns_status = 2;
+                } else {
+                    $no_error = false;
+                }
             }
-            if ($rs) {
+            if ($no_error) {
                 $cdnpop->status = $new_status;
                 $result = $cdnpop->save();
                 return response()->json(compact('result')); 

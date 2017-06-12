@@ -7,7 +7,7 @@ use App\BaseModel;
 class Cdn_Resources extends BaseModel
 {
     protected $table = 'cdn_resources';
-    protected $fillable = ['org_id', 'cdn_hostname', 'origin', 'host_header', 'max_age', 'file_type', 'cname', 'status', 'update_status', 'force_update', 'error_msg'];
+    protected $fillable = ['org_id', 'cdn_hostname', 'origin', 'group', 'host_header', 'max_age', 'file_type', 'cname', 'status', 'update_status', 'force_update', 'error_msg'];
 
     protected $cdn_domain = 'allcdn888.com';
     protected $exclude_domain = 'allbrightnetwork.com';

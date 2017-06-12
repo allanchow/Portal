@@ -7,7 +7,7 @@ use App\BaseModel;
 class CdnPop extends BaseModel
 {
     protected $table = 'cdn_pop';
-    protected $fillable = ['pop_hostname', 'ip', 'deployment_ips', 'status', 'dns_updated_at'];
+    protected $fillable = ['pop_hostname', 'ip', 'deployment_ips', 'status', 'dns_status', 'dns_updated_at'];
     protected $primaryKey = 'pop_hostname';
     public $incrementing = false;
 

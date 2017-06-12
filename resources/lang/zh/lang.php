@@ -993,6 +993,9 @@ return [
     'ddos_attacking'       => 'DDOS攻擊',
     'resume'               => '復原',
     'update_failed'        => '更新失敗',
+    'dns_status'           => 'DNS 狀態',
+    'completed'            => '完成',
+    'pop_updating'         => 'POP 更新中',
 
     //API Error
     'E1001'              => 'E1001: CNAME為空白',
