@@ -86,9 +86,9 @@ class CdnPopController extends Controller
                         ->addColumn('Actions', function ($model) {
                             if (!($model->region == 'hk' && $model->total_default_pop == 1 && $model->status == 1)) {
                                 if ($model->status) {
-                                    return '<button data="'.$model->pop_hostname.'" change=0 class="btn btn-default btn-xs btn_change">'.\Lang::get('lang.inactive').'</a>';
+                                    return '<button data="'.$model->pop_hostname.'" change=0 class="btn btn-default btn-xs btn_change">'.\Lang::get('lang.active').' -&gt; '.\Lang::get('lang.inactive').'</a>';
                                 } else {
-                                    return '<button data="'.$model->pop_hostname.'" change=1 class="btn btn-success btn-xs btn_change">'.\Lang::get('lang.active').'</a>';
+                                    return '<button data="'.$model->pop_hostname.'" change=1 class="btn btn-success btn-xs btn_change">'.\Lang::get('lang.inactive').' -&gt; '.\Lang::get('lang.active').'</a>';
                                 }
                                 
                             }
