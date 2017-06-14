@@ -996,7 +996,7 @@ return [
     'dns_status'           => 'DNS 狀態',
     'completed'            => '完成',
     'pop_updating'         => 'POP 更新中',
-    'switched'             => '切換',
+    'dns_switched'         => '切換',
 
     //API Error
     'E1001'              => 'E1001: CNAME為空白',

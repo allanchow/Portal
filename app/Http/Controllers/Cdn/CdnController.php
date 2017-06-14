@@ -64,7 +64,7 @@ class CdnController extends Controller
             Lang::get('lang.type'),
             Lang::get('lang.status'),
             Lang::get('lang.created'),
-            Lang::get('lang.switched'),
+            Lang::get('lang.dns_switched'),
             Lang::get('lang.action'))
             ->noScript();
         $ext_view = $this->ext_view;
