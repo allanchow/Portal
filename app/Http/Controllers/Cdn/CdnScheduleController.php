@@ -217,7 +217,7 @@ class CdnScheduleController extends Controller
                         if ($rs->getData()->result) {
                             $subject = "[XNS] Changed to DDoS Mode";
                         } else {
-                            $subject = "[XNS] Changed to DDoS Mode Failed";
+                            $subject = "[XNS] Change to DDoS Mode Failed";
                         }
                         $message = $subject;
                         $message .= "\n<br><br>CDN POP downed:<br>\n";
