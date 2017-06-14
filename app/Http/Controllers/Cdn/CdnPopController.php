@@ -27,9 +27,11 @@ class CdnPopController extends Controller
 
     public function __construct()
     {
-        // checking authentication
-        $this->middleware('auth');
-        $this->middleware('role.agent');
+        if (!\App::runningInConsole()) {
+            // checking authentication
+            $this->middleware('auth');
+            $this->middleware('role.agent');
+        }
     }
 
     /**
@@ -101,7 +103,7 @@ class CdnPopController extends Controller
                                 } else {
                                     return '<button data="'.$model->pop_hostname.'" change=1 class="btn btn-success btn-xs btn_change"> -&gt; '.\Lang::get('lang.active').'</a>';
                                 }
-                                
+
                             }
                         })
                         ->make();
@@ -200,7 +202,7 @@ class CdnPopController extends Controller
                                 $cdnpop->dns_status = 0;
                                 $no_error = false;
                             }
-    
+
                         }
                     }
 
@@ -210,7 +212,7 @@ class CdnPopController extends Controller
                         if ($cdn_pop->save())
                         {
                             return redirect()->route('cdnpop.edit', $cdn_pop->pop_hostname)->with('success', Lang::get('lang.updated_successfully'));
-                        }                            
+                        }
                     }
 
                 } else {
@@ -258,7 +260,7 @@ class CdnPopController extends Controller
             return $rs;
         } else {
             $error = Lang::get('lang.not_allowed');
-            return response()->json(compact('error'));          
+            return response()->json(compact('error'));
         }
     }
 
@@ -285,7 +287,7 @@ class CdnPopController extends Controller
             return $rs;
         } else {
             $error = Lang::get('lang.not_allowed');
-            return response()->json(compact('error'));          
+            return response()->json(compact('error'));
         }
     }
 
@@ -313,7 +315,7 @@ class CdnPopController extends Controller
         }
     }
 
-    public function getStatus(){
+    public function getStatus($console = false){
         $cdnpop = new CdnPop();
         $xns = new XnsController();
         $group = $cdnpop->get_resource_group(1);
@@ -323,7 +325,11 @@ class CdnPopController extends Controller
                 if ($record_list = $xns->getRecordList($host_id))
                 {
                     $result = true;
-                    $msg = $record_list[$group][0]['value'] == $cdnpop->get_ddos_pop_group().'.'.$xns->getDomainName().'.' ? Lang::get('lang.ddos_attacking') : Lang::get('lang.normal');
+                    if ($console){
+                        $msg = $record_list[$group][0]['value'] == $cdnpop->get_ddos_pop_group().'.'.$xns->getDomainName().'.' ? 'ddos' : 'normal';
+                    } else {
+                        $msg = $record_list[$group][0]['value'] == $cdnpop->get_ddos_pop_group().'.'.$xns->getDomainName().'.' ? Lang::get('lang.ddos_attacking') : Lang::get('lang.normal');
+                    }
                     //$msg = $record_list[$group][0]['value'] . " : " . $cdnpop->get_ddos_pop_group().'.'.$xns->getDomainName().'.';
                     return response()->json(compact('result', 'msg'));
                 }
@@ -340,12 +346,12 @@ class CdnPopController extends Controller
         $xns = new XnsController();
         if ($cdnpop = $cdnpop->where('pop_hostname', $pop_hostname)->first()) {
             if (is_null($status)) {
-                $new_status  = $cdnpop->status ? 0 : 1;    
+                $new_status  = $cdnpop->status ? 0 : 1;
             } else {
                 $new_status = $status;
             }
 
-            $no_error = true;            
+            $no_error = true;
             if ($new_status) {
                 $cdnpop->dns_status = 0;
             } else {
@@ -360,14 +366,14 @@ class CdnPopController extends Controller
             if ($no_error) {
                 $cdnpop->status = $new_status;
                 $result = $cdnpop->save();
-                return response()->json(compact('result')); 
+                return response()->json(compact('result'));
             } else {
                 $error = Lang::get('lang.update_failed');
-                return response()->json(compact('error'));          
+                return response()->json(compact('error'));
             }
         } else {
             $error = Lang::get('lang.not_found');
-            return response()->json(compact('error'));          
+            return response()->json(compact('error'));
         }
     }
 

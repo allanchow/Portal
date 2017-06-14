@@ -628,3 +628,6 @@ Breadcrumbs::register('resource.create', function ($breadcrumbs) {
     $breadcrumbs->parent('resources');
     $breadcrumbs->push(Lang::get('lang.create_resource'), route('resource.create'));
 });
+Breadcrumbs::register('cdnpop.index', function ($breadcrumbs) {
+    $breadcrumbs->push(Lang::get('lang.Cdn').'&nbsp; > &nbsp;'.Lang::get('lang.Pop'), route('cdnpop.index'));
+});

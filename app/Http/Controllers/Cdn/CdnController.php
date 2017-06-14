@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Cdn;
 
 // controllers
 use App\Http\Controllers\Cdn\CdnPopController;
-use App\Http\Controllers\Common\PhpMailController;
 use App\Http\Controllers\Xns\XnsController;
 use App\Http\Controllers\Controller;
 // requests
@@ -44,12 +43,11 @@ class CdnController extends Controller
      *
      * @return type void
      */
-    public function __construct(PhpMailController $PhpMailController)
+    public function __construct()
     {
         //$this->middleware('board');
         // checking authentication
         $this->middleware('auth');
-        $this->PhpMailController = $PhpMailController;
 		if (Auth::user()->role == "user") {
             $this->ext_view = 'themes.default1.client.layout.dashboard';
         }

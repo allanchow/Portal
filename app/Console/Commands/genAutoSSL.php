@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\Common\PhpMailController;
 use App\Http\Controllers\Cdn\CdnScheduleController;
 use Illuminate\Console\Command;
 
@@ -41,7 +40,7 @@ class genAutoSSL extends Command
     {
         try {
             if (env('DB_INSTALL') == 1) {
-                $cdn = new CdnScheduleController(new PhpMailController());
+                $cdn = new CdnScheduleController();
                 $cdn->genAutoSSL();
             }
         } catch (Exception $ex) {

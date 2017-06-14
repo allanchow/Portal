@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Cdn;
 
 // controllers
-use App\Http\Controllers\Common\PhpMailController;
 use App\Http\Controllers\Controller;
 // models
 use App\Model\Cdn\Cdn_Resources;
@@ -22,9 +21,8 @@ class CdnReportController extends Controller
      *
      * @return type void
      */
-    public function __construct(PhpMailController $PhpMailController)
+    public function __construct()
     {
-        $this->PhpMailController = $PhpMailController;
     }
 
     public function genDailyByteSentReport($day = null)

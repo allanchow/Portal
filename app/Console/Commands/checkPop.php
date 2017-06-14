@@ -5,21 +5,21 @@ namespace App\Console\Commands;
 use App\Http\Controllers\Cdn\CdnScheduleController;
 use Illuminate\Console\Command;
 
-class checkResourcesXns extends Command
+class checkPop extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'cdnschedule:checkxns';
+    protected $signature = 'cdnschedule:checkpop';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Check Resources XNS';
+    protected $description = 'Check CDN POP Status';
 
     /**
      * Create a new command instance.
@@ -41,7 +41,7 @@ class checkResourcesXns extends Command
         try {
             if (env('DB_INSTALL') == 1) {
                 $cdn = new CdnScheduleController();
-                $cdn->checkXNS();
+                $cdn->checkPOP();
             }
         } catch (Exception $ex) {
             //dd($ex);

@@ -21,6 +21,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\GenCdnDailyReport',
         'App\Console\Commands\genAutoSSL',
         'App\Console\Commands\checkResourcesXns',
+        'App\Console\Commands\checkPop',
     ];
 
     /**
@@ -42,6 +43,7 @@ class Kernel extends ConsoleKernel
             $this->execute($schedule, 'cdnDailyReport');
             $this->execute($schedule, 'genAutoSSL');
             $this->execute($schedule, 'checkResourcesXns');
+            $this->execute($schedule, 'checkPop');
         }
     }
 
@@ -67,7 +69,11 @@ class Kernel extends ConsoleKernel
                 break;
             case 'checkResourcesXns':
                 $this->getCondition($schedule->command('cdnschedule:checkxns'), ['condition'=>'everyMinute', 'at'=>'']);
-                break;        }
+                break;
+            case 'checkPop':
+                $this->getCondition($schedule->command('cdnschedule:checkpop'), ['condition'=>'everyMinute', 'at'=>'']);
+                break;
+        }
     }
 
     public function getCondition($schedule, $command)

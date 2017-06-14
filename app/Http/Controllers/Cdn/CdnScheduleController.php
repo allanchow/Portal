@@ -3,16 +3,19 @@
 namespace App\Http\Controllers\Cdn;
 
 // controllers
-use App\Http\Controllers\Common\PhpMailController;
 use App\Http\Controllers\Xns\XnsController;
+use App\Http\Controllers\Cdn\CdnPopController;
 use App\Http\Controllers\Controller;
 // models
 use App\Model\Cdn\Cdn_Resources;
 use App\Model\Cdn\CdnSSL;
 use App\Model\Cdn\CdnPop;
+use App\Model\helpdesk\Email\Emails;
+use App\User;
 // classes
 use Crypt;
 use DB;
+use Mail;
 /**
  * CdnReportController.
  *
@@ -27,9 +30,11 @@ class CdnScheduleController extends Controller
      *
      * @return type void
      */
-    public function __construct(PhpMailController $PhpMailController)
+    public function __construct()
     {
-        $this->PhpMailController = $PhpMailController;
+        if (!\App::runningInConsole()) {
+            $this->middleware('auth');
+        }
     }
 
     public function genAutoSSL()
@@ -118,5 +123,127 @@ class CdnScheduleController extends Controller
             }
 
         }
+    }
+
+    public function checkPop()
+    {
+        $nagios_server = env('NAGIOS_SERVER');
+        $nagios_port = env('NAGIOS_PORT');
+        $time_buffer = 900;
+        $tcp_service = "/^TCP-80-Monitor/";
+        if (\App::environment('production')) {
+            $pop_group = 'all_dedicated_cdn';
+            $pattern = '/^cdn-g\d+-(\w{2})-\d+/';
+        } else {
+            $pop_group = 'all_cdn_uat';
+            $pattern = '/^uat-cdn-g\d+-(\w{2})-\d+/';
+        }
+
+        $action = "/_status/_hostgroup/{$pop_group}/_service";
+        $base_url = "http://{$nagios_server}:{$nagios_port}{$action}";
+        if (($rs = file_get_contents($base_url)) && ($pop_list = json_decode($rs, true)))
+        {
+
+            $all_outdate = true;
+            $ts = time();
+            $hk_down = $hk_total = 0;
+            $pop_down = array();
+
+            foreach ($pop_list as $hostname=>$pop) {
+                if (preg_match($pattern, $hostname, $matches)) {
+                    $pop_hostname = $matches[0];
+                    $region = $matches[1];
+                    if ($is_hk = ($region == 'hk')) {
+                        $hk_total++;
+                    }
+
+                    $tcp_service_down = 0;
+                    $services_name = preg_grep($tcp_service, array_keys($pop));
+                    $service_down = array();
+                    foreach ($services_name as $service_name) {
+                        $service = $pop[$service_name];
+                        if ($ts - $service['last_check'] < $time_buffer * 2 ) {
+                            $all_outdate = false;
+                        }
+                        if ($service['current_state'] > 0 && $service['current_attempt'] == $service['max_attempts'] && $service['last_check'] - $service['last_state_change'] >= $time_buffer) {
+                            $service_down[] = $service_name;
+                        }
+                    }
+
+                    if (count($service_down) > 1) {
+                        if ($is_hk) {
+                            $hk_down++;
+                        }
+                        $pop_down[$pop_hostname] = $service_down;
+                    }
+                }
+            }
+
+            if ($all_outdate) {
+                $restart_rs = json_decode(trim(`ssh -t -o StrictHostKeyChecking=no {$nagios_server} 'sudo /etc/init.d/nagira restart >/dev/null 2>&1 && echo {\"result\":1}'`), true);
+                $subject = "[XNS] Nagios API not update";
+                $message = $subject;
+                if (isset($restart_rs['result']))
+                {
+                    $subject .= ' and restarted';
+                    $message .= '<br><br>Nagios API <span style="color:#0000FF">succeeded</span> to restart<br>';
+                }
+                else
+                {
+                    $subject .= ' and failed to restart';
+                    $message .= '<br><br>Nagios API <span style="color:#FF0000">failed</span> to restart<br>';
+                }
+                $this->send_mail($subject, $message);
+            } elseif (count($pop_down)) {
+                $CdnPopController = new CdnPopController();
+                foreach ($pop_down as $pop_hostname=>$services_name) {
+                    if ($cdnpop = CdnPop::where('pop_hostname', $pop_hostname)->where('status', 1)->first())
+                    {
+                        $rs = $CdnPopController->changeStatus($pop_hostname, 0);
+                        if ($rs->getData()->result) {
+                            $subject = "[XNS] TCP 80 CRITICAL @{$pop_hostname}";
+                            $message = $subject;
+                            $message .= "\n<br><br>Nagios Services CRITICAL:<br>\n";
+                            $message .= implode("<br>\n", $services_name);
+                            $this->send_mail($subject, $message);
+                        }
+                    }
+
+                }
+                if ($hk_total > 2 && $hk_down > $hk_total / 2){
+                    $status = $CdnPopController->getStatus(true);
+                    if ($status->getData()->result && $status->getData()->msg == 'normal') {
+                        $rs = $CdnPopController->attack($pop_hostname, 0);
+                        if ($rs->getData()->result) {
+                            $subject = "[XNS] Changed to DDoS Mode";
+                        } else {
+                            $subject = "[XNS] Changed to DDoS Mode Failed";
+                        }
+                        $message = $subject;
+                        $message .= "\n<br><br>CDN POP downed:<br>\n";
+                        $message .= implode("<br>\n", array_keys($pop_down));
+                        $this->send_mail($subject, $message);
+
+                    }
+                }
+
+            }
+        }
+    }
+
+    public function send_mail($subject, $message)
+    {
+        $from = Emails::where('id', 1)->first();
+        if (\App::environment('production')) {
+            $to = 'monitors-push@allbrightnet.com';
+        } else {
+            $to = 'tommy.ho@allbrightnet.com';
+        }
+        Mail::send([], [], function ($m) use ($from, $to, $message, $subject) {
+            $m->from($from->email_address, $from->email_name);
+            $m->to($to)
+                ->subject($subject)
+                ->setBody($message, 'text/html');
+        });
     }
 }

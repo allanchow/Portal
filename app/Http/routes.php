@@ -549,6 +549,7 @@ Route::group(['middleware' => ['web']], function () {
             Route::get('cdnpop-list', ['as' => 'resource.cdnpop.list', 'uses' => 'Cdn\CdnPopController@list']);
             Route::get('cdnpop-status', ['as' => 'resource.cdnpop.status', 'uses' => 'Cdn\CdnPopController@getStatus']);
             Route::post('cdnpop-change/{pop_hostname}/{status?}', ['as' => 'resource.cdnpop.change', 'uses' => 'Cdn\CdnPopController@changeStatus']);
+            Route::get('checkpop', ['as' => 'resource.cdnpop.check', 'uses' => 'Cdn\CdnScheduleController@checkPop']);
             //Route::get('daily-bsent/{day?}', ['as' => 'resource.daily.bsent', 'uses' => 'Cdn\CdnReportController@genDailyByteSentReport']);
         });
     });

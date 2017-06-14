@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\Common\PhpMailController;
 use App\Http\Controllers\Cdn\CdnReportController;
 use Illuminate\Console\Command;
 
@@ -42,7 +41,7 @@ class GenCdnDailyReport extends Command
         try {
             if (env('DB_INSTALL') == 1) {
                 $day = $this->argument('day');
-                $cdn = new CdnReportController(new PhpMailController());
+                $cdn = new CdnReportController();
                 $cdn->genDailyByteSentReport($day);
             }
         } catch (Exception $ex) {
