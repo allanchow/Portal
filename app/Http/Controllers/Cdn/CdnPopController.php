@@ -77,7 +77,7 @@ class CdnPopController extends Controller
 
         return \Datatables::of($cdnpop_list)
                         ->removeColumn('region', 'total_default_pop')
-                        ->addColumn('status', function ($model) {
+                        ->editColumn('status', function ($model) {
                             $status = $model->status;
                             if ($status) {
                                 $stat = '<span class="label label-primary">'.\Lang::get('lang.active').'</span>';
@@ -86,7 +86,7 @@ class CdnPopController extends Controller
                             }
                             return $stat;
                         })
-                        ->addColumn('dns_status', function ($model) {
+                        ->editColumn('dns_status', function ($model) {
                             $dns_status = $model->dns_status;
                             if ($dns_status == 2) {
                                 $stat = '<span class="label label-primary">'.\Lang::get('lang.completed').'</span>';

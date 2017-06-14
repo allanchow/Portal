@@ -73,6 +73,7 @@ class CdnController extends Controller
 
     public function resource_list(Cdn_Resources $resources, Request $request)
     {
+        //DB::enableQueryLog();
         $type = $request->input('profiletype');
         $search = $request->input('searchTerm');
 
@@ -117,10 +118,11 @@ class CdnController extends Controller
         return \Datatables::of($resources)
                         /* column username */
                         ->removeColumn('id', 'update_status', 'force_update', 'error_msg', 'ssl_status', 'http')
-                        ->addColumn('cdn_hostname', function ($model) {
+                        ->editColumn('cdn_hostname', function ($model) {
+                            //dd(DB::getQueryLog());
                                 return '<a href="'.route('resource.edit', $model->id).'">'.$model->cdn_hostname.'</a>';
                         })
-                        ->addColumn('dns_switched', function ($model) {
+                        ->editColumn('dns_switched', function ($model) {
                                 if ($model->dns_switched)
                                 {
                                     return '<b class="fa fa-link" style="color:blue"></b>';
@@ -128,14 +130,14 @@ class CdnController extends Controller
                                     return '<b class="fa fa-unlink" style="color:red"></b>';
                                 }
                         })
-                        ->addColumn('file_type', function ($model) {
+                        ->editColumn('file_type', function ($model) {
                             if (json_decode($model->file_type)) {
                                 return '<span class="label label-primary">'.\Lang::get('lang.website').'</span>';
                             } else {
                                 return '<span class="label label-warning">'.\Lang::get('lang.dynamic').'</span>';
                             }
                         })
-                        ->addColumn('status', function ($model) {
+                        ->editColumn('status', function ($model) {
                             $status = $model->status;
                             $update_status = $model->update_status;
                             if ($status == -1) {
