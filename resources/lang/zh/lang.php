@@ -996,6 +996,7 @@ return [
     'dns_status'           => 'DNS 狀態',
     'completed'            => '完成',
     'pop_updating'         => 'POP 更新中',
+    'switched'             => '切換',
 
     //API Error
     'E1001'              => 'E1001: CNAME為空白',
@@ -1664,5 +1665,5 @@ return [
      'search'              => '搜索...',
      //update 21-12-2016
      'selected-user-is-already-the-owner' => '已選用戶已是此工單的所有者',
-	 
+
 ];

@@ -64,6 +64,7 @@ class CdnController extends Controller
             Lang::get('lang.type'),
             Lang::get('lang.status'),
             Lang::get('lang.created'),
+            Lang::get('lang.switched'),
             Lang::get('lang.action'))
             ->noScript();
         $ext_view = $this->ext_view;
@@ -156,6 +157,19 @@ class CdnController extends Controller
                             }
 
                             return $stat;
+                        })
+                        ->addColumn('switched', function ($model) {
+                                $chk_hostname = $model->cdn_hostname;
+                                if ($model->is_wildcard($model->cdn_hostname))
+                                {
+                                    $chk_hostname = preg_replace('/^\*\./', 'www.', $chk_hostname);
+                                }
+                                if (($dns_record = dns_get_record($chk_hostname, DNS_CNAME)) && $dns_record[0]['target'] == $model->cname)
+                                {
+                                    return '<span class="label label-primary">'.\Lang::get('lang.completed').'</span>';
+                                } else {
+                                    return '<span class="label label-warning">'.\Lang::get('lang.pending').'</span>';
+                                }
                         })
                         ->addColumn('Actions', function ($model) {
                                 return '<a href="'.route('resource.edit', $model->id).'" class="btn btn-warning btn-xs">'.\Lang::get('lang.edit').'</a>';
@@ -263,7 +277,7 @@ class CdnController extends Controller
                     if (!$ssl->validate_cert($request->input('ssl_cert'))) {
                         $errors['ssl_cert'] = Lang::get('lang.invalid_ssl_cert');
                     }
-       
+
                     if (!$ssl->validate_key($request->input('ssl_key'))) {
                         $errors['ssl_key'] = Lang::get('lang.invalid_ssl_key');
                     }
@@ -289,7 +303,7 @@ class CdnController extends Controller
                         $xns = new XnsController();
                         $rs = $xns->addResourceCNameGroup($resource);
                     }
-    
+
                     if ($resource->http > 0) {
                         $ssl->resource_id = $resource->id;
                         $ssl->type = $ssl_type;
@@ -300,7 +314,7 @@ class CdnController extends Controller
                         }
                         $ssl->save();
                     }
-    
+
                 }
                 return redirect('resources')->with('success', Lang::get('lang.added_successfully')."; ".Lang::get('lang.wait_few_mins'));
             }
@@ -318,13 +332,13 @@ class CdnController extends Controller
             }
 
             if (!empty($ssl->type)){
-                $resource->ssl_type = $ssl->type;    
+                $resource->ssl_type = $ssl->type;
             }
 
             if ($ssl->type == 'U' && !empty($ssl->cert)){
-                $resource->ssl_cert = Crypt::decrypt($ssl->cert);    
+                $resource->ssl_cert = Crypt::decrypt($ssl->cert);
             }
-            
+
             if ($ssl->type == 'U' && !empty($ssl->key)){
                 $resource->ssl_key = Crypt::decrypt($ssl->key);
             }
@@ -446,7 +460,7 @@ class CdnController extends Controller
                         $ssl_error = 1;
                         $errors['ssl_cert'] = Lang::get('lang.invalid_ssl_cert');
                     }
-     
+
                     if (!$ssl->validate_key($request->input('ssl_key'))) {
                         $ssl_error = 1;
                         $errors['ssl_key'] = Lang::get('lang.invalid_ssl_key');
@@ -484,7 +498,7 @@ class CdnController extends Controller
                 if ($resource->origin == $new_origin && $resource->cdn_hostname == $cdn_hostname && $resource->http == $request->input('http') && $resource->error_msg == '' && !$has_change)     {
                     return redirect()->back()->withInput()->with('fails', Lang::get('lang.error-no_change'));
                 }
-    
+
                 $resource->cdn_hostname = $cdn_hostname;
                 $resource->http = $request->input('http');
                 $resource->origin = $new_origin;
@@ -492,7 +506,7 @@ class CdnController extends Controller
                 $resource->error_msg = null;
                 // saving inputs
                 $resource->save();
-    
+
                 return redirect()->route('resource.edit', $resource->id)->with('success', Lang::get('lang.updated_successfully').'; '.Lang::get('lang.wait_few_mins'));
             }
         } catch (Exception $e) {
@@ -575,7 +589,7 @@ class CdnController extends Controller
         } catch (Exception $e) {
             $error = $e->getMessage();
             return response()->json(compact('error'));
-        }      
+        }
     }
 
     public function getHourlyByteSentReport()
@@ -622,7 +636,7 @@ class CdnController extends Controller
                 {
                     return response()->file($filename);
                 }
-                
+
             }
         }
         abort(404);

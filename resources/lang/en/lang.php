@@ -996,6 +996,7 @@ return [
     'dns_status'           => 'DNS Status',
     'completed'            => 'Completed',
     'pop_updating'         => 'POP updating',
+    'switched'             => 'Switched',
 
     //API Error
     'E1001'              => 'E1001: CNAME is null',
