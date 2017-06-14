@@ -671,6 +671,7 @@ class ComposerStaticInit1bacc9bd2a82216bf11bc15e6aee6c79
         'Absolute_Positioner' => __DIR__ . '/..' . '/dompdf/dompdf/include/absolute_positioner.cls.php',
         'Abstract_Renderer' => __DIR__ . '/..' . '/dompdf/dompdf/include/abstract_renderer.cls.php',
         'AddDnsStatusToCdnPopTable' => __DIR__ . '/../..' . '/database/migrations/2017_06_12_113617_add_dns_status_to_cdn_pop_table.php',
+        'AddDnsSwitchedToCdnResourcesTable' => __DIR__ . '/../..' . '/database/migrations/2017_06_14_151600_add_dns_switched_to_cdn_resources_table.php',
         'AddExpireDateToCdnSslTable' => __DIR__ . '/../..' . '/database/migrations/2017_05_25_113145_add_expire_date_to_cdn_ssl_table.php',
         'AddForeignKeysToCannedResponseTable' => __DIR__ . '/../..' . '/database/migrations/2016_02_16_140454_add_foreign_keys_to_canned_response_table.php',
         'AddForeignKeysToDepartmentTable' => __DIR__ . '/../..' . '/database/migrations/2016_02_16_140454_add_foreign_keys_to_department_table.php',

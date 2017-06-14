@@ -10,7 +10,7 @@ foreach($segments as $seg){
         var show = 'all';
         var searchTerm = '';
         oTable = myFunction(show, searchTerm);
-        
+
         $("select[name=type_of_profile]").change(function () {
             //alert($('select[name=type_of_profile]').val());
             $("#chumper").dataTable().fnDestroy();
@@ -43,7 +43,7 @@ foreach($segments as $seg){
                         d.searchTerm = searchTerm;
                     }
                 }
-                
+
             });
         }
 
@@ -103,7 +103,7 @@ foreach($segments as $seg){
         document.getElementById('search-text').onkeypress = function(e){
             if (!e) e = window.event;
             var keyCode = e.keyCode || e.which;
-            if (keyCode == '13'){ 
+            if (keyCode == '13'){
                 searchTerm = $('input[name=search]').val();
                 $("#chumper").dataTable().fnDestroy();
                 myFunction(show, searchTerm);

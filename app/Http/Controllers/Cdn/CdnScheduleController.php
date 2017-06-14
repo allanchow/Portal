@@ -246,4 +246,25 @@ class CdnScheduleController extends Controller
                 ->setBody($message, 'text/html');
         });
     }
+
+    public function checkDNSSwitched()
+    {
+        if ($resources = Cdn_Resources::where('status', '>', 0)->get()) {
+            foreach ($resources as $resource) {
+                $chk_hostname = $resource->cdn_hostname;
+                if ($resource->is_wildcard($resource->cdn_hostname))
+                {
+                    $chk_hostname = preg_replace('/^\*\./', 'www.', $chk_hostname);
+                }
+                if (($dns_record = dns_get_record($chk_hostname, DNS_CNAME)) && $dns_record[0]['target'] == $resource->cname)
+                {
+                    $resource->dns_switched = 1;
+                } else {
+                    $resource->dns_switched = 0;
+                }
+                $resource->save();
+            }
+        }
+
+    }
 }

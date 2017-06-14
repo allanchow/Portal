@@ -60,11 +60,11 @@ class CdnController extends Controller
     {
         $table = \ Datatable::table()
         ->addColumn(Lang::get('lang.cdn_hostname'),
+            '<b class="fa fa-link"></b>',
             Lang::get('lang.cname'),
             Lang::get('lang.type'),
             Lang::get('lang.status'),
             Lang::get('lang.created'),
-            Lang::get('lang.dns_switched'),
             Lang::get('lang.action'))
             ->noScript();
         $ext_view = $this->ext_view;
@@ -104,7 +104,7 @@ class CdnController extends Controller
             $resources = $resources->where('update_status', '<>', 2);
         }
 
-        $resources = $resources->select('cdn_hostname', 'cname', 'file_type', 'cdn_resources.status AS status', 'cdn_resources.created_at AS created_at', 'cdn_ssl.status AS ssl_status', 'update_status', 'force_update', 'error_msg', 'id', 'http');
+        $resources = $resources->select('cdn_hostname', 'dns_switched', 'cname', 'file_type', 'cdn_resources.status AS status', 'cdn_resources.created_at AS created_at', 'cdn_ssl.status AS ssl_status', 'update_status', 'force_update', 'error_msg', 'id', 'http');
 
         if ($search !== '') {
             $resources = $resources->where(function ($query) use ($search) {
@@ -119,6 +119,14 @@ class CdnController extends Controller
                         ->removeColumn('id', 'update_status', 'force_update', 'error_msg', 'ssl_status', 'http')
                         ->addColumn('cdn_hostname', function ($model) {
                                 return '<a href="'.route('resource.edit', $model->id).'">'.$model->cdn_hostname.'</a>';
+                        })
+                        ->addColumn('dns_switched', function ($model) {
+                                if ($model->dns_switched)
+                                {
+                                    return '<b class="fa fa-link" style="color:blue"></b>';
+                                } else {
+                                    return '<b class="fa fa-unlink" style="color:red"></b>';
+                                }
                         })
                         ->addColumn('file_type', function ($model) {
                             if (json_decode($model->file_type)) {
@@ -157,19 +165,6 @@ class CdnController extends Controller
                             }
 
                             return $stat;
-                        })
-                        ->addColumn('switched', function ($model) {
-                                $chk_hostname = $model->cdn_hostname;
-                                if ($model->is_wildcard($model->cdn_hostname))
-                                {
-                                    $chk_hostname = preg_replace('/^\*\./', 'www.', $chk_hostname);
-                                }
-                                if (($dns_record = dns_get_record($chk_hostname, DNS_CNAME)) && $dns_record[0]['target'] == $model->cname)
-                                {
-                                    return '<span class="label label-primary">'.\Lang::get('lang.completed').'</span>';
-                                } else {
-                                    return '<span class="label label-warning">'.\Lang::get('lang.pending').'</span>';
-                                }
                         })
                         ->addColumn('Actions', function ($model) {
                                 return '<a href="'.route('resource.edit', $model->id).'" class="btn btn-warning btn-xs">'.\Lang::get('lang.edit').'</a>';

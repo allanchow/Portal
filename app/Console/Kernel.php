@@ -22,6 +22,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\genAutoSSL',
         'App\Console\Commands\checkResourcesXns',
         'App\Console\Commands\checkPop',
+        'App\Console\Commands\checkDNSSwitched',
     ];
 
     /**
@@ -44,6 +45,7 @@ class Kernel extends ConsoleKernel
             $this->execute($schedule, 'genAutoSSL');
             $this->execute($schedule, 'checkResourcesXns');
             $this->execute($schedule, 'checkPop');
+            $this->execute($schedule, 'checkDNSSwitched');
         }
     }
 
@@ -73,7 +75,9 @@ class Kernel extends ConsoleKernel
             case 'checkPop':
                 $this->getCondition($schedule->command('cdnschedule:checkpop'), ['condition'=>'everyMinute', 'at'=>'']);
                 break;
-        }
+            case 'checkDNSSwitched':
+                $this->getCondition($schedule->command('cdnschedule:checkdnsswitched'), ['condition'=>'everyMinute', 'at'=>'']);
+                break;        }
     }
 
     public function getCondition($schedule, $command)
