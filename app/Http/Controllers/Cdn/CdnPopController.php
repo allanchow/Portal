@@ -204,7 +204,7 @@ class CdnPopController extends Controller
                             }
 
                         }
-                    } elseif ($status = 1) {
+                    } elseif ($status == 1) {
                         $cdn_pop->dns_status = 0;
                     }
 
