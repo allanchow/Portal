@@ -199,11 +199,13 @@ class CdnPopController extends Controller
                                     $cdn_pop->dns_status = 0;
                                 }
                             } else {
-                                $cdnpop->dns_status = 0;
+                                $cdn_pop->dns_status = 0;
                                 $no_error = false;
                             }
 
                         }
+                    } elseif ($status = 1) {
+                        $cdn_pop->dns_status = 0;
                     }
 
                     if ($no_error) {
@@ -211,7 +213,7 @@ class CdnPopController extends Controller
                         $cdn_pop->status = $status;
                         if ($cdn_pop->save())
                         {
-                            return redirect()->route('cdnpop.edit', $cdn_pop->pop_hostname)->with('success', Lang::get('lang.updated_successfully'));
+                            return redirect()->route('cdnpop.index', $cdn_pop->pop_hostname)->with('success', Lang::get('lang.updated_successfully'));
                         }
                     }
 

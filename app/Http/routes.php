@@ -534,7 +534,7 @@ Route::group(['middleware' => ['web']], function () {
         Route::post('resources-dns-to-origin/{id}', ['as' => 'resource.dns-to-origin', 'uses' => 'Xns\XnsController@revertResourceDNS']);
         Route::post('resources-cancel-dns-to-origin/{id}', ['as' => 'resource.cancel-dns-to-origin', 'uses' => 'Cdn\CdnController@cancelRevertDns']);
         Route::post('check-hostname-dns/{hostname}/{id}', ['as' => 'resource.check.dns', 'uses' => 'Cdn\CdnController@checkHostnameDNS']);
-       
+
         Route::get('summary-report/{date}/{id}', ['as' => 'summary.report', 'uses' => 'Cdn\CdnController@getSummaryReport']);
         Route::post('chart-cdn-traffic/{sdate}/{edate}/{resource_id?}', ['as' => 'post.chart.cdn.traffic', 'uses' => 'Cdn\CdnController@chartTraffic']);
         Route::group(['middleware' => 'role.agent'], function () {
@@ -542,7 +542,14 @@ Route::group(['middleware' => ['web']], function () {
             Route::get('houly-bsent', ['as' => 'resource.hourly.bsent', 'uses' => 'Cdn\CdnController@getHourlyByteSentReport']);
             Route::resource('cdnpop', 'Cdn\CdnPopController');
             Route::get('cdnpop-store', ['as' => 'resource.cdnpop.store', 'uses' => 'Cdn\CdnPopController@store']);
-            Route::get('cdnpop-update/{pop_hostname}', ['as' => 'resource.cdnpop.update', 'uses' => 'Cdn\CdnPopController@update']);
+            Route::get('cdnpop-update/{pop_hostname}', ['as' => 'resource.cdnpop.update',
+                function ($pop_hostname) {
+                    $CdnPopUpdateRequest = new \App\Http\Requests\Cdn\CdnPopUpdateRequest();
+                    $CdnPopUpdateRequest->replace(request()->all());
+                    $cdnpop = new \App\Http\Controllers\Cdn\CdnPopController();
+                    $cdnpop->update($pop_hostname, $CdnPopUpdateRequest);
+                }
+            ]);
             Route::get('cdnpop-force-update', ['as' => 'resource.cdnpop.forceupdate', 'uses' => 'Cdn\CdnPopController@forceUpdate']);
             Route::post('cdnpop-resume', ['as' => 'resource.cdnpop.resume', 'uses' => 'Cdn\CdnPopController@resume']);
             Route::post('cdnpop-attack', ['as' => 'resource.cdnpop.attack', 'uses' => 'Cdn\CdnPopController@attack']);
