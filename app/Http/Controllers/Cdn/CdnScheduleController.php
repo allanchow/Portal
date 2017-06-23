@@ -72,11 +72,12 @@ class CdnScheduleController extends Controller
                 }
             }
         }
+        return true;
     }
 
     public function checkXNS()
     {
-        ini_set('max_execution_time', 1800);
+        ini_set('max_execution_time', 600);
         set_error_handler(null);
         set_exception_handler(null);
         $xns = new XnsController();
@@ -123,6 +124,7 @@ class CdnScheduleController extends Controller
             }
 
         }
+        return true;
     }
 
     public function checkPop()
@@ -228,7 +230,9 @@ class CdnScheduleController extends Controller
                 }
 
             }
+            return true;
         }
+        return false;
     }
 
     public function send_mail($subject, $message)
@@ -262,7 +266,7 @@ class CdnScheduleController extends Controller
                 } else {
                     $resource->dns_switched = 0;
                 }
-                $resource->save();
+                return $resource->save();
             }
         }
 

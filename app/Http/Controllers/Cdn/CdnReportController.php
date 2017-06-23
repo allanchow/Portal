@@ -93,5 +93,6 @@ class CdnReportController extends Controller
             $report->total_req = $data['count'];
             $report->save();
         }
+        return true;
     }
 }
