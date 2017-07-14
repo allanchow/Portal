@@ -78,8 +78,8 @@ class CdnScheduleController extends Controller
     public function checkXNS()
     {
         ini_set('max_execution_time', 600);
-        set_error_handler(null);
-        set_exception_handler(null);
+        //set_error_handler(null);
+        //set_exception_handler(null);
         $xns = new XnsController();
         if ($resources = Cdn_Resources::whereNull('xns_host_id')->where('status', '>', 0)->get()){
             if ($host_list = $xns->getHostList()) {
@@ -152,7 +152,7 @@ class CdnScheduleController extends Controller
             $pop_down = array();
 
             foreach ($pop_list as $hostname=>$pop) {
-                if (preg_match($pattern, $hostname, $matches)) {
+                if (is_array($pop) && preg_match($pattern, $hostname, $matches)) {
                     $pop_hostname = $matches[0];
                     $region = $matches[1];
                     if ($is_hk = ($region == 'hk')) {
