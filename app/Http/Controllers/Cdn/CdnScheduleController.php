@@ -266,9 +266,10 @@ class CdnScheduleController extends Controller
                 } else {
                     $resource->dns_switched = 0;
                 }
-                return $resource->save();
+                $resource->save();
             }
+            return true;
         }
-
+        return false;
     }
 }
