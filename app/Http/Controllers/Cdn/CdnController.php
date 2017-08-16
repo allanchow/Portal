@@ -608,9 +608,11 @@ class CdnController extends Controller
         set_error_handler(null);
         set_exception_handler(null);
 
-        $resource = Cdn_Resources::whereId($id)->first();
-        if (!$resource or (Auth::user()->role == "user" && $resource->org_id != User_org::where('user_id', '=', Auth::user()->id)->first()->org_id)) {
-            abort(404);
+        if ($id != 'all_domain') {
+            $resource = Cdn_Resources::whereId($id)->first();
+            if (!$resource or (Auth::user()->role == "user" && $resource->org_id != User_org::where('user_id', '=', Auth::user()->id)->first()->org_id)) {
+                abort(404);
+            }
         }
 
         //$id = 4;

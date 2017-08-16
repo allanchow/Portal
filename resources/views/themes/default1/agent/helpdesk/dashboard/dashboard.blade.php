@@ -177,15 +177,15 @@ class="active"
                     <style>
                         #legend-holder { border: 1px solid #ccc; float: left; width: 25px; height: 25px; margin: 1px; }
                     </style>
-                    <div class="col-md-3"><span id="legend-holder" style="background-color: #6C96DF;"></span>&nbsp; <span class="lead"> <span id="total-created-tickets" ></span> {!! Lang::get('lang.tickets') !!} {!! Lang::get('lang.created') !!}</span></div> 
-                    <div class="col-md-3"><span id="legend-holder" style="background-color: #6DC5B2;"></span>&nbsp; <span class="lead"> <span id="total-reopen-tickets" class="lead"></span> {!! Lang::get('lang.tickets') !!} {!! Lang::get('lang.reopen') !!}</span></div> 
-                    <div class="col-md-3"><span id="legend-holder" style="background-color: #E3B870;"></span>&nbsp; <span class="lead"> <span id="total-closed-tickets" class="lead"></span> {!! Lang::get('lang.tickets') !!} {!! Lang::get('lang.closed') !!}</span></div> 
+                    <div class="col-md-3"><span id="legend-holder" style="background-color: #6C96DF;"></span>&nbsp; <span class="lead"> <span id="total-created-tickets" ></span> {!! Lang::get('lang.tickets') !!} {!! Lang::get('lang.created') !!}</span></div>
+                    <div class="col-md-3"><span id="legend-holder" style="background-color: #6DC5B2;"></span>&nbsp; <span class="lead"> <span id="total-reopen-tickets" class="lead"></span> {!! Lang::get('lang.tickets') !!} {!! Lang::get('lang.reopen') !!}</span></div>
+                    <div class="col-md-3"><span id="legend-holder" style="background-color: #E3B870;"></span>&nbsp; <span class="lead"> <span id="total-closed-tickets" class="lead"></span> {!! Lang::get('lang.tickets') !!} {!! Lang::get('lang.closed') !!}</span></div>
                 </div>
             </div>
         </form>
         <!--<div id="legendDiv"></div>-->
         <div id="chart-tickets" class="chart">
-            <canvas class="chart-data" id="tickets-graph" width="1000" height="250"></canvas>   
+            <canvas class="chart-data" id="tickets-graph" width="1000" height="250"></canvas>
         </div>
     </div><!-- /.box-body -->
 </div><!-- /.box -->
@@ -206,8 +206,8 @@ class="active"
                 <th>Department</th>
                 @forelse($statuses as $status)
                  <th>{!! $status !!}</th>
-                @empty 
-                
+                @empty
+
                 @endforelse
 
             </tr>
@@ -217,14 +217,14 @@ class="active"
                 @forelse($statuses as $status)
                 @if($dept->get($status))
                  <th>{!! $dept->get($status)->count !!}</th>
-                @else 
+                @else
                     <th></th>
                  @endif
-                @empty 
-                
+                @empty
+
                 @endforelse
             </tr>
-            @endforeach 
+            @endforeach
         </table>
     </div>
 </div>
@@ -287,13 +287,13 @@ class="active"
         </form>
         <div id="legend-traffic">
             <div class="row">
-                <div class="col-md-3"></div> 
-                <div class="col-md-6 col-md-offset-5"><span class="lead">{!! Lang::get('lang.total') !!}: <span id="total-kb" class="lead"></span></span></div> 
-                <div class="col-md-3"></div> 
-            </div>            
+                <div class="col-md-3"></div>
+                <div class="col-md-6 col-md-offset-5"><span class="lead">{!! Lang::get('lang.total') !!}: <span id="total-kb" class="lead"></span></span></div>
+                <div class="col-md-3"></div>
+            </div>
         </div>
         <div id="chart-traffic" class="chart">
-            <canvas class="chart-data" id="traffic-graph" width="1000" height="250"></canvas>   
+            <canvas class="chart-data" id="traffic-graph" width="1000" height="250"></canvas>
         </div>
     </div><!-- /.box-body -->
 </div><!-- /.box -->
@@ -325,7 +325,7 @@ class="active"
                         $resource_list = $resources->selectRaw('CONCAT(id, " - ", cdn_hostname) as full_resource, id')->pluck('full_resource', 'id')->toArray();
                     ?>
                         {!! Form::label('resource', Lang::get('lang.resource').':',['class' => 'lead']) !!}
-                        {!! Form::select('resource_id',[''=>Lang::get('lang.select'),Lang::get('lang.resource')=>$resource_list],null,['class' => 'form-control','id'=>'resource_id']) !!}
+                        {!! Form::select('resource_id',['all_domain'=>Lang::get('lang.all'),Lang::get('lang.resource')=>$resource_list],null,['class' => 'form-control','id'=>'resource_id']) !!}
                     </div>
                     <div class='col-sm-1'>
                         {!! Form::label('filter', '&nbsp;', ['class' => 'lead']) !!}<br>
@@ -341,7 +341,7 @@ class="active"
         </div>
     </div><!-- /.box-body -->
 </div><!-- /.box -->
-<div id="refresh"> 
+<div id="refresh">
     <script src="{{asset("lb-faveo/plugins/chartjs/Chart.min.js")}}" type="text/javascript"></script>
 </div>
 <script src="{{asset("lb-faveo/plugins/chartjs/Chart.min.js")}}" type="text/javascript"></script>
@@ -619,7 +619,7 @@ class="active"
                                         type: 'POST',
                                         url: '/chart-cdn-traffic/' + sdate + '/' + edate + '/' + resource_id,
                                         dataType: 'json',
-    
+
                                         success: function (t_result) {
                                             var report_date = [], total_byte = [], total = 0;
                                             for (var i = 0; i < t_result.length; i++) {
@@ -627,7 +627,7 @@ class="active"
                                                 total_byte.push(t_result[i].total_byte);
                                                 total += t_result[i].total_byte * 1;
                                             }
-    
+
                                             var reportData = {
                                                 labels: report_date,
                                                 datasets: [
@@ -699,7 +699,7 @@ class="active"
                                     alert('{{ Lang::get('lang.date_resource_empty') }}');
                                 } else {
                                     $('#report-graph').attr("src", 'summary-report/' + report_date + '/' + resource_id);
-                   
+
                                 }
                                 return false;
                                 event.preventDefault();
@@ -730,6 +730,8 @@ $sdate = date('Y-m-d', strtotime('-1 month'.$edate));
         $('#cdn_traffic_sdate').val('{{ $sdate }}');
         $('#cdn_traffic_edate').val('{{ $edate }}');
         $('#f_traffic').submit();
+        $('#report_date').val('{{ $edate }}');
+        $('#summary_report').submit();
     });
 </script>
 <script src="{{asset("lb-faveo/plugins/moment-develop/moment.js")}}" type="text/javascript"></script>

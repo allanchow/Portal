@@ -112,13 +112,13 @@ class="active"
         </form>
         <div id="legend-traffic">
             <div class="row">
-                <div class="col-md-3"></div> 
-                <div class="col-md-6 col-md-offset-5"><span class="lead">{!! Lang::get('lang.total') !!}: <span id="total-kb" class="lead"></span></span></div> 
-                <div class="col-md-3"></div> 
-            </div>            
+                <div class="col-md-3"></div>
+                <div class="col-md-6 col-md-offset-5"><span class="lead">{!! Lang::get('lang.total') !!}: <span id="total-kb" class="lead"></span></span></div>
+                <div class="col-md-3"></div>
+            </div>
         </div>
         <div id="chart-traffic" class="chart">
-            <canvas class="chart-data" id="traffic-graph" width="1000" height="250"></canvas>   
+            <canvas class="chart-data" id="traffic-graph" width="1000" height="250"></canvas>
         </div>
     </div><!-- /.box-body -->
 </div><!-- /.box -->
@@ -150,7 +150,7 @@ class="active"
                         $resource_list = $resources->selectRaw('CONCAT(id, " - ", cdn_hostname) as full_resource, id')->pluck('full_resource', 'id')->toArray();
                     ?>
                         {!! Form::label('resource', Lang::get('lang.resource').':',['class' => 'lead']) !!}
-                        {!! Form::select('resource_id',[''=>Lang::get('lang.select'),Lang::get('lang.resource')=>$resource_list],null,['class' => 'form-control','id'=>'resource_id']) !!}
+                        {!! Form::select('resource_id',['all_domain'=>Lang::get('lang.all'),Lang::get('lang.resource')=>$resource_list],null,['class' => 'form-control','id'=>'resource_id']) !!}
                     </div>
                     <div class='col-sm-1'>
                         {!! Form::label('filter', '&nbsp;', ['class' => 'lead']) !!}<br>
@@ -166,7 +166,7 @@ class="active"
         </div>
     </div><!-- /.box-body -->
 </div><!-- /.box -->
-<div id="refresh"> 
+<div id="refresh">
     <script src="https://portal-dev.allbrightnet.com/lb-faveo/plugins/chartjs/Chart.min.js" type="text/javascript"></script>
 </div>
 <script src="https://portal-dev.allbrightnet.com/lb-faveo/plugins/chartjs/Chart.min.js" type="text/javascript"></script>
@@ -184,7 +184,7 @@ class="active"
                     type: 'POST',
                     url: '/chart-cdn-traffic/' + sdate + '/' + edate + '/' + resource_id,
                     dataType: 'json',
-    
+
                     success: function (t_result) {
                         var report_date = [], total_byte = [], total = 0;
                         for (var i = 0; i < t_result.length; i++) {
@@ -192,7 +192,7 @@ class="active"
                             total_byte.push(t_result[i].total_byte);
                             total += t_result[i].total_byte * 1;
                         }
-    
+
                         var reportData = {
                             labels: report_date,
                             datasets: [
@@ -276,8 +276,8 @@ $sdate = date('Y-m-d', strtotime('-1 month'.$edate));
         $('#cdn_traffic_sdate').val('{{ $sdate }}');
         $('#cdn_traffic_edate').val('{{ $edate }}');
         $('#f_traffic').submit();
-
-
+        $('#report_date').val('{{ $edate }}');
+        $('#summary_report').submit();
     });
 </script>
 <script src="{{asset("lb-faveo/plugins/moment-develop/moment.js")}}" type="text/javascript"></script>
