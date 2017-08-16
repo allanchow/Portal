@@ -70,13 +70,13 @@ class Kernel extends ConsoleKernel
                 $this->getCondition($schedule->command('cdnschedule:autossl'), ['condition'=>'everyMinute', 'at'=>'']);
                 break;
             case 'checkResourcesXns':
-                $this->getCondition($schedule->command('cdnschedule:checkxns'), ['condition'=>'everyMinute', 'at'=>'']);
+                $this->getCondition($schedule->command('cdnschedule:checkxns'), ['condition'=>'everyFiveMinutes', 'at'=>'']);
                 break;
             case 'checkPop':
                 $this->getCondition($schedule->command('cdnschedule:checkpop'), ['condition'=>'everyMinute', 'at'=>'']);
                 break;
             case 'checkDNSSwitched':
-                $this->getCondition($schedule->command('cdnschedule:checkdnsswitched'), ['condition'=>'everyMinute', 'at'=>'']);
+                $this->getCondition($schedule->command('cdnschedule:checkdnsswitched'), ['condition'=>'everyThirtyMinutes', 'at'=>'']);
                 break;        }
     }
 
