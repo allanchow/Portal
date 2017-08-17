@@ -57,7 +57,7 @@ class CdnReportController extends Controller
             for ($page = 1; $page <= $total_page; $page++) {
                 $rs_data = $total_b = $http_b = $https_b = $count = array();
                 if (is_null($id)) {
-                    loging('cdn-daily-report-query', "time: $start_ts - $end_ts, page: $page / $total_page, per_page: $per_page", 'info');
+                    loging('cdn-daily-report-query', "day: $day, time: $start_ts - $end_ts, page: $page / $total_page, per_page: $per_page", 'info');
                     $rs = NgxAccessCdn::select('resource_id', 'tags', 'resp.bytes', 'https', 'request_at_ms')->whereBetween('request_at_ms', [$start_ts, $end_ts])->take($per_page)->get();
                 } else {
                     loging('cdn-daily-report-query', "last id: $id, time: $start_ts - $end_ts, page: $page / $total_page, per_page: $per_page", 'info');
