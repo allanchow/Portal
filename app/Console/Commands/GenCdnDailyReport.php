@@ -12,7 +12,7 @@ class GenCdnDailyReport extends Command
      *
      * @var string
      */
-    protected $signature = 'cdnreport:daily {day?}';
+    protected $signature = 'cdnreport:daily {day?} {id?}';
 
     /**
      * The console command description.

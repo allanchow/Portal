@@ -1562,7 +1562,7 @@ class ApiController extends Controller
                 } else {
                     $resources = $resources->where('status', '<>', 0);
                 }
-    
+
             }
 
             if ($user->role == 'user')
@@ -1578,6 +1578,9 @@ class ApiController extends Controller
             if ($this->request->has('per_page')) {
                 $per_page = $this->request->input('per_page') * 1;
             }
+
+            $page = $this->request->has('page') ? $this->request->input('page') : 1;
+
             if ($resources = $resources->paginate($per_page)) {
                 foreach ($resources as $resource)
                 {
@@ -1623,7 +1626,7 @@ class ApiController extends Controller
 
                 }
             }
-            return response()->json(['resources'=>$rs_resources, 'total'=>$total]);
+            return response()->json(['resources'=>$rs_resources, 'per_page'=>$per_page, 'page'=>$page, 'total'=>$total]);
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $line = $e->getLine();
@@ -1925,7 +1928,7 @@ class ApiController extends Controller
             } else {
                 return response()->json(compact('result'));
             }
-            
+
 
         } catch (\Exception $e) {
             $error = $e->getMessage();
@@ -2055,7 +2058,7 @@ class ApiController extends Controller
             } else {
                 return response()->json(compact('result'));
             }
-            
+
 
         } catch (\Exception $e) {
             $error = $e->getMessage();
@@ -2066,7 +2069,7 @@ class ApiController extends Controller
             $error = $e->getMessage();
 
             return response()->json(compact('error'));
-        }    
+        }
     }
 
     public function destroyResource($id)
@@ -2087,7 +2090,7 @@ class ApiController extends Controller
                     'resource'                 => 'required',
                     'resource.cdn_hostname'    => 'required',
                     'resource.hash'            => 'required',
-                ]);              
+                ]);
             }
 
             if ($v->fails()) {
@@ -2116,7 +2119,7 @@ class ApiController extends Controller
                 if ($result = $resource->save()) {
                     $j_origin = json_decode($resource->origin, true);
                     $status = 'deleting';
-    
+
                     if ($user->role == 'user') {
                         $ar_resources = array(
                             'resource_id' => $resource->id,
