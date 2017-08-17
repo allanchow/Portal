@@ -1894,6 +1894,13 @@ class ApiController extends Controller
             $resource->status = 1;
             $resource->update_status = 0;
 
+            $cdnpop = new CdnPopController();
+            $max_group = $cdnpop->get_max_group();
+            if (!$max_group){
+                $max_group = 1;
+            }
+            $resource->group = $max_group;
+
             if ($result = $resource->save()) {
 
                 $resource->createCName();

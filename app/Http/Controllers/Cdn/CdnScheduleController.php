@@ -8,6 +8,7 @@ use App\Http\Controllers\Cdn\CdnPopController;
 use App\Http\Controllers\Controller;
 // models
 use App\Model\Cdn\Cdn_Resources;
+use App\Model\Cdn\CdnDailyReport;
 use App\Model\Cdn\CdnSSL;
 use App\Model\Cdn\CdnPop;
 use App\Model\helpdesk\Email\Emails;
@@ -16,11 +17,7 @@ use App\User;
 use Crypt;
 use DB;
 use Mail;
-/**
- * CdnReportController.
- *
- * @author      Ladybird <info@ladybirdweb.com>
- */
+
 class CdnScheduleController extends Controller
 {
     protected $cmd_path = '/usr/local/share/dehydrated/';
@@ -81,45 +78,61 @@ class CdnScheduleController extends Controller
         //set_error_handler(null);
         //set_exception_handler(null);
         $xns = new XnsController();
+        loging('check-xns', "Start get resources list", 'info');
         if ($resources = Cdn_Resources::whereNull('xns_host_id')->where('status', '>', 0)->get()){
+            loging('check-xns', "Get resources list completed", 'info');
             if ($host_list = $xns->getHostList()) {
+                loging('check-xns', "Get xns host list completed", 'info');
                 foreach ($resources as $resource) {
                     $host = $resource->getHostFromCName();
-                    if (array_key_exists($host, $host_list)){
+                    if (array_key_exists($host, $host_list)) {
                         $host_id = $host_list[$host]['id'];
                         $resource->xns_host_id = $host_id;
                         $resource->save();
+                        loging('check-xns', "Update host: $host, xns_host_id: $host_id completed", 'info');
                     } else {
+                        loging('check-xns', "Start create XNS host: $host", 'info');
                         $xns->addResourceCNameGroup($resource);
+                        loging('check-xns', "Create XNS host: $host completed", 'info');
                     }
                 }
             }
         }
 
         if (($cdnpop_list = CdnPop::where('status', 0)->where('dns_status', 0)->get()) && count($cdnpop_list)) {
+            loging('check-xns', "Get inactive cdnpop list completed", 'info');
             foreach ($cdnpop_list as $cdnpop) {
-                if ($xns->del_cdn_pop($cdnpop))
-                {
+                loging('check-xns', "Start delete inactive cdnpop: {$cdnpop->pop_hostname}", 'info');
+                if ($xns->del_cdn_pop($cdnpop)) {
+                    loging('check-xns', "Delete XNS inactive cdnpop: {$cdnpop->pop_hostname} completed", 'info');
                     $cdnpop->dns_status = 2;
                     $cdnpop->dns_updated_at = DB::raw('now()');
                     $cdnpop->save();
+                    loging('check-xns', "Update inactive cdnpop: {$cdnpop->pop_hostname} completed", 'info');
                 }
             }
         }
 
         if (($cdnpop_list = CdnPop::where('status', 1)->where('dns_status', 0)->get()) && count($cdnpop_list) && (Cdn_Resources::where('force_update', 0)->where('status', '>', 0)->count() > 0) && (Cdn_Resources::where('force_update', 0)->where('status', '>', 0)->update(['force_update' => 1, 'error_msg' => '']) !== false )) {
+            loging('check-xns', "Get new active cdnpop list completed", 'info');
             foreach ($cdnpop_list as $cdnpop) {
+                loging('check-xns', "Start update new active cdnpop: {$cdnpop->pop_hostname}", 'info');
                 $cdnpop->dns_status = 1;
                 $cdnpop->save();
+                loging('check-xns', "Update new active cdnpop: {$cdnpop->pop_hostname} to waiting completed", 'info');
             }
         }
 
         if (($cdnpop_list = CdnPop::where('status', 1)->where('dns_status', 1)->get()) && count($cdnpop_list) && (Cdn_Resources::where('force_update', 0)->where('status', '>', 0)->count() > 0)) {
+            loging('check-xns', "Get completed force_update active cdnpop list completed", 'info');
             foreach ($cdnpop_list as $cdnpop) {
+                loging('check-xns', "Start add XNS new active cdnpop: {$cdnpop->pop_hostname}", 'info');
                 if ($xns->add_cdn_pop($cdnpop)){
+                    loging('check-xns', "Add XNS new active cdnpop: {$cdnpop->pop_hostname} completed", 'info');
                     $cdnpop->dns_status = 2;
                     $cdnpop->dns_updated_at = DB::raw('now()');
                     $cdnpop->save();
+                    loging('check-xns', "Update new active cdnpop: {$cdnpop->pop_hostname} completed", 'info');
                 }
             }
 
@@ -253,6 +266,8 @@ class CdnScheduleController extends Controller
 
     public function checkDNSSwitched()
     {
+        loging('check-dns-switched', "Start", 'info');
+        $day = date('Y-m-d', strtotime('yesterday'));
         if ($resources = Cdn_Resources::where('status', '>', 0)->get()) {
             foreach ($resources as $resource) {
                 $chk_hostname = $resource->cdn_hostname;
@@ -271,10 +286,18 @@ class CdnScheduleController extends Controller
                         $resource->dns_switched = 0;
                     }
                 }
+
+                if ($resource->dns_switched == 0) {
+                    if ($report = CdnDailyReport::where('report_date', $day)->where('resource_id', $resource->resource_id)->first()){
+                        $resource->dns_switched = 1;
+                    }
+                }
+
                 if ($old_switched != $resource->dns_switched) {
                     $resource->save();
                 }
             }
+            loging('check-dns-switched', "Complete", 'info');
             return true;
         }
         return false;
