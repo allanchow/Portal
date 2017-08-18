@@ -35,9 +35,9 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         if (env('DB_INSTALL') == 1) {
-            if ($this->getCurrentQueue() != 'sync') {
-                $schedule->command('queue:listen '.$this->getCurrentQueue().' --sleep 60')->everyMinute();
-            }
+            //if ($this->getCurrentQueue() != 'sync') {
+            //    $schedule->command('queue:listen '.$this->getCurrentQueue().' --sleep 60')->everyMinute();
+            //}
             $this->execute($schedule, 'fetching');
             $this->execute($schedule, 'notification');
             $this->execute($schedule, 'work');
