@@ -41,6 +41,7 @@ class CdnScheduleController extends Controller
         set_exception_handler(null);
         $expire_date = date('Y-m-d H:i:s', strtotime('+3 weeks'));
         $ts = time();
+        loging('check-auto-ssl', "Start", 'info');
         if ($ssl_list = CdnSSL::where('type', 'A')->where('expire_date', '<', $expire_date)->get()){
             foreach ($ssl_list as $ssl) {
                 if ($resource = Cdn_Resources::where('id', $ssl->resource_id)->where('http', '>', 0)->first()){
@@ -69,6 +70,7 @@ class CdnScheduleController extends Controller
                 }
             }
         }
+        loging('check-auto-ssl', "Complete", 'info');
         return true;
     }
 
