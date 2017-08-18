@@ -142,6 +142,7 @@ class CdnScheduleController extends Controller
 
     public function checkPop()
     {
+        loging('check-pop', "Start", 'info');
         $nagios_server = env('NAGIOS_SERVER');
         $nagios_port = env('NAGIOS_PORT');
         $time_buffer = 900;
@@ -195,6 +196,7 @@ class CdnScheduleController extends Controller
             }
 
             if ($all_outdate) {
+                loging('check-pop', "Restart Nagios API service", 'info');
                 $restart_rs = json_decode(trim(`ssh -t -o StrictHostKeyChecking=no {$nagios_server} 'sudo /etc/init.d/nagira restart >/dev/null 2>&1 && echo {\"result\":1}'`), true);
                 $subject = "[XNS] Nagios API not update";
                 $message = $subject;
@@ -243,6 +245,7 @@ class CdnScheduleController extends Controller
                 }
 
             }
+            loging('check-pop', "Complete", 'info');
             return true;
         }
         return false;
