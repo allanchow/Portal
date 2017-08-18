@@ -95,6 +95,10 @@ class CdnController extends Controller
             $resources = $resources->where('update_status', 2);
         } elseif ($type === 'dns_to_origin'){
             $resources = $resources->where('cdn_resources.status', -1);
+        } elseif ($type === 'dns_linked'){
+            $resources = $resources->where('cdn_resources.dns_switched', 1);
+        } elseif ($type === 'dns_unlinked'){
+            $resources = $resources->where('cdn_resources.dns_switched', 0);
         } else {
             $resources = $resources->where('cdn_resources.status', '<>', 0);
         }

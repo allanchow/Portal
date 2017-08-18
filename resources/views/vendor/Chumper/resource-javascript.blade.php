@@ -89,6 +89,20 @@ foreach($segments as $seg){
             toggleActiveClass(classname);
         });
 
+        $('.dns_linked').on('click', function(){
+            show = 'dns_linked';
+            classname = '.'+show;
+            filterTable(show);
+            toggleActiveClass(classname);
+        });
+
+        $('.dns_unlinked').on('click', function(){
+            show = 'dns_unlinked';
+            classname = '.'+show;
+            filterTable(show);
+            toggleActiveClass(classname);
+        });
+
         $('#force_update_button').on('click', function(){
             $.post("{{url('resources-force-update')}}", function (data) {
                 if (data.error) {

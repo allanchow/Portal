@@ -953,6 +953,8 @@ return [
     'only_suspended'       => '僅暫停',
     'only_deleting'        => '僅刪除中',
     'only_dns_to_origin'   => '僅DNS回源',
+    'only_dns_linked'      => '僅DNS已連結',
+    'only_dns_unlinked'    => '僅DNS未連結',
     'pending'              => '處理中',
     'suspended'            => '已停用',
     'updating'             => '更新中',

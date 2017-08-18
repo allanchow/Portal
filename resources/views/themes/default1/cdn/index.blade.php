@@ -29,7 +29,7 @@ class="active"
         <div class="row">
         <div>
             <div class="col-md-6">
-                <h3 class="box-title ">{{Lang::get('lang.resources')}}</h3>                
+                <h3 class="box-title ">{{Lang::get('lang.resources')}}</h3>
             </div>
             <div class="col-md-6">
                 <div class="col-md-5">
@@ -50,6 +50,8 @@ class="active"
                             <li><a href="#" class="active">{{Lang::get('lang.only_active')}}</a></li>
                             <li><a href="#" class="pending">{{Lang::get('lang.only_pending')}}</a></li>
                             <li><a href="#" class="dns_to_origin">{{Lang::get('lang.only_dns_to_origin')}}</a></li>
+                            <li><a href="#" class="dns_linked">{{Lang::get('lang.only_dns_linked')}}</a></li>
+                            <li><a href="#" class="dns_unlinked">{{Lang::get('lang.only_dns_unlinked')}}</a></li>
                             @if (Auth::user()->role == "admin" or Auth::user()->role == "agent")
                                 <li><a href="#" class="suspended">{{Lang::get('lang.only_suspended')}}</a></li>
                                 <li><a href="#" class="deleting">{{Lang::get('lang.only_deleting')}}</a></li>

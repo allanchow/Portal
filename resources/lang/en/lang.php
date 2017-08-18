@@ -953,6 +953,8 @@ return [
     'only_suspended'        => 'Only suspended',
     'only_deleting'         => 'Only deleting',
     'only_dns_to_origin'    => 'Only DNS to origin',
+    'only_dns_linked'       => 'Only DNS linked',
+    'only_dns_unlinked'     => 'Only DNS unlinked',
     'pending'               => 'Pending',
     'suspended'             => 'Suspended',
     'updating'              => 'Updating',
