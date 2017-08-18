@@ -268,28 +268,36 @@ class CdnScheduleController extends Controller
     {
         loging('check-dns-switched', "Start", 'info');
         $day = date('Y-m-d', strtotime('yesterday'));
+        set_error_handler(null);
+        set_exception_handler(null);
         if ($resources = Cdn_Resources::where('status', '>', 0)->get()) {
             foreach ($resources as $resource) {
                 $chk_hostname = $resource->cdn_hostname;
                 $old_switched = $resource->dns_switched;
-                if (($dns_record = dns_get_record($chk_hostname, DNS_CNAME)) && $dns_record[0]['target'] == $resource->cname) {
+
+//                loging('check-dns-switched', "Start check hostname: $chk_hostname", 'info');
+
+                if ($report = CdnDailyReport::where('report_date', $day)->where('resource_id', $resource->id)->first()){
+//                    loging('check-dns-switched', "Resource_id found in report: {$resource->resource_id}", 'info');
                     $resource->dns_switched = 1;
-                } else {
-                    if ($resource->is_wildcard($resource->cdn_hostname)) {
-                        $chk_hostname = preg_replace('/^\*\./', 'www.', $chk_hostname);
-                        if (($dns_record = dns_get_record($chk_hostname, DNS_CNAME)) && $dns_record[0]['target'] == $resource->cname) {
-                            $resource->dns_switched = 1;
-                        } else {
-                            $resource->dns_switched = 0;
-                        }
-                    } else {
-                        $resource->dns_switched = 0;
-                    }
                 }
 
                 if ($resource->dns_switched == 0) {
-                    if ($report = CdnDailyReport::where('report_date', $day)->where('resource_id', $resource->resource_id)->first()){
+                    if (($dns_record = dns_get_record($chk_hostname, DNS_CNAME)) && $dns_record[0]['target'] == $resource->cname) {
                         $resource->dns_switched = 1;
+//                        loging('check-dns-switched', "hostname: $chk_hostname found in DNS", 'info');
+                    } else {
+                        if ($resource->is_wildcard($resource->cdn_hostname)) {
+                            $chk_hostname = preg_replace('/^\*\./', 'www.', $chk_hostname);
+                            if (($dns_record = dns_get_record($chk_hostname, DNS_CNAME)) && $dns_record[0]['target'] == $resource->cname) {
+                                $resource->dns_switched = 1;
+//                                loging('check-dns-switched', "hostname: $chk_hostname found in DNS", 'info');
+                            } else {
+                                $resource->dns_switched = 0;
+                            }
+                        } else {
+                            $resource->dns_switched = 0;
+                        }
                     }
                 }
 

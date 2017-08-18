@@ -76,7 +76,7 @@ class Kernel extends ConsoleKernel
                 $this->getCondition($schedule->command('cdnschedule:checkpop'), ['condition'=>'everyMinute', 'at'=>'']);
                 break;
             case 'checkDNSSwitched':
-                $this->getCondition($schedule->command('cdnschedule:checkdnsswitched'), ['condition'=>'everyThirtyMinutes', 'at'=>'']);
+                $this->getCondition($schedule->command('cdnschedule:checkdnsswitched'), ['condition'=>'hourly', 'at'=>'']);
                 break;        }
     }
 
