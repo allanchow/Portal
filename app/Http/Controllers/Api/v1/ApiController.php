@@ -1539,10 +1539,11 @@ class ApiController extends Controller
             $resources = $this->resources;
             $user = \JWTAuth::parseToken()->authenticate();
 
+            $type = $this->request->input('type');
+
             if ($id) {
                 $resources = $resources->where('id', $id);
             } else {
-                $type = $this->request->input('type');
                 if ($type === 'active') {
                     $resources = $resources->where('status', 2);
                 } elseif ($type === 'pending') {
