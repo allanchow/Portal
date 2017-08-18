@@ -87,7 +87,7 @@ class Kernel extends ConsoleKernel
         $at = $command['at'];
         switch ($condition) {
             case 'everyMinute':
-                //$schedule->everyMinute();
+                $schedule->everyMinute();
                 break;
             case 'everyFiveMinutes':
                 $schedule->everyFiveMinutes();
