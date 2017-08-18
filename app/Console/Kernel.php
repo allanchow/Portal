@@ -55,29 +55,30 @@ class Kernel extends ConsoleKernel
         $command = $condition->getConditionValue($task);
         switch ($task) {
             case 'fetching':
-                $this->getCondition($schedule->command('ticket:fetch'), $command);
+                $this->getCondition($schedule->command('ticket:fetch')->withoutOverlapping(), $command);
                 break;
             case 'notification':
-                $this->getCondition($schedule->command('report:send'), $command);
+                $this->getCondition($schedule->command('report:send')->withoutOverlapping(), $command);
                 break;
             case 'work':
-                $this->getCondition($schedule->command('ticket:close'), $command);
+                $this->getCondition($schedule->command('ticket:close')->withoutOverlapping(), $command);
                 break;
             case 'cdnDailyReport':
-                $this->getCondition($schedule->command('cdnreport:daily'), ['condition'=>'dailyAt', 'at'=>'1:00']);
+                $this->getCondition($schedule->command('cdnreport:daily')->withoutOverlapping(), ['condition'=>'dailyAt', 'at'=>'1:00']);
                 break;
             case 'genAutoSSL':
-                $this->getCondition($schedule->command('cdnschedule:autossl'), ['condition'=>'everyMinute', 'at'=>'']);
+                $this->getCondition($schedule->command('cdnschedule:autossl')->withoutOverlapping(), ['condition'=>'everyMinute', 'at'=>'']);
                 break;
             case 'checkResourcesXns':
-                $this->getCondition($schedule->command('cdnschedule:checkxns'), ['condition'=>'everyFiveMinutes', 'at'=>'']);
+                $this->getCondition($schedule->command('cdnschedule:checkxns')->withoutOverlapping(), ['condition'=>'everyFiveMinutes', 'at'=>'']);
                 break;
             case 'checkPop':
-                $this->getCondition($schedule->command('cdnschedule:checkpop'), ['condition'=>'everyMinute', 'at'=>'']);
+                $this->getCondition($schedule->command('cdnschedule:checkpop')->withoutOverlapping(), ['condition'=>'everyMinute', 'at'=>'']);
                 break;
             case 'checkDNSSwitched':
-                $this->getCondition($schedule->command('cdnschedule:checkdnsswitched'), ['condition'=>'hourly', 'at'=>'']);
-                break;        }
+                $this->getCondition($schedule->command('cdnschedule:checkdnsswitched')->withoutOverlapping(), ['condition'=>'hourly', 'at'=>'']);
+                break;
+        }
     }
 
     public function getCondition($schedule, $command)
