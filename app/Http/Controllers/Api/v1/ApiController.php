@@ -1959,7 +1959,6 @@ class ApiController extends Controller
                 'resource'                 => 'required',
                 'resource.cdn_hostname'    => 'required|unique:cdn_resources,cdn_hostname,'.$id,
                 'resource.origin'          => 'required',
-                'resource.origin.*.ip'     => 'required',
                 'resource.hash'            => 'required',
             ];
 
@@ -2033,7 +2032,7 @@ class ApiController extends Controller
 
             $resource->cdn_hostname = $this->request->input('resource.cdn_hostname');
             if (isset($new_org_id)) {
-                $resource->org_id = $org_id;
+                $resource->org_id = $new_org_id;
             }
             $resource->update_status = 1;
 
