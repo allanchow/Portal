@@ -80,7 +80,7 @@ class CdnScheduleController extends Controller
         //set_error_handler(null);
         //set_exception_handler(null);
         $xns = new XnsController();
-        loging('check-xns', "Start get resources list", 'info');
+        loging('check-xns', "Start", 'info');
         if ($resources = Cdn_Resources::whereNull('xns_host_id')->where('status', '>', 0)->get()){
             loging('check-xns', "Get resources list completed", 'info');
             if ($host_list = $xns->getHostList()) {
@@ -101,6 +101,7 @@ class CdnScheduleController extends Controller
             }
         }
 
+        loging('check-xns', "Start get inactive cdnpop list", 'info');
         if (($cdnpop_list = CdnPop::where('status', 0)->where('dns_status', 0)->get()) && count($cdnpop_list)) {
             loging('check-xns', "Get inactive cdnpop list completed", 'info');
             foreach ($cdnpop_list as $cdnpop) {
@@ -115,6 +116,7 @@ class CdnScheduleController extends Controller
             }
         }
 
+        loging('check-xns', "Start get new active cdnpop list", 'info');
         if (($cdnpop_list = CdnPop::where('status', 1)->where('dns_status', 0)->get()) && count($cdnpop_list) && (Cdn_Resources::where('force_update', 0)->where('status', '>', 0)->count() > 0) && (Cdn_Resources::where('force_update', 0)->where('status', '>', 0)->update(['force_update' => 1, 'error_msg' => '']) !== false )) {
             loging('check-xns', "Get new active cdnpop list completed", 'info');
             foreach ($cdnpop_list as $cdnpop) {
@@ -125,6 +127,7 @@ class CdnScheduleController extends Controller
             }
         }
 
+        loging('check-xns', "Get completed force_update active cdnpop list", 'info');
         if (($cdnpop_list = CdnPop::where('status', 1)->where('dns_status', 1)->get()) && count($cdnpop_list) && (Cdn_Resources::where('force_update', 0)->where('status', '>', 0)->count() > 0)) {
             loging('check-xns', "Get completed force_update active cdnpop list completed", 'info');
             foreach ($cdnpop_list as $cdnpop) {
@@ -139,6 +142,7 @@ class CdnScheduleController extends Controller
             }
 
         }
+        loging('check-xns', "Complete", 'info');
         return true;
     }
 
