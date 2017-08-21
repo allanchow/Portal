@@ -76,9 +76,9 @@ class CdnScheduleController extends Controller
 
     public function checkXNS()
     {
-        ini_set('max_execution_time', 600);
-        //set_error_handler(null);
-        //set_exception_handler(null);
+        ini_set('max_execution_time', 300);
+        set_error_handler(null);
+        set_exception_handler(null);
         $xns = new XnsController();
         loging('check-xns', "Start", 'info');
         if ($resources = Cdn_Resources::whereNull('xns_host_id')->where('status', '>', 0)->get()){
