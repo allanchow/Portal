@@ -289,6 +289,8 @@ class CdnScheduleController extends Controller
                 if ($report = CdnDailyReport::where('report_date', $day)->where('resource_id', $resource->id)->first()){
 //                    loging('check-dns-switched', "Resource_id found in report: {$resource->resource_id}", 'info');
                     $resource->dns_switched = 1;
+                } else {
+                    $resource->dns_switched = 0;
                 }
 
                 if ($resource->dns_switched == 0) {
