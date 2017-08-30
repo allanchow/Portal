@@ -95,6 +95,7 @@ class GuestController extends Controller
             }
             $user->fill($request->except('profile_pic', 'mobile'));
             $user->gender = $request->input('gender');
+            $user->lang = $request->input('language');
             $user->save();
             if (Input::file('profile_pic')) {
                 // fetching picture name
@@ -108,6 +109,13 @@ class GuestController extends Controller
             // saving filename to database
                 $user->profile_pic = $fileName;
             }
+
+            if ($request->input('language') == 1) {
+              $user->lang = 'en';
+            } elseif ($request->input('language') == 0 ) {
+              $user->lang = 'zh';
+            }
+
             if ($request->get('mobile')) {
                 $user->mobile = $request->get('mobile');
             } else {

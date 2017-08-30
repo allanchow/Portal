@@ -46,13 +46,13 @@ class="active"
                     <div class="form-group {{ $errors->has('first_name') ? 'has-error' : '' }}">
                         <!-- first name -->
                         {!! Form::label('first_name',Lang::get('lang.first_name')) !!}<span class="text-red"> *</span>
-                        
+
                         {!! Form::text('first_name',null,['class' => 'form-control']) !!}
                     </div>
                     <div class="form-group {{ $errors->has('last_name') ? 'has-error' : '' }}">
                         <!-- last name -->
                         {!! Form::label('last_name',Lang::get('lang.last_name')) !!}
-                       
+
                         {!! Form::text('last_name',null,['class' => 'form-control']) !!}
                     </div>
                     <div class="form-group">
@@ -67,6 +67,29 @@ class="active"
                             </div>
                         </div>
                     </div>
+                        <!-- language -->
+                    <div class="form-group">
+                        {!! Form::label('language',Lang::get('lang.language')) !!}
+                        <div class="row">
+                          @if ( $user->lang == 'en')
+                            <div class="col-xs-3">
+                              {!! Form::radio('language','1', true, ['checked' => 'checked']) !!} {{Lang::get('English')}}
+                            </div>
+                            <div class="col-xs-3">
+                              {!! Form::radio('language','0', false, []) !!} {{Lang::get('繁體中文')}}
+                            </div>
+                          @else
+                            <div class="col-xs-3">
+                              {!! Form::radio('language','1', false, []) !!} {{Lang::get('English')}}
+                            </div>
+                            <div class="col-xs-3">
+                              {!! Form::radio('language','0', false, ['checked' => 'checked']) !!} {{Lang::get('繁體中文')}}
+                            </div>
+                          @endif
+                        </div>
+                    </div>
+
+
                     <div class="form-group">
                         <!-- email -->
                         {!! Form::label('email',Lang::get('lang.email_address')) !!}
@@ -77,7 +100,7 @@ class="active"
                     <div class="form-group {{ $errors->has('company') ? 'has-error' : '' }}">
                         <!-- company -->
                         {!! Form::label('company',Lang::get('lang.company')) !!}
-                        
+
                         {!! Form::text('company',null,['class' => 'form-control']) !!}
                     </div>
                     <div class="row">
@@ -86,30 +109,30 @@ class="active"
                             {!! Form::label('country_code',Lang::get('lang.country-code')) !!}
                             {!! Form::text('country_code',null,['class' => 'form-control', 'placeholder' => $phonecode, 'title' => Lang::get('lang.enter-country-phone-code'), 'id' => 'code']) !!}
 
-                        </div>  
+                        </div>
                         <div class="col-xs-2 form-group {{ $errors->has('ext') ? 'has-error' : '' }}">
                             <!-- phone extensionn -->
                             {!! Form::label('ext',Lang::get('lang.ext')) !!}
-                           
+
                             {!! Form::text('ext',null,['class' => 'form-control']) !!}
                         </div>
                         <div class="col-xs-8 form-group {{ $errors->has('phone_number') ? 'has-error' : '' }}">
                             <!-- phone number -->
                             {!! Form::label('phone_number',Lang::get('lang.phone')) !!}
-                           
+
                             {!! Form::text('phone_number',null,['class' => 'form-control']) !!}
                         </div>
                     </div>
                     <div class="form-group {{ $errors->has('mobile') ? 'has-error' : '' }}">
                         <!-- mobile -->
                         {!! Form::label('mobile',Lang::get('lang.mobile_number')) !!}
-                        
+
                         {!! Form::input('number', 'mobile',null,['class' => 'form-control', 'id' => 'mobile']) !!}
                     </div>
                     <div class="form-group {{ $errors->has('profile_pic') ? 'has-error' : '' }}">
                         <!-- profile pic -->
                         {!! Form::label('profile_pic',Lang::get('lang.profile_pic')) !!}
-                        
+
                         {!! Form::file('profile_pic') !!}
                     </div>
                     {!! Form::token() !!}
@@ -179,7 +202,7 @@ class="active"
         <div class="col-md-12" style="height:40%">
             <div class="modal-content">
                 <div class="modal-header">
-                    <span style="font-size:1.2em">{{Lang::get('lang.verify-number')}}</span> 
+                    <span style="font-size:1.2em">{{Lang::get('lang.verify-number')}}</span>
                     <button type="button" class="close closemodal" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
                 </div>
                 <div class="modal-body">
@@ -237,8 +260,8 @@ class="active"
         if (mobile !== old_mobile) {
             e.preventDefault();
             $('#last-modal').css('display', 'block');
-            $.ajax({                    
-                url: '{{URL::route("client-verify-number")}}',     
+            $.ajax({
+                url: '{{URL::route("client-verify-number")}}',
                 type: 'POST', // performing a POST request
                 data : {
                     mobile : mobile,
@@ -246,7 +269,7 @@ class="active"
                     email: email,
                     code: code// will be accessible in $_POST['data1']
                 },
-                dataType: 'json', 
+                dataType: 'json',
                 beforeSend: function() {
                     $('#loader2').css('display', 'block');
                     $('#verify-number-form').css('display', 'none');

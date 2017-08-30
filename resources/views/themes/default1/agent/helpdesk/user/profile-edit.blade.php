@@ -46,7 +46,7 @@ class="active"
                 @endif
                 @if(Session::has('errors'))
                 <?php //dd($errors); ?>
-               
+
                 <div class="alert alert-danger alert-dismissable">
                     <i class="fa fa-ban"></i>
                     <b>{!! Lang::get('lang.alert') !!}!</b>
@@ -82,6 +82,29 @@ class="active"
                         </div>
                     </div>
                 </div>
+                <!-- language -->
+                <div class="form-group">
+                  {!! Form::label('language',Lang::get('lang.language')) !!}
+                  <div class="row">
+                  @if ( $user->lang == 'en')
+                    <div class="col-xs-3">
+                      {!! Form::radio('language','1', true, ['checked' => 'checked']) !!} {{Lang::get('English')}}
+                    </div>
+                    <div class="col-xs-3">
+                      {!! Form::radio('language','0', false, []) !!} {{Lang::get('繁體中文')}}
+                    </div>
+                  @else
+                    <div class="col-xs-3">
+                      {!! Form::radio('language','1', false, []) !!} {{Lang::get('English')}}
+                    </div>
+                    <div class="col-xs-3">
+                      {!! Form::radio('language','0', false, ['checked' => 'checked']) !!} {{Lang::get('繁體中文')}}
+                    </div>
+                  @endif
+                </div>
+              </div>
+
+
                 <div class="form-group">
                     <!-- email address -->
                     {!! Form::label('email',Lang::get('lang.email_address')) !!}
@@ -125,7 +148,7 @@ class="active"
                         <i class="fa fa-user"> </i>
                         {!! Form::label('profile_pic',Lang::get('lang.profile_pic')) !!}
                         {!! Form::file('profile_pic',['class' => 'form-file']) !!}
-                    </div>  
+                    </div>
                 </div>
                 {!! Form::token() !!}
                 {!! Form::close() !!}
@@ -139,7 +162,7 @@ class="active"
         {!! Form::model($user,['url'=>'agent-profile-password/'.$user->id , 'method' => 'PATCH']) !!}
         <div class="box box-primary">
             <div class="box-header with-border">
-                <h4 class="box-title">{!! Lang::get('lang.change_password') !!}</h4> 
+                <h4 class="box-title">{!! Lang::get('lang.change_password') !!}</h4>
             </div>
             <div class="box-body">
                 @if(Session::has('success1'))
@@ -195,7 +218,7 @@ class="active"
         <div class="col-md-12" style="height:40%">
             <div class="modal-content">
                 <div class="modal-header">
-                    <span style="font-size:1.2em">{{Lang::get('lang.verify-number')}}</span> 
+                    <span style="font-size:1.2em">{{Lang::get('lang.verify-number')}}</span>
                     <button type="button" class="close closemodal" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
                 </div>
                 <div class="modal-body">
@@ -258,8 +281,8 @@ $('#agent-profile').on('submit', function(e){
         if (mobile !== old_mobile) {
             e.preventDefault();
             $('#last-modal').css('display', 'block');
-            $.ajax({                    
-                url: '{{URL::route("agent-verify-number")}}',     
+            $.ajax({
+                url: '{{URL::route("agent-verify-number")}}',
                 type: 'post', // performing a POST request
                 data : {
                     mobile : mobile,
@@ -267,7 +290,7 @@ $('#agent-profile').on('submit', function(e){
                     email: email,
                     code: code // will be accessible in $_POST['data1']
                 },
-                dataType: 'json', 
+                dataType: 'json',
                 beforeSend: function() {
                     $('#loader2').css('display', 'block');
                     $('#verify-number-form').css('display', 'none');
@@ -322,7 +345,7 @@ $('#agent-profile').on('submit', function(e){
                 }
             });
         }
-          
+
     }
 });
 $('.closemodal').on('click', function(){

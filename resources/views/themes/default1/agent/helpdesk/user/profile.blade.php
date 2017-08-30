@@ -75,6 +75,13 @@ class="active"
                     <div class='col-xs-4'><label>{!! Lang::get('lang.gender') !!}:</label></div> <div class='col-xs-7'>{{ 'Female' }}</div>
                     @endif
                 </div>
+                <div class="form-group row">
+                    @if($user->lang == 'en')
+                    <div class='col-xs-4'><label>{!! Lang::get('lang.language') !!}:</label></div> <div class='col-xs-7'>{{ 'English' }}</div>
+                    @else
+                    <div class='col-xs-4'><label>{!! Lang::get('lang.language') !!}:</label></div> <div class='col-xs-7'>{{ '繁體中文' }}</div>
+                    @endif
+                </div>
                 <div class="form-group  row">
                     <div class='col-xs-4'><label>{!! Lang::get('lang.department') !!}:</label></div> <div class='col-xs-7'> {{ $dept }}</div>
                 </div>

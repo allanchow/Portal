@@ -63,6 +63,27 @@
 			</div>
 		</div>
 
+    <!-- language -->
+        <div class="form-group">
+            {!! Form::label('language',Lang::get('lang.language')) !!}
+            <div class="row">
+            @if ( $user->lang == 'en')
+                <div class="col-xs-3">
+                    {!! Form::radio('language','1', true, ['checked' => 'checked']) !!} {{Lang::get('English')}}
+                </div>
+                <div class="col-xs-3">
+                    {!! Form::radio('language','0', false, []) !!} {{Lang::get('繁體中文')}}
+                </div>
+            @else
+                <div class="col-xs-3">
+                    {!! Form::radio('language','1', false, []) !!} {{Lang::get('English')}}
+                </div>
+                <div class="col-xs-3">
+                    {!! Form::radio('language','0', false, ['checked' => 'checked']) !!} {{Lang::get('繁體中文')}}
+                </div>
+            @endif
+            </div>
+        </div>
 
 
 		<div class="form-group">
